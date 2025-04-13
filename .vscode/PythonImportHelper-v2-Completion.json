@@ -1,0 +1,143 @@
+[
+    {
+        "label": "pyautogui",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pyautogui",
+        "description": "pyautogui",
+        "detail": "pyautogui",
+        "documentation": {}
+    },
+    {
+        "label": "cv2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "cv2",
+        "description": "cv2",
+        "detail": "cv2",
+        "documentation": {}
+    },
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "tkinter",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "messagebox",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "win32gui",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "win32gui",
+        "description": "win32gui",
+        "detail": "win32gui",
+        "documentation": {}
+    },
+    {
+        "label": "get_monitors",
+        "importPath": "screeninfo",
+        "description": "screeninfo",
+        "isExtraImport": true,
+        "detail": "screeninfo",
+        "documentation": {}
+    },
+    {
+        "label": "DotaAutoAccept",
+        "kind": 6,
+        "importPath": "dota_auto_accept",
+        "description": "dota_auto_accept",
+        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"450x230\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#2c3e50')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        if self.reference_image is None:",
+        "detail": "dota_auto_accept",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "dota_auto_accept",
+        "description": "dota_auto_accept",
+        "peekOfCode": "def main():\n    root = tk.Tk()\n    app = DotaAutoAccept(root)\n    app.start_script()\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
+        "detail": "dota_auto_accept",
+        "documentation": {}
+    }
+]
