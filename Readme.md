@@ -1,5 +1,9 @@
 # Dota Auto Accept Script
 
+## Interface Preview
+
+![Application Interface](print.png)
+
 ## Setup and Compilation
 
 ### Prerequisites
