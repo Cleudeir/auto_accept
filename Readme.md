@@ -30,14 +30,31 @@
    - Ensure high contrast and visibility
 
 ### Using the Compile Script (Recommended)
+
+#### Windows
 1. Ensure you have followed the installation steps and installed all prerequisites.
-2. Navigate to the project directory in your terminal.
-3. Run the compile script:
+2. Make sure you have a `.env` file configured in the project root.
+3. Navigate to the project directory in your terminal or PowerShell.
+4. Run the compile script:
    ```batch
    .\compile-script.bat
    ```
-   *(Note: Adjust the command if your script has a different name or extension, e.g., `compile-script.sh` for Linux/macOS)*
-4. The compiled executable will be placed in the `dist` directory.
+5. The compiled executable (`DotaAutoAccept.exe`) will be placed in the `dist` directory.
+
+#### Linux / macOS
+1. Ensure you have followed the installation steps and installed all prerequisites.
+2. Make sure you have a `.env` file configured in the project root.
+3. (Optional) For a custom icon on macOS, place an `icon.icns` file in the project root. For Linux, you can try `icon.ico` or `icon.png`, but support varies.
+4. Navigate to the project directory in your terminal.
+5. Make the script executable:
+   ```bash
+   chmod +x compile-script.sh
+   ```
+6. Run the compile script:
+   ```bash
+   ./compile-script.sh
+   ```
+7. The compiled executable (`DotaAutoAccept`) will be placed in the `dist` directory.
 
 ### WhatsApp Notification API Integration
 
