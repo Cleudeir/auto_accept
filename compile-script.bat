@@ -57,11 +57,9 @@ if not exist "%ICON_NAME%" (
 if not exist "dist" mkdir dist
 if not exist "build" mkdir build
 
-
-
 :: Compile the script with additional data files
 echo Compiling %SCRIPT_NAME%...
-python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "DotaAutoAccept" --add-data "%REFERENCE_IMAGE%;." --clean --distpath "dist" --workpath "build" "%SCRIPT_NAME%"
+python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "DotaAutoAccept" --add-data "%REFERENCE_IMAGE%;." --add-data ".env;." --clean --distpath "dist" --workpath "build" "%SCRIPT_NAME%"
 
 :: Check compilation result
 if %errorlevel% equ 0 (

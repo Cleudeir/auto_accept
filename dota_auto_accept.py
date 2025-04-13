@@ -13,10 +13,20 @@ from dotenv import load_dotenv
 import win32gui
 from screeninfo import get_monitors
 
-load_dotenv() # Load environment variables from .env file
-
 class DotaAutoAccept:
     def __init__(self, root):
+        # Determine the path to the .env file
+        try:
+            # If running as a bundled app, find the .env file in the temp directory
+            base_path = sys._MEIPASS
+            env_path = os.path.join(base_path, '.env')
+        except Exception:
+            # If running as a script, find the .env file in the current directory
+            env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '.env'))
+
+        # Load environment variables from the determined path
+        load_dotenv(dotenv_path=env_path)
+
         self.root = root
         self.root.title("Dota 2 Auto Accept")
         self.root.geometry("450x230")
