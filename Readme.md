@@ -42,6 +42,8 @@
 5. The compiled executable (`DotaAutoAccept.exe`) will be placed in the `dist` directory.
 
 #### Linux / macOS
+**Note:** Compilation and functionality on Linux have not been specifically tested, although the script aims for compatibility. macOS testing is recommended.
+
 1. Ensure you have followed the installation steps and installed all prerequisites.
 2. Make sure you have a `.env` file configured in the project root.
 3. (Optional) For a custom icon on macOS, place an `icon.icns` file in the project root. For Linux, you can try `icon.ico` or `icon.png`, but support varies.
