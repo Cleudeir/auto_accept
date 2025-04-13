@@ -26,8 +26,12 @@
    - Save as `.ico` format
 
 2. Prepare the reference image (dota.png)
-   - Capture a clear screenshot of the Dota 2 match accept button
-   - Ensure high contrast and visibility
+   - Capture a clear screenshot of the Dota 2 match accept button *on your primary monitor where Dota 2 runs*.
+   - Ensure high contrast and visibility.
+   - **Resolution Compatibility:** The accuracy of button detection depends heavily on this reference image matching what appears on your screen.
+     - The `dota.png` image included in this repository was captured on a **1920x1080** resolution screen with default Dota 2 UI scaling.
+     - If your screen resolution, aspect ratio, or Dota 2's UI scaling settings are different, the included `dota.png` **may not work reliably**.
+     - **If detection fails:** You *must* replace the `dota.png` file with a new screenshot of the accept button captured from *your own screen* with your current settings.
 
 ### Using the Compile Script (Recommended)
 
