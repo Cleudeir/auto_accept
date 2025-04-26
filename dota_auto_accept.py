@@ -36,14 +36,18 @@ class DotaAutoAccept:
         self.reference_image_path = self.resource_path("dota.png")
         self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)
 
-        if self.reference_image is None:
-            messagebox.showerror("Error", f"Reference image not found: {self.reference_image_path}")
+        self.reference_image_plus_path = self.resource_path("dota2-plus.jpeg")
+        self.reference_image_plus = cv2.imread(self.reference_image_plus_path, cv2.IMREAD_COLOR)
+
+        if self.reference_image is None and self.reference_image_plus is None:
+            messagebox.showerror("Error", f"Reference images not found: {self.reference_image_path} and {self.reference_image_plus_path}")
             sys.exit(1)
 
         # Load environment variables
         self.phone_number = os.getenv("PHONE_NUMBER")
         self.api_base_url = os.getenv("API_BASE_URL")
         self.api_password = os.getenv("API_PASSWORD")
+        self.with_nine = os.getenv("NUMBER_WITH_NINE", False)
 
         if not self.phone_number or not self.api_base_url or not self.api_password:
             missing_vars = []
@@ -115,7 +119,7 @@ class DotaAutoAccept:
         parsed_encode_phone = re.sub(r'\D', '', self.phone_number)
         message = "Match Accepted in Dota 2 and stopped the script."
         
-        url = f"{self.api_base_url}/enviar-mensagem?phone={parsed_encode_phone}&password={self.api_password}&message={message}"
+        url = f"{self.api_base_url}/enviar-mensagem?phone={parsed_encode_phone}&password={self.api_password}&message={message}&withNine={self.with_nine}"
         try:
             response = requests.get(url)
             print(f"Notification sent! Status: {response.status_code}")
@@ -123,9 +127,16 @@ class DotaAutoAccept:
             print(f"Failed to send notification: {e}")
 
     def find_and_press_enter(self):
-        reference_gray = cv2.cvtColor(self.reference_image, cv2.COLOR_BGR2GRAY)
         confidence = 0.6
         phone = self.phone_number
+
+        # Prepare reference images (gray)
+        reference_gray = None
+        reference_plus_gray = None
+        if self.reference_image is not None:
+            reference_gray = cv2.cvtColor(self.reference_image, cv2.COLOR_BGR2GRAY)
+        if self.reference_image_plus is not None:
+            reference_plus_gray = cv2.cvtColor(self.reference_image_plus, cv2.COLOR_BGR2GRAY)
 
         dota_monitor_region = self.get_dota_monitor()
         if dota_monitor_region is None:
@@ -140,10 +151,24 @@ class DotaAutoAccept:
                 screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
                 screenshot_gray = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2GRAY)
 
-                result = cv2.matchTemplate(screenshot_gray, reference_gray, cv2.TM_CCOEFF_NORMED)
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                found = False
+                max_val = 0
+                # Check dota.png
+                if reference_gray is not None:
+                    result = cv2.matchTemplate(screenshot_gray, reference_gray, cv2.TM_CCOEFF_NORMED)
+                    _, max_val1, _, _ = cv2.minMaxLoc(result)
+                    if max_val1 >= confidence:
+                        found = True
+                        max_val = max_val1
+                # Check dota2-plus.png
+                if not found and reference_plus_gray is not None:
+                    result_plus = cv2.matchTemplate(screenshot_gray, reference_plus_gray, cv2.TM_CCOEFF_NORMED)
+                    _, max_val2, _, _ = cv2.minMaxLoc(result_plus)
+                    if max_val2 >= confidence:
+                        found = True
+                        max_val = max_val2
 
-                if max_val >= confidence:
+                if found:
                     print(f"Detected ACCEPT screen! Confidence: {max_val:.2f}")
                     pyautogui.press('enter')
                     self.send_notification()
