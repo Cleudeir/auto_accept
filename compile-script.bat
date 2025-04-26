@@ -65,7 +65,16 @@ python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "DotaAutoAccept" 
 if %errorlevel% equ 0 (
     echo Compilation successful!
     echo Executable located in: dist\DotaAutoAccept.exe
-    start "" dist
+    
+    :: Move the executable to Google Drive folder
+    move /Y "dist\DotaAutoAccept.exe" "C:\Users\CleudeirSilva\My Drive\Dota compile\DotaAutoAccept.exe"
+    if %errorlevel% equ 0 (
+        echo Executable moved to: C:\Users\CleudeirSilva\My Drive\Dota compile\DotaAutoAccept.exe
+        start "" "C:\Users\CleudeirSilva\My Drive\Dota compile"
+    ) else (
+        echo Warning: Could not move executable. Please check the destination path.
+    )
+    
 ) else (
     echo Compilation failed.
 )
