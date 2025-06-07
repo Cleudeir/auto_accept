@@ -8,7 +8,6 @@
         "detail": "pyautogui",
         "documentation": {}
     },
-    
     {
         "label": "cv2",
         "kind": 6,
@@ -18,7 +17,6 @@
         "detail": "cv2",
         "documentation": {}
     },
-
     {
         "label": "numpy",
         "kind": 6,
@@ -28,7 +26,6 @@
         "detail": "numpy",
         "documentation": {}
     },
-
     {
         "label": "time",
         "kind": 6,
@@ -38,7 +35,6 @@
         "detail": "time",
         "documentation": {}
     },
-
     {
         "label": "threading",
         "kind": 6,
@@ -48,7 +44,6 @@
         "detail": "threading",
         "documentation": {}
     },
-
     {
         "label": "tkinter",
         "kind": 6,
@@ -58,7 +53,6 @@
         "detail": "tkinter",
         "documentation": {}
     },
-
     {
         "label": "messagebox",
         "importPath": "tkinter",
@@ -67,7 +61,6 @@
         "detail": "tkinter",
         "documentation": {}
     },
-
     {
         "label": "os",
         "kind": 6,
@@ -77,7 +70,6 @@
         "detail": "os",
         "documentation": {}
     },
-
     {
         "label": "sys",
         "kind": 6,
@@ -87,36 +79,6 @@
         "detail": "sys",
         "documentation": {}
     },
-
-    {
-        "label": "requests",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "requests",
-        "description": "requests",
-        "detail": "requests",
-        "documentation": {}
-    },
-
-    {
-        "label": "re",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "re",
-        "description": "re",
-        "detail": "re",
-        "documentation": {}
-    },
-
-    {
-        "label": "load_dotenv",
-        "importPath": "dotenv",
-        "description": "dotenv",
-        "isExtraImport": true,
-        "detail": "dotenv",
-        "documentation": {}
-    },
-
     {
         "label": "win32gui",
         "kind": 6,
@@ -126,7 +88,6 @@
         "detail": "win32gui",
         "documentation": {}
     },
-
     {
         "label": "get_monitors",
         "importPath": "screeninfo",
@@ -135,17 +96,15 @@
         "detail": "screeninfo",
         "documentation": {}
     },
-
     {
         "label": "DotaAutoAccept",
         "kind": 6,
         "importPath": "dota_auto_accept",
         "description": "dota_auto_accept",
-        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"450x230\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#2c3e50')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        if self.reference_image is None:",
+        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"450x230\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#2c3e50')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        self.reference_image_plus_path = self.resource_path(\"dota2-plus.jpeg\")",
         "detail": "dota_auto_accept",
         "documentation": {}
     },
-
     {
         "label": "main",
         "kind": 2,
@@ -155,5 +114,4 @@
         "detail": "dota_auto_accept",
         "documentation": {}
     }
-
 ]

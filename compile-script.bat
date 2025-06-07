@@ -30,6 +30,7 @@ if %errorlevel% neq 0 (
 set SCRIPT_NAME=dota_auto_accept.py
 set ICON_NAME=icon.ico
 set REFERENCE_IMAGE=dota.png
+set PLUS_IMAGE=dota2-plus.jpeg
 
 :: Validate script exists
 if not exist "%SCRIPT_NAME%" (
@@ -41,6 +42,13 @@ if not exist "%SCRIPT_NAME%" (
 :: Validate reference image exists
 if not exist "%REFERENCE_IMAGE%" (
     echo Error: Reference image %REFERENCE_IMAGE% not found in current directory.
+    pause
+    exit /b 1
+)
+
+:: Validate plus image exists
+if not exist "%PLUS_IMAGE%" (
+    echo Error: Plus image %PLUS_IMAGE% not found in current directory.
     pause
     exit /b 1
 )
@@ -59,7 +67,7 @@ if not exist "build" mkdir build
 
 :: Compile the script with additional data files
 echo Compiling %SCRIPT_NAME%...
-python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "DotaAutoAccept" --add-data "%REFERENCE_IMAGE%;." --add-data ".env;." --clean --distpath "dist" --workpath "build" "%SCRIPT_NAME%"
+python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "DotaAutoAccept" --add-data "%REFERENCE_IMAGE%;." --add-data "%PLUS_IMAGE%;." --add-data ".env;." --clean --distpath "dist" --workpath "build" "%SCRIPT_NAME%"
 
 :: Check compilation result
 if %errorlevel% equ 0 (

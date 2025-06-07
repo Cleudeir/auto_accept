@@ -45,6 +45,7 @@ fi
 SCRIPT_NAME="dota_auto_accept.py"
 ICON_NAME="icon.icns" # macOS uses .icns, Linux often uses .png or none for windowed apps
 REFERENCE_IMAGE="dota.png"
+PLUS_IMAGE="dota2-plus.jpeg"
 ENV_FILE=".env"
 APP_NAME="DotaAutoAccept"
 
@@ -57,6 +58,12 @@ fi
 # Validate reference image exists
 if [ ! -f "$REFERENCE_IMAGE" ]; then
     echo "Error: Reference image $REFERENCE_IMAGE not found in current directory."
+    exit 1
+fi
+
+# Validate plus image exists
+if [ ! -f "$PLUS_IMAGE" ]; then
+    echo "Error: Plus image $PLUS_IMAGE not found in current directory."
     exit 1
 fi
 
@@ -103,6 +110,7 @@ echo "Compiling $SCRIPT_NAME..."
 # Adding ':' for Linux/macOS path separator in --add-data
 PYINSTALLER_CMD="$PYTHON_CMD -m PyInstaller --onefile --windowed --name "$APP_NAME" \
     --add-data "$REFERENCE_IMAGE:." \
+    --add-data "$PLUS_IMAGE:." \
     --add-data "$ENV_FILE:." \
     --clean \
     --distpath "dist" \
