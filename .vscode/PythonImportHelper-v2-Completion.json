@@ -1,14 +1,5 @@
 [
     {
-        "label": "asyncio",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "asyncio",
-        "description": "asyncio",
-        "detail": "asyncio",
-        "documentation": {}
-    },
-    {
         "label": "pyautogui",
         "kind": 6,
         "isExtraImport": true,
@@ -79,14 +70,6 @@
         "documentation": {}
     },
     {
-        "label": "messagebox",
-        "importPath": "tkinter",
-        "description": "tkinter",
-        "isExtraImport": true,
-        "detail": "tkinter",
-        "documentation": {}
-    },
-    {
         "label": "os",
         "kind": 6,
         "isExtraImport": true,
@@ -122,23 +105,6 @@
         "documentation": {}
     },
     {
-        "label": "get_monitors",
-        "importPath": "screeninfo",
-        "description": "screeninfo",
-        "isExtraImport": true,
-        "detail": "screeninfo",
-        "documentation": {}
-    },
-    {
-        "label": "main",
-        "kind": 2,
-        "importPath": "bluetooth_discovery",
-        "description": "bluetooth_discovery",
-        "peekOfCode": "def main():\n    if not BLUETOOTH_AVAILABLE:\n        return\n    print(\"=== Bluetooth Device Discovery ===\")\n    print(\"This tool will help you find your phone's Bluetooth address\")\n    print()\n    # Run the async discovery\n    asyncio.run(discover_devices())\n    print(\"\\n=== Instructions ===\")\n    print(\"1. Find your phone in the list above\")",
-        "detail": "bluetooth_discovery",
-        "documentation": {}
-    },
-    {
         "label": "DotaAutoAccept",
         "kind": 6,
         "importPath": "dota_auto_accept",
@@ -154,24 +120,6 @@
         "description": "dota_auto_accept",
         "peekOfCode": "def main():\n    root = tk.Tk()\n    app = DotaAutoAccept(root)\n    app.start_script()\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
         "detail": "dota_auto_accept",
-        "documentation": {}
-    },
-    {
-        "label": "DotaAutoAccept",
-        "kind": 6,
-        "importPath": "dota_auto_accept_backup",
-        "description": "dota_auto_accept_backup",
-        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"450x230\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#2c3e50')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        self.reference_image_plus_path = self.resource_path(\"dota2-plus.jpeg\")",
-        "detail": "dota_auto_accept_backup",
-        "documentation": {}
-    },
-    {
-        "label": "main",
-        "kind": 2,
-        "importPath": "dota_auto_accept_backup",
-        "description": "dota_auto_accept_backup",
-        "peekOfCode": "def main():\n    root = tk.Tk()\n    app = DotaAutoAccept(root)\n    app.start_script()\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
-        "detail": "dota_auto_accept_backup",
         "documentation": {}
     }
 ]
