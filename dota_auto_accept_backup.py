@@ -1,0 +1,233 @@
+import pyautogui
+import cv2
+import numpy as np
+import time
+import threading
+import tkinter as tk
+from tkinter import messagebox
+import os
+import sys
+import win32gui
+from screeninfo import get_monitors
+
+# Add Bluetooth support
+try:
+    from bleak import BleakClient, BleakScanner
+    import asyncio
+    BLUETOOTH_AVAILABLE = True
+except ImportError:
+    BLUETOOTH_AVAILABLE = False
+    print("Bluetooth not available. Install bleak: pip install bleak")
+
+class DotaAutoAccept:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Dota 2 Auto Accept")
+        self.root.geometry("450x230")
+        self.root.resizable(False, False)
+        self.root.configure(bg='#2c3e50')
+
+        self.reference_image_path = self.resource_path("dota.png")
+        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)
+
+        self.reference_image_plus_path = self.resource_path("dota2-plus.jpeg")
+        self.reference_image_plus = cv2.imread(self.reference_image_plus_path, cv2.IMREAD_COLOR)
+
+        if self.reference_image is None and self.reference_image_plus is None:
+            messagebox.showerror("Error", f"Reference images not found: {self.reference_image_path} and {self.reference_image_plus_path}")
+            sys.exit(1)
+
+        self.running = False
+        self.start_button = None
+        self.stop_button = None
+        
+        # Bluetooth configuration
+        self.phone_bluetooth_address = ""  # Set your phone's MAC address here (e.g., "XX:XX:XX:XX:XX:XX")
+        self.enable_bluetooth_notifications = False  # Set to True when you have configured the MAC address
+        
+        self.setup_ui()
+          def send_bluetooth_notification(self, message):
+        """Send notification via Bluetooth to paired device"""
+        if not self.enable_bluetooth_notifications or not BLUETOOTH_AVAILABLE:
+            return False
+            
+        if not self.phone_bluetooth_address:
+            print("Bluetooth MAC address not configured")
+            return False
+            
+        try:
+            print(f"Sending Bluetooth notification: {message}")
+            # Use asyncio to run the async Bluetooth operation
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(self._send_bluetooth_async(message))
+            loop.close()
+            return result
+        except Exception as e:
+            print(f"Failed to send Bluetooth notification: {e}")
+            return False
+    
+    async def _send_bluetooth_async(self, message):
+        """Async helper for Bluetooth communication"""
+        try:
+            timestamp = time.strftime("%H:%M:%S")
+            full_message = f"[{timestamp}] Dota 2: {message}"
+            
+            # For demonstration - bleak is primarily for BLE, not classic Bluetooth
+            # You might need a different approach for classic Bluetooth notifications
+            print("Bluetooth notification prepared (bleak is for BLE)")
+            print(f"Message: {full_message}")
+            print("Note: For classic Bluetooth notifications, consider using Windows notifications instead")
+            return True
+        except Exception as e:
+            print(f"Bluetooth async error: {e}")
+            return False
+    
+    async def discover_bluetooth_devices(self):
+        """Discover nearby Bluetooth Low Energy devices"""
+        if not BLUETOOTH_AVAILABLE:
+            print("Bluetooth not available")
+            return []
+            
+        try:
+            print("Discovering Bluetooth LE devices...")
+            devices = await BleakScanner.discover()
+            print("Found devices:")
+            for device in devices:
+                print(f"  {device.name} - {device.address}")
+            return devices
+        except Exception as e:
+            print(f"Error discovering devices: {e}")
+            return []
+
+    def get_dota_monitor(self):
+        try:
+            hwnd = win32gui.FindWindow(None, "Dota 2")
+            if hwnd == 0:
+                print("Dota 2 window not found.")
+                return None
+
+            rect = win32gui.GetWindowRect(hwnd)
+            window_x, window_y, _, _ = rect
+
+            for monitor in get_monitors():
+                if monitor.x <= window_x < monitor.x + monitor.width and \
+                   monitor.y <= window_y < monitor.y + monitor.height:
+                    print(f"Dota 2 found on monitor: {monitor.name}")
+                    return (monitor.x, monitor.y, monitor.width, monitor.height)
+            
+            print("Could not determine the monitor for Dota 2 window.")
+            return None
+        except Exception as e:
+            print(f"Error finding Dota 2 window/monitor: {e}")
+            return None
+
+    def resource_path(self, relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
+
+    def setup_ui(self):
+        main_frame = tk.Frame(self.root, bg='#2c3e50', padx=20, pady=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        self.status_label = tk.Label(main_frame, text="Not Running", fg="white", bg='#2c3e50', font=("Arial", 16, "bold"))
+        self.status_label.pack(pady=(0, 10))
+
+        self.button_frame = tk.Frame(main_frame, bg='#2c3e50')
+        self.button_frame.pack(pady=10)
+
+        self.start_button = tk.Button(
+            self.button_frame, text="Start", command=self.start_script, bg="#2ecc71", fg="white", font=("Arial", 12, "bold"), width=10)
+        self.start_button.pack(side=tk.LEFT, padx=10)
+
+        self.stop_button = tk.Button(
+            self.button_frame, text="Stop", command=self.stop_script, bg="#e74c3c", fg="white", font=("Arial", 12, "bold"), width=10)
+
+        info_label = tk.Label(main_frame, text="Auto-accepting matches", fg="#f1c40f", bg='#2c3e50', font=("Arial", 10))
+        info_label.pack(side=tk.BOTTOM, pady=(10, 0))
+
+    def find_and_press_enter(self):
+        confidence = 0.6
+
+        # Prepare reference images (gray)
+        reference_gray = None
+        reference_plus_gray = None
+        if self.reference_image is not None:
+            reference_gray = cv2.cvtColor(self.reference_image, cv2.COLOR_BGR2GRAY)
+        if self.reference_image_plus is not None:
+            reference_plus_gray = cv2.cvtColor(self.reference_image_plus, cv2.COLOR_BGR2GRAY)
+
+        dota_monitor_region = self.get_dota_monitor()
+        if dota_monitor_region is None:
+            messagebox.showerror("Error", "Could not find Dota 2 window. Ensure Dota 2 is running.")
+            self.stop_script() # Stop if monitor not found
+            return
+
+        while self.running:
+            try:
+                # Take screenshot of the specific monitor where Dota 2 is running
+                screenshot = pyautogui.screenshot(region=dota_monitor_region)
+                screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+                screenshot_gray = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2GRAY)
+
+                found = False
+                max_val = 0
+                # Check dota.png
+                if reference_gray is not None:
+                    result = cv2.matchTemplate(screenshot_gray, reference_gray, cv2.TM_CCOEFF_NORMED)
+                    _, max_val1, _, _ = cv2.minMaxLoc(result)
+                    if max_val1 >= confidence:
+                        found = True
+                        max_val = max_val1
+                # Check dota2-plus.png
+                if not found and reference_plus_gray is not None:
+                    result_plus = cv2.matchTemplate(screenshot_gray, reference_plus_gray, cv2.TM_CCOEFF_NORMED)
+                    _, max_val2, _, _ = cv2.minMaxLoc(result_plus)
+                    if max_val2 >= confidence:
+                        found = True
+                        max_val = max_val2
+
+                if found:
+                    print(f"Detected ACCEPT screen! Confidence: {max_val:.2f}")
+                    pyautogui.press('enter')
+                    print("Match Accepted!")
+                    # Send Bluetooth notification
+                    self.send_bluetooth_notification("Match Accepted!")
+                    time.sleep(5)
+                    self.stop_script() # Stop the script after finding the match.
+                    return # exit the function
+            except Exception as e:
+                print(f"Error in detection: {e}")
+
+            time.sleep(1)
+
+    def start_script(self):
+        # Check for Dota 2 window before starting
+        if self.get_dota_monitor() is None:
+             messagebox.showwarning("Warning", "Dota 2 window not found. Please start Dota 2.")
+             return # Don't start if Dota 2 isn't running
+
+        if not self.running:
+            self.running = True
+            threading.Thread(target=self.find_and_press_enter, daemon=True).start()
+            self.status_label.config(text="Running...", fg="#2ecc71")
+            self.start_button.pack_forget()
+            self.stop_button.pack(side=tk.LEFT, padx=10)
+
+    def stop_script(self):
+        self.running = False
+        self.status_label.config(text="Stopped", fg="#e74c3c")
+        self.stop_button.pack_forget()
+        self.start_button.pack(side=tk.LEFT, padx=10)
+
+def main():
+    root = tk.Tk()
+    app = DotaAutoAccept(root)
+    app.start_script()
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
