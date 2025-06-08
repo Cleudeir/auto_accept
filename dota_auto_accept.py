@@ -361,8 +361,7 @@ class DotaAutoAccept:
                     return
                 except Exception as mp3_error:
                     print(f"Failed to play MP3 in fallback: {mp3_error}")
-            
-            # If MP3 fails, generate a 1kHz beep for 300ms
+              # If MP3 fails, generate a 1kHz beep for 300ms
             sample_rate = 44100
             duration = 0.3
             freq = 1000
@@ -371,31 +370,65 @@ class DotaAutoAccept:
             sound = pygame.sndarray.make_sound(tone)
             sound.set_volume(1.0)  # Maximum volume
             sound.play()
-            
             print("Fallback beep played at maximum volume")
         except Exception as e:
             print(f"Error playing fallback beep: {e}")
-
+            
     def get_dota_monitor(self):
         try:
+            # Print all available monitors first
+            print("\n----- MONITOR DETECTION DEBUG -----")
+            monitors = get_monitors()
+            print(f"Found {len(monitors)} monitors:")
+            for i, m in enumerate(monitors):
+                is_primary = " (PRIMARY)" if hasattr(m, 'is_primary') and m.is_primary else ""
+                print(f"  Monitor {i}: {m.name}{is_primary} - Position: ({m.x}, {m.y}) - Size: {m.width}x{m.height}")
+            
+            # Find Dota 2 window
             hwnd = win32gui.FindWindow(None, "Dota 2")
             if hwnd == 0:
-                print("Dota 2 window not found.")
+                print("Dota 2 window not found. Make sure the game is running and the window title is 'Dota 2'.")
                 return None
 
+            # Get window position and size
             rect = win32gui.GetWindowRect(hwnd)
-            window_x, window_y, _, _ = rect
+            window_x, window_y, window_right, window_bottom = rect
+            window_width = window_right - window_x
+            window_height = window_bottom - window_y
+            print(f"Dota 2 window found at: ({window_x}, {window_y}) - Size: {window_width}x{window_height}")
 
-            for monitor in get_monitors():
-                if monitor.x <= window_x < monitor.x + monitor.width and \
-                   monitor.y <= window_y < monitor.y + monitor.height:
-                    print(f"Dota 2 found on monitor: {monitor.name}")
+            # Check which monitor contains the Dota 2 window
+            print("Checking which monitor contains the Dota 2 window:")
+            for i, monitor in enumerate(monitors):
+                # Calculate monitor boundaries
+                monitor_left = monitor.x
+                monitor_right = monitor.x + monitor.width
+                monitor_top = monitor.y
+                monitor_bottom = monitor.y + monitor.height
+                
+                # Check if window is within this monitor (use window top-left corner as reference)
+                is_in_monitor = (monitor_left <= window_x < monitor_right and 
+                                monitor_top <= window_y < monitor_bottom)
+                
+                # Print detailed check information
+                print(f"  Monitor {i} check: window ({window_x}, {window_y}) in bounds " +
+                      f"({monitor_left}-{monitor_right}, {monitor_top}-{monitor_bottom})? " +
+                      f"{'YES' if is_in_monitor else 'NO'}")
+                
+                if is_in_monitor:
+                    print(f"➤ Dota 2 found on monitor {i}: {monitor.name}")
+                    print(f"➤ Using screenshot region: ({monitor.x}, {monitor.y}, {monitor.width}, {monitor.height})")
+                    print("----- END MONITOR DETECTION -----\n")
                     return (monitor.x, monitor.y, monitor.width, monitor.height)
             
-            print("Could not determine the monitor for Dota 2 window.")
+            # If we get here, we couldn't find the monitor
+            print("❌ Could not determine the monitor for Dota 2 window.")
+            print("   Window might be outside all monitor boundaries or partially visible.")
+            print("----- END MONITOR DETECTION -----\n")
             return None
         except Exception as e:
-            print(f"Error finding Dota 2 window/monitor: {e}")
+            print(f"❌ Error finding Dota 2 window/monitor: {e}")
+            print("----- END MONITOR DETECTION -----\n")
             return None
 
     def resource_path(self, relative_path):
@@ -404,63 +437,142 @@ class DotaAutoAccept:
         except Exception:
             base_path = os.path.abspath(".")
         return os.path.join(base_path, relative_path)
-
+        
     def find_and_press_enter(self):
         confidence = 0.6
-
-        # Prepare reference images (gray)
         reference_gray = None
         reference_plus_gray = None
         if self.reference_image is not None:
             reference_gray = cv2.cvtColor(self.reference_image, cv2.COLOR_BGR2GRAY)
+            print(f"Loaded reference image 'dota.png': {self.reference_image.shape[1]}x{self.reference_image.shape[0]}")
         if self.reference_image_plus is not None:
             reference_plus_gray = cv2.cvtColor(self.reference_image_plus, cv2.COLOR_BGR2GRAY)
-
-        dota_monitor_region = self.get_dota_monitor()
-        if dota_monitor_region is None:
-            messagebox.showerror("Error", "Could not find Dota 2 window. Ensure Dota 2 is running.")
-            self.stop_script() # Stop if monitor not found
-            return
-
+            print(f"Loaded reference image 'dota2-plus.jpeg': {self.reference_image_plus.shape[1]}x{self.reference_image_plus.shape[0]}")
+        
+        print(f"Template matching confidence threshold: {confidence}")
+        monitor_printed = False
+        
         while self.running:
             try:
-                # Take screenshot of the specific monitor where Dota 2 is running
-                screenshot = pyautogui.screenshot(region=dota_monitor_region)
+                # Get the monitor where Dota 2 is running (this will print debug info)
+                dota_monitor_region = self.get_dota_monitor()
+                if dota_monitor_region is None:
+                    print("⚠️ Dota 2 monitor not found. Stopping detection.")
+                    messagebox.showerror("Error", "Could not find Dota 2 window. Ensure Dota 2 is running.")
+                    self.stop_script()
+                    return
+                
+                # Ensure region is (left, top, width, height) for pyautogui
+                left, top, width, height = dota_monitor_region
+                
+                # Take screenshot and convert for processing
+                if not monitor_printed:
+                    print(f"\n----- SCREENSHOT DEBUG -----")
+                    print(f"Taking screenshot of region: ({left}, {top}, {width}, {height})")
+                    monitor_printed = True
+                
+                screenshot = pyautogui.screenshot(region=(left, top, width, height))
                 screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
                 screenshot_gray = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2GRAY)
-
+                
+                # Debug screenshot dimensions
+                if not monitor_printed:
+                    print(f"Screenshot dimensions: {screenshot_np.shape[1]}x{screenshot_np.shape[0]}")
+                    print("----- END SCREENSHOT DEBUG -----\n")
+                
+                # Template matching
                 found = False
                 max_val = 0
+                max_val1 = 0
+                max_val2 = 0
+                max_loc1 = None
+                max_loc2 = None
+                
                 # Check dota.png
                 if reference_gray is not None:
                     result = cv2.matchTemplate(screenshot_gray, reference_gray, cv2.TM_CCOEFF_NORMED)
-                    _, max_val1, _, _ = cv2.minMaxLoc(result)
+                    _, max_val1, _, max_loc1 = cv2.minMaxLoc(result)
                     if max_val1 >= confidence:
                         found = True
                         max_val = max_val1
+                
                 # Check dota2-plus.png
                 if not found and reference_plus_gray is not None:
                     result_plus = cv2.matchTemplate(screenshot_gray, reference_plus_gray, cv2.TM_CCOEFF_NORMED)
-                    _, max_val2, _, _ = cv2.minMaxLoc(result_plus)
+                    _, max_val2, _, max_loc2 = cv2.minMaxLoc(result_plus)
                     if max_val2 >= confidence:
                         found = True
                         max_val = max_val2
-
+                  # Update UI with detection information
+                monitor_index = next((i for i, m in enumerate(get_monitors()) 
+                                    if m.x == left and m.y == top and m.width == width and m.height == height), -1)
+                monitor_type = "PRIMARY" if monitor_index == 0 else f"SECONDARY #{monitor_index}"
+                monitor_info = f"Monitor: {monitor_type} ({width}x{height})"
+                
+                if self.analysis_label:
+                    self.analysis_label.config(
+                        text=f"{monitor_info} | dota.png={max_val1:.3f} | dota2-plus.jpeg={max_val2:.3f}"
+                    )
+                  # Print detection debug info every few seconds (not every frame to avoid log spam)
+                if time.time() % 5 < 0.1:  # Print roughly every 5 seconds
+                    print(f"\n----- DETECTION DEBUG -----")
+                    print(f"Monitoring region: ({left}, {top}, {width}, {height})")
+                    monitor_idx = next((i for i, m in enumerate(get_monitors()) 
+                                    if m.x == left and m.y == top and m.width == width and m.height == height), -1)
+                    print(f"Current monitor: #{monitor_idx} - {'PRIMARY' if monitor_idx == 0 else 'SECONDARY'}")
+                    print(f"Current confidence values: dota.png={max_val1:.3f}, dota2-plus.jpeg={max_val2:.3f}")
+                    if max_loc1:
+                        print(f"Best match for dota.png at position: {max_loc1} (relative to monitor)")
+                        print(f"  Absolute position: ({left + max_loc1[0]}, {top + max_loc1[1]})")
+                    if max_loc2:
+                        print(f"Best match for dota2-plus.jpeg at position: {max_loc2} (relative to monitor)")
+                        print(f"  Absolute position: ({left + max_loc2[0]}, {top + max_loc2[1]})")
+                    print(f"Detection threshold: {confidence}")
+                    print("----- END DETECTION DEBUG -----\n")
+                
+                # Save a debug screenshot periodically to help troubleshoot detection
+                if time.time() % 30 < 0.1:  # Every 30 seconds
+                    debug_filename = f"monitor_{width}x{height}_confidence_{max_val1:.3f}_{max_val2:.3f}.png"
+                    self.save_debug_screenshot(screenshot_np, debug_filename)
+                    
+                    # Also save grayscale version with matches highlighted
+                    debug_vis = cv2.cvtColor(screenshot_gray, cv2.COLOR_GRAY2BGR)
+                    if max_loc1 and reference_gray is not None:
+                        h, w = reference_gray.shape
+                        top_left = max_loc1
+                        bottom_right = (top_left[0] + w, top_left[1] + h)
+                        cv2.rectangle(debug_vis, top_left, bottom_right, (0, 255, 0), 2)
+                        cv2.putText(debug_vis, f"{max_val1:.3f}", (top_left[0], top_left[1] - 10),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    
+                    if max_loc2 and reference_plus_gray is not None:
+                        h, w = reference_plus_gray.shape
+                        top_left = max_loc2
+                        bottom_right = (top_left[0] + w, top_left[1] + h)
+                        cv2.rectangle(debug_vis, top_left, bottom_right, (0, 0, 255), 2)
+                        cv2.putText(debug_vis, f"{max_val2:.3f}", (top_left[0], top_left[1] - 10),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+                    
+                    vis_filename = f"monitor_{width}x{height}_matches.png"
+                    self.save_debug_screenshot(debug_vis, vis_filename)
+                
                 if found:
-                    print(f"Detected ACCEPT screen! Confidence: {max_val:.2f}")
-                    repeat_count = 2  # Number of times to repeat the beep
+                    print(f"✅ Detected ACCEPT screen! Confidence: {max_val:.3f}")
+                    repeat_count = 2
                     for i in range(repeat_count):
                         self.play_high_beep()
                         pyautogui.press('enter')
                         print(f"Match Accepted! (Attempt {i+1}/{repeat_count})")
                         if i < repeat_count - 1:
-                            time.sleep(3)  # 3 second delay between attempts
+                            time.sleep(3)
                     time.sleep(5)
-                    self.stop_script() # Stop the script after finding the match.
-                    return # exit the function
+                    self.stop_script()
+                    return
             except Exception as e:
-                print(f"Error in detection: {e}")
-
+                print(f"❌ Error in detection: {e}")
+                import traceback
+                traceback.print_exc()
+            
             time.sleep(1)
 
     def start_script(self):
@@ -471,6 +583,8 @@ class DotaAutoAccept:
 
         if not self.running:
             self.running = True
+            if self.analysis_label:
+                self.analysis_label.config(text="Waiting for analysis...")
             threading.Thread(target=self.find_and_press_enter, daemon=True).start()
             self.status_label.config(text="● Running...", fg="#00d4aa")
             self.start_button.pack_forget()
@@ -479,6 +593,8 @@ class DotaAutoAccept:
     def stop_script(self):
         self.running = False
         self.status_label.config(text="● Stopped", fg="#ff6b6b")
+        if self.analysis_label:
+            self.analysis_label.config(text="")
         self.stop_button.pack_forget()
         self.start_button.pack(side=tk.LEFT, padx=10)
 
@@ -506,6 +622,9 @@ class DotaAutoAccept:
         self.status_label = tk.Label(header_frame, text="● Not Running", fg=text_secondary, 
                                    bg=bg_primary, font=("Segoe UI", 18, "bold"))
         self.status_label.pack()
+        # Analysis/comparison label (hidden by default)
+        self.analysis_label = tk.Label(header_frame, text="", fg=accent_primary, bg=bg_primary, font=("Segoe UI", 10, "bold"))
+        self.analysis_label.pack(pady=(6, 0))
 
         # Card-style container for audio settings
         audio_card = tk.Frame(main_frame, bg=bg_secondary, relief=tk.GROOVE, bd=1, highlightbackground=accent_secondary, highlightthickness=1)
@@ -630,11 +749,19 @@ class DotaAutoAccept:
         self.stop_button.pack(side=tk.LEFT, padx=(0, 0), ipadx=8, ipady=2)
         self.stop_button.bind("<Enter>", lambda e: self.stop_button.config(bg="#ff8787"))
         self.stop_button.bind("<Leave>", lambda e: self.stop_button.config(bg=danger_color))
-        self.stop_button.config(highlightbackground="#ffd6d6")
-
-        # Info section at bottom
+        self.stop_button.config(highlightbackground="#ffd6d6")        # Info section at bottom
         info_frame = tk.Frame(main_frame, bg=bg_primary)
         info_frame.pack(side=tk.BOTTOM, pady=(24, 0))
+
+        # Add diagnostics button
+        diag_frame = tk.Frame(main_frame, bg=bg_primary)
+        diag_frame.pack(side=tk.BOTTOM, pady=(0, 10))
+        
+        diag_button = tk.Button(diag_frame, text="🔍 Run Monitor Diagnostics", command=self.run_monitor_diagnostics,
+                             bg='#8a94a6', fg='white', font=("Segoe UI", 9, "bold"), 
+                             relief=tk.FLAT, bd=0, padx=15, pady=6,
+                             activebackground='#6c7a8c', activeforeground='white', cursor='hand2')
+        diag_button.pack()
 
         info_label = tk.Label(info_frame, text="🎮 Auto-accepting Dota 2 matches with audio alerts", 
                              fg=accent_primary, bg=bg_primary, font=("Segoe UI", 10, "italic"))
@@ -643,6 +770,139 @@ class DotaAutoAccept:
         device_count_label = tk.Label(info_frame, text=f"📊 {len(self.audio_devices)} active audio devices detected", 
                                      fg=text_secondary, bg=bg_primary, font=("Segoe UI", 8))
         device_count_label.pack(pady=(5, 0))
+
+    def save_debug_screenshot(self, screenshot_np, filename="debug_screenshot.png"):
+        """Save a debug screenshot to help troubleshoot detection issues"""
+        try:
+            debug_dir = "debug_screenshots"
+            # Create the debug directory if it doesn't exist
+            if not os.path.exists(debug_dir):
+                os.makedirs(debug_dir)
+                
+            # Limit to max 10 files - check current files and remove oldest if needed
+            try:
+                files = [os.path.join(debug_dir, f) for f in os.listdir(debug_dir) 
+                         if os.path.isfile(os.path.join(debug_dir, f))]
+                
+                # Sort files by modification time (oldest first)
+                files.sort(key=os.path.getmtime)
+                
+                # If we have 10 or more files, delete the oldest ones
+                max_files = 10
+                if len(files) >= max_files:
+                    # Calculate how many to delete (keep max_files-1 to make room for the new one)
+                    to_delete = len(files) - (max_files - 1)
+                    for i in range(to_delete):
+                        try:
+                            os.remove(files[i])
+                            print(f"🗑️ Removed old debug screenshot: {files[i]} (maintaining max {max_files} files)")
+                        except Exception as del_err:
+                            print(f"⚠️ Could not delete old screenshot {files[i]}: {del_err}")
+            except Exception as limit_err:
+                print(f"⚠️ Error while limiting debug screenshots: {limit_err}")
+                
+            # Generate a filename with timestamp
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            path = os.path.join(debug_dir, f"{timestamp}_{filename}")
+            
+            # Save the screenshot
+            cv2.imwrite(path, screenshot_np)
+            print(f"✅ Debug screenshot saved to {path}")
+            return path
+        except Exception as e:
+            print(f"❌ Failed to save debug screenshot: {e}")
+            return None
+
+    def run_monitor_diagnostics(self):
+        """Run detailed diagnostics on all monitors and Dota 2 window detection"""
+        try:
+            print("\n===== DETAILED MONITOR DIAGNOSTICS =====")
+            
+            # Get all monitors
+            monitors = get_monitors()
+            print(f"Found {len(monitors)} monitors:")
+            
+            # Check if primary monitor is correctly identified
+            primary_monitor = None
+            for i, m in enumerate(monitors):
+                is_primary = hasattr(m, 'is_primary') and m.is_primary
+                primary_text = " (PRIMARY)" if is_primary else ""
+                if is_primary:
+                    primary_monitor = m
+                print(f"  Monitor {i}: {m.name}{primary_text}")
+                print(f"    Position: ({m.x}, {m.y})")
+                print(f"    Size: {m.width}x{m.height}")
+                print(f"    Work area: {getattr(m, 'work_area', 'Unknown')}")
+                print(f"    Attributes: {dir(m)}")
+            
+            # Find Dota 2 window
+            print("\nLooking for Dota 2 window:")
+            hwnd = win32gui.FindWindow(None, "Dota 2")
+            
+            if hwnd == 0:
+                print("❌ Dota 2 window not found! Make sure the game is running with the title 'Dota 2'")
+                print("\nAll open windows with titles:")
+                def enum_windows_callback(hwnd, results):
+                    if win32gui.IsWindowVisible(hwnd):
+                        window_title = win32gui.GetWindowText(hwnd)
+                        if window_title and len(window_title.strip()) > 0:
+                            results.append(f"- {window_title}")
+                    return True
+                
+                window_titles = []
+                win32gui.EnumWindows(enum_windows_callback, window_titles)
+                for title in sorted(window_titles):
+                    print(f"  {title}")
+            else:
+                # Get window details
+                rect = win32gui.GetWindowRect(hwnd)
+                window_x, window_y, window_right, window_bottom = rect
+                window_width = window_right - window_x
+                window_height = window_bottom - window_y
+                
+                print(f"✅ Dota 2 window found!")
+                print(f"  Position: ({window_x}, {window_y})")
+                print(f"  Size: {window_width}x{window_height}")
+                
+                # Check which monitor contains the window
+                containing_monitor = None
+                for i, m in enumerate(monitors):
+                    if (m.x <= window_x < m.x + m.width and 
+                        m.y <= window_y < m.y + m.height):
+                        containing_monitor = (i, m)
+                        break
+                
+                if containing_monitor:
+                    idx, monitor = containing_monitor
+                    is_primary = hasattr(monitor, 'is_primary') and monitor.is_primary
+                    print(f"✅ Window is on Monitor {idx}{' (PRIMARY)' if is_primary else ''}: {monitor.name}")
+                    print(f"  Monitor region: ({monitor.x}, {monitor.y}, {monitor.width}, {monitor.height})")
+                    print(f"  Window position relative to monitor: ({window_x - monitor.x}, {window_y - monitor.y})")
+                else:
+                    print("❌ Window is not fully within any monitor boundary!")
+                    print("  This can happen when the window is partially visible across multiple monitors.")
+              # Take test screenshots of each monitor
+            print("\nTaking test screenshots of each monitor:")
+            for i, m in enumerate(monitors):
+                try:
+                    screenshot = pyautogui.screenshot(region=(m.x, m.y, m.width, m.height))
+                    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+                    filename = f"monitor_{i}_diagnostic.png"
+                    path = self.save_debug_screenshot(screenshot_np, filename)
+                    print(f"  Monitor {i} screenshot saved to {path}")
+                except Exception as e:
+                    print(f"  ❌ Failed to capture Monitor {i} screenshot: {e}")
+            
+            print("\n===== END MONITOR DIAGNOSTICS =====")
+            messagebox.showinfo("Diagnostics Complete", 
+                               "Monitor diagnostics complete. Check the console output and debug_screenshots folder.\n\nNote: A maximum of 10 debug screenshots are kept to save disk space.")
+        except Exception as e:
+            print(f"❌ Error in monitor diagnostics: {e}")
+            import traceback
+            traceback.print_exc()
+            print("===== END MONITOR DIAGNOSTICS (WITH ERRORS) =====")
+            messagebox.showerror("Diagnostics Error", f"Error during monitor diagnostics: {e}")
+
 
 def main():
     root = tk.Tk()
