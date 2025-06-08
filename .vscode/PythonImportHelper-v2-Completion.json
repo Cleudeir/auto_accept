@@ -294,7 +294,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    load_audio_settings()\n    show_audio_settings()",
+        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    load_audio_settings()\n    is_running = True\n    match_found = False",
         "detail": "accept",
         "documentation": {}
     },

@@ -347,5 +347,9 @@ def main():
 
 if __name__ == "__main__":
     load_audio_settings()
+    is_running = True
+    match_found = False
+    detection_thread = threading.Thread(target=main_loop, daemon=True)
+    detection_thread.start()
     show_audio_settings()
 
