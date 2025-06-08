@@ -204,7 +204,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def save_dota2_monitor_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False\n    win = windows[0]\n    if win.isMinimized:\n        print('❌ Dota 2 window is minimized!')\n        return False\n    # Find which monitor the window is on",
+        "peekOfCode": "def save_dota2_monitor_screenshot(filename, target_monitor_index: int):\n    # Removed Dota 2 window detection. Now captures the selected monitor directly.\n    with mss.mss() as sct:\n        monitors = sct.monitors\n        # monitors[0] is all-in-one, actual monitors start from index 1.\n        # target_monitor_index is 1-based from user selection.\n        if not monitors or len(monitors) <= 1: # Need at least one actual monitor besides the combined one\n            print('❌ No distinct monitors found by mss to capture from!')\n            return False\n        # Validate target_monitor_index (it's 1-based for user, so it maps to monitors[target_monitor_index])",
         "detail": "accept",
         "documentation": {}
     },
@@ -240,7 +240,16 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def get_output_devices():\n    devices = sd.query_devices()\n    output_devices = []\n    for i, d in enumerate(devices):\n        if d['max_output_channels'] > 0:\n            output_devices.append({'id': i, 'name': d['name']})\n    return output_devices\ndef test_alert_sound():\n    try:\n        import pygame",
+        "peekOfCode": "def get_output_devices():\n    devices = sd.query_devices()\n    output_devices = []\n    for i, d in enumerate(devices):\n        if d['max_output_channels'] > 0:\n            output_devices.append({'id': i, 'name': d['name']})\n    return output_devices\ndef get_available_monitors():\n    monitor_options = [] # No \"Auto-detect\"\n    try:",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "get_available_monitors",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def get_available_monitors():\n    monitor_options = [] # No \"Auto-detect\"\n    try:\n        with mss.mss() as sct:\n            # sct.monitors[0] is the full virtual screen, physical monitors start at index 1\n            if len(sct.monitors) > 1:\n                for i, monitor in enumerate(sct.monitors[1:], start=1): \n                    monitor_options.append((f\"Monitor {i} ({monitor['width']}x{monitor['height']})\", i))\n            else:\n                print(\"No individual monitors detected by mss, only the combined virtual screen.\")",
         "detail": "accept",
         "documentation": {}
     },
@@ -258,7 +267,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def load_audio_settings():\n    global selected_device_id, alert_volume\n    try:\n        if os.path.exists(SETTINGS_FILE):\n            with open(SETTINGS_FILE, 'r') as f:\n                data = json.load(f)\n                alert_volume = float(data.get('alert_volume', 1.0))\n                selected_device_id = data.get('selected_device_id', None)\n    except Exception as e:\n        print(f\"Error loading audio settings: {e}\")",
+        "peekOfCode": "def load_audio_settings():\n    global selected_device_id, alert_volume, selected_monitor_capture_setting\n    # Set defaults before trying to load\n    selected_monitor_capture_setting = 1 # Default to monitor 1\n    alert_volume = 1.0\n    selected_device_id = None\n    try:\n        if os.path.exists(SETTINGS_FILE):\n            with open(SETTINGS_FILE, 'r') as f:\n                data = json.load(f)",
         "detail": "accept",
         "documentation": {}
     },
@@ -267,7 +276,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def save_audio_settings():\n    try:\n        data = {\n            'alert_volume': alert_volume,\n            'selected_device_id': selected_device_id\n        }\n        with open(SETTINGS_FILE, 'w') as f:\n            json.dump(data, f)\n    except Exception as e:\n        print(f\"Error saving audio settings: {e}\")",
+        "peekOfCode": "def save_audio_settings():\n    global selected_monitor_capture_setting, alert_volume, selected_device_id\n    try:\n        data = {\n            'alert_volume': alert_volume,\n            'selected_device_id': selected_device_id,\n            'selected_monitor_capture_setting': selected_monitor_capture_setting # This will be an int\n        }\n        with open(SETTINGS_FILE, 'w') as f:\n            json.dump(data, f)",
         "detail": "accept",
         "documentation": {}
     },
@@ -276,7 +285,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume, is_running, detection_thread\n    win = tk.Tk()\n    win.title(\"Dota 2 Auto Accept - Control Panel\")\n    # Center window on screen\n    window_width = 450\n    window_height = 450\n    screen_width = win.winfo_screenwidth()\n    screen_height = win.winfo_screenheight()\n    x = (screen_width // 2) - (window_width // 2)",
+        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume, is_running, detection_thread, selected_monitor_capture_setting\n    win = tk.Tk()\n    win.title(\"Dota 2 Auto Accept - Control Panel\")\n    # Center window on screen\n    window_width = 450\n    window_height = 450\n    screen_width = win.winfo_screenwidth()\n    screen_height = win.winfo_screenheight()\n    x = (screen_width // 2) - (window_width // 2)",
         "detail": "accept",
         "documentation": {}
     },
@@ -285,7 +294,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def main_loop():\n    global is_running, match_found\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'\n    while is_running:\n        filename = os.path.join(folder, f'screenshot_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n        if not save_dota2_monitor_screenshot(filename):\n            filename = os.path.join(folder, f'fullscreen_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')",
+        "peekOfCode": "def main_loop():\n    global is_running, match_found, selected_monitor_capture_setting\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'\n    while is_running:\n        # Use a more specific name for the screenshot attempt for clarity\n        screenshot_filename = os.path.join(folder, f'dota2_monitor_capture_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n        if save_dota2_monitor_screenshot(screenshot_filename, selected_monitor_capture_setting):",
         "detail": "accept",
         "documentation": {}
     },
@@ -303,7 +312,7 @@
         "kind": 5,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "selected_device_id = None\nalert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)",
+        "peekOfCode": "selected_device_id = None\nalert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\nselected_monitor_capture_setting = 1 # Default to monitor 1\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)",
         "detail": "accept",
         "documentation": {}
     },
@@ -312,7 +321,7 @@
         "kind": 5,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "alert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")",
+        "peekOfCode": "alert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\nselected_monitor_capture_setting = 1 # Default to monitor 1\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)",
         "detail": "accept",
         "documentation": {}
     },
@@ -321,7 +330,16 @@
         "kind": 5,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "SETTINGS_FILE = 'alert_volume.json'\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):",
+        "peekOfCode": "SETTINGS_FILE = 'alert_volume.json'\nselected_monitor_capture_setting = 1 # Default to monitor 1\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "selected_monitor_capture_setting",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "selected_monitor_capture_setting = 1 # Default to monitor 1\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):",
         "detail": "accept",
         "documentation": {}
     },

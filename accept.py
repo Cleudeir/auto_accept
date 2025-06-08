@@ -16,6 +16,7 @@ import threading
 selected_device_id = None
 alert_volume = 1.0
 SETTINGS_FILE = 'alert_volume.json'
+selected_monitor_capture_setting = 1 # Default to monitor 1
 is_running = False
 detection_thread = None
 match_found = False
@@ -42,27 +43,37 @@ def save_dota2_window_screenshot(filename):
     print(f"✅ Dota 2 window screenshot saved to {filename}")
     return True
 
-def save_dota2_monitor_screenshot(filename):
-    windows = gw.getWindowsWithTitle('Dota 2')
-    if not windows:
-        print('❌ Dota 2 window not found!')
-        return False
-    win = windows[0]
-    if win.isMinimized:
-        print('❌ Dota 2 window is minimized!')
-        return False
-    # Find which monitor the window is on
+def save_dota2_monitor_screenshot(filename, target_monitor_index: int):
+    # Removed Dota 2 window detection. Now captures the selected monitor directly.
     with mss.mss() as sct:
-        for monitor in sct.monitors[1:]:  # skip the first, which is the full virtual screen
-            if (win.left >= monitor['left'] and win.right <= monitor['left'] + monitor['width'] and
-                win.top >= monitor['top'] and win.bottom <= monitor['top'] + monitor['height']):
-                img = sct.grab(monitor)
-                img_np = np.array(img)
-                cv2.imwrite(filename, img_np)
-                print(f"✅ Dota 2 monitor screenshot saved to {filename}")
-                return True
-    print('❌ Dota 2 window not fully within a single monitor!')
-    return False
+        monitors = sct.monitors
+        # monitors[0] is all-in-one, actual monitors start from index 1.
+        # target_monitor_index is 1-based from user selection.
+        if not monitors or len(monitors) <= 1: # Need at least one actual monitor besides the combined one
+            print('❌ No distinct monitors found by mss to capture from!')
+            return False
+
+        # Validate target_monitor_index (it's 1-based for user, so it maps to monitors[target_monitor_index])
+        if not isinstance(target_monitor_index, int) or not (0 < target_monitor_index < len(monitors)):
+            print(f"❌ Invalid monitor index {target_monitor_index} specified. Available: 1 to {len(monitors)-1}. Screenshot not taken.")
+            return False
+            
+        monitor_to_capture = monitors[target_monitor_index]
+        
+        try:
+            img = sct.grab(monitor_to_capture)
+            # mss grabs in BGRA, convert to BGR for OpenCV compatibility and to avoid alpha channel issues
+            img_np = np.array(img)
+            img_bgr = cv2.cvtColor(img_np, cv2.COLOR_BGRA2BGR)
+            cv2.imwrite(filename, img_bgr)
+            print(f"✅ Screenshot of Monitor {target_monitor_index} saved to {filename}")
+            return True
+        except mss.exception.ScreenShotError as e:
+            print(f"❌ Error capturing screenshot from Monitor {target_monitor_index} using mss: {e}")
+            return False
+        except Exception as e:
+            print(f"❌ An unexpected error occurred while capturing/saving screenshot from Monitor {target_monitor_index}: {e}")
+            return False
 
 def compare_images(img1_path, img2_path):
     img1 = cv2.imread(img1_path)
@@ -113,6 +124,20 @@ def get_output_devices():
             output_devices.append({'id': i, 'name': d['name']})
     return output_devices
 
+def get_available_monitors():
+    monitor_options = [] # No "Auto-detect"
+    try:
+        with mss.mss() as sct:
+            # sct.monitors[0] is the full virtual screen, physical monitors start at index 1
+            if len(sct.monitors) > 1:
+                for i, monitor in enumerate(sct.monitors[1:], start=1): 
+                    monitor_options.append((f"Monitor {i} ({monitor['width']}x{monitor['height']})", i))
+            else:
+                print("No individual monitors detected by mss, only the combined virtual screen.")
+    except Exception as e:
+        print(f"Error getting monitor list: {e}")
+    return monitor_options
+
 def test_alert_sound():
     try:
         import pygame
@@ -136,31 +161,50 @@ def test_alert_sound():
         messagebox.showerror("Test Error", str(e))
 
 def load_audio_settings():
-    global selected_device_id, alert_volume
+    global selected_device_id, alert_volume, selected_monitor_capture_setting
+    
+    # Set defaults before trying to load
+    selected_monitor_capture_setting = 1 # Default to monitor 1
+    alert_volume = 1.0
+    selected_device_id = None
+
     try:
         if os.path.exists(SETTINGS_FILE):
             with open(SETTINGS_FILE, 'r') as f:
                 data = json.load(f)
                 alert_volume = float(data.get('alert_volume', 1.0))
                 selected_device_id = data.get('selected_device_id', None)
+                
+                loaded_monitor_setting = data.get('selected_monitor_capture_setting', 1)
+                if isinstance(loaded_monitor_setting, int) and loaded_monitor_setting > 0:
+                    # We'll validate if this index is currently available in show_audio_settings
+                    selected_monitor_capture_setting = loaded_monitor_setting
+                else:
+                    print(f"Invalid monitor setting '{loaded_monitor_setting}' in config. Defaulting to Monitor 1.")
+                    selected_monitor_capture_setting = 1
+        else:
+            print(f"Settings file {SETTINGS_FILE} not found. Using default settings.")
+            # Defaults are already set above
+            
     except Exception as e:
-        print(f"Error loading audio settings: {e}")
-        alert_volume = 1.0
-        selected_device_id = None
+        print(f"Error loading settings from {SETTINGS_FILE}: {e}. Using default values.")
+        # Defaults are already set above
 
 def save_audio_settings():
+    global selected_monitor_capture_setting, alert_volume, selected_device_id
     try:
         data = {
             'alert_volume': alert_volume,
-            'selected_device_id': selected_device_id
+            'selected_device_id': selected_device_id,
+            'selected_monitor_capture_setting': selected_monitor_capture_setting # This will be an int
         }
         with open(SETTINGS_FILE, 'w') as f:
             json.dump(data, f)
     except Exception as e:
-        print(f"Error saving audio settings: {e}")
+        print(f"Error saving settings: {e}")
 
 def show_audio_settings():
-    global selected_device_id, alert_volume, is_running, detection_thread
+    global selected_device_id, alert_volume, is_running, detection_thread, selected_monitor_capture_setting
     win = tk.Tk()
     win.title("Dota 2 Auto Accept - Control Panel")
     
@@ -200,6 +244,32 @@ def show_audio_settings():
             selected_device_id = devices[0]['id']
         current_device.set(device_names[initial_idx])
 
+    # Monitor selection
+    monitors_available = get_available_monitors() # Now returns list of (display_name, index) or empty
+    monitor_display_names = [m[0] for m in monitors_available]
+    current_monitor_setting_tk = tk.StringVar()
+
+    initial_monitor_idx = 0 # Default to the first in the list if available
+
+    if monitors_available:
+        found_saved_setting = False
+        for i, (_, monitor_val_from_list) in enumerate(monitors_available):
+            if monitor_val_from_list == selected_monitor_capture_setting:
+                initial_monitor_idx = i
+                found_saved_setting = True
+                break
+        
+        if not found_saved_setting:
+            print(f"Previously selected monitor {selected_monitor_capture_setting} is not currently available or invalid. Defaulting to Monitor {monitors_available[0][1]}.")
+            initial_monitor_idx = 0
+            selected_monitor_capture_setting = monitors_available[0][1] # Update global to the first available
+            save_audio_settings() # Persist this default if changed
+        
+        current_monitor_setting_tk.set(monitor_display_names[initial_monitor_idx])
+    else:
+        current_monitor_setting_tk.set("No monitors available")
+        selected_monitor_capture_setting = -1 # Indicate no valid monitor can be selected
+
     def on_device_change(event=None):
         nonlocal devices
         idx = combo.current()
@@ -212,6 +282,17 @@ def show_audio_settings():
         global alert_volume
         alert_volume = int(val) / 100.0
         save_audio_settings()
+
+    def on_monitor_select(event=None):
+        nonlocal monitors_available # Ensure this is the list from show_audio_settings scope
+        idx = monitor_combo.current()
+        if monitors_available and 0 <= idx < len(monitors_available):
+            global selected_monitor_capture_setting
+            selected_monitor_capture_setting = monitors_available[idx][1] # Get the monitor index (int)
+            save_audio_settings()
+            print(f"Monitor capture setting changed to: Monitor {selected_monitor_capture_setting}")
+        elif not monitors_available:
+            print("No monitors to select.")
 
     def update_status():
         if is_running:
@@ -273,6 +354,24 @@ def show_audio_settings():
 
     test_btn = tk.Button(audio_frame, text="🎵 Test Sound", command=test_alert_sound)
     test_btn.pack(pady=5)
+    
+    # Monitor settings frame
+    monitor_frame = tk.LabelFrame(win, text="Monitor Settings", padx=10, pady=10)
+    monitor_frame.pack(fill="x", padx=10, pady=5)
+
+    tk.Label(monitor_frame, text="Capture Monitor:").pack(pady=(5,0))
+    monitor_combo = ttk.Combobox(monitor_frame, textvariable=current_monitor_setting_tk, values=monitor_display_names, state="readonly")
+    
+    if not monitors_available:
+        monitor_combo.config(state="disabled")
+    
+    monitor_combo.pack(pady=5)
+    
+    if monitors_available:
+        monitor_combo.current(initial_monitor_idx)
+    
+    monitor_combo.bind('<<ComboboxSelected>>', on_monitor_select)
+
 
     # Control buttons frame
     control_frame = tk.LabelFrame(win, text="Detection Control", padx=10, pady=10)
@@ -315,27 +414,36 @@ def show_audio_settings():
     win.mainloop()
 
 def main_loop():
-    global is_running, match_found
+    global is_running, match_found, selected_monitor_capture_setting
     folder = 'debug_screenshots'
     os.makedirs(folder, exist_ok=True)
     ref1 = 'dota.png'
     ref2 = 'print.png'
     while is_running:
-        filename = os.path.join(folder, f'screenshot_{time.strftime("%Y%m%d-%H%M%S")}.png')
-        if not save_dota2_monitor_screenshot(filename):
-            filename = os.path.join(folder, f'fullscreen_{time.strftime("%Y%m%d-%H%M%S")}.png')
-            save_fullscreen_screenshot(filename)
-        keep_last_n_files(folder, 5)
-        sim1 = compare_images(filename, ref1)
-        sim2 = compare_images(filename, ref2)
-        print(f"Similarity with {ref1}: {sim1:.2f}, with {ref2}: {sim2:.2f}")
-        if sim1 > 0.7 or sim2 > 0.7:
-            print("Detected match! Pressing Enter and playing sound.")
-            play_alert_sound()
-            pyautogui.press('enter')
-            match_found = True
-            is_running = False  # Stop detection after match found
-            break
+        # Use a more specific name for the screenshot attempt for clarity
+        screenshot_filename = os.path.join(folder, f'dota2_monitor_capture_{time.strftime("%Y%m%d-%H%M%S")}.png')
+        
+        if save_dota2_monitor_screenshot(screenshot_filename, selected_monitor_capture_setting):
+            # Successfully captured Dota 2 monitor; proceed with comparison
+            # save_dota2_monitor_screenshot already prints a success message
+            
+            keep_last_n_files(folder, 5) # Manage screenshots in the folder
+            sim1 = compare_images(screenshot_filename, ref1)
+            sim2 = compare_images(screenshot_filename, ref2)
+            print(f"Similarity with {ref1}: {sim1:.2f}, with {ref2}: {sim2:.2f}")
+            if sim1 > 0.7 or sim2 > 0.7:
+                print("Detected match! Pressing Enter and playing sound.")
+                play_alert_sound()
+                pyautogui.press('enter')
+                match_found = True
+                is_running = False  # Stop detection after match found
+                break # Exit the while loop
+        else:
+            # Failed to capture Dota 2 monitor. 
+            # The save_dota2_monitor_screenshot function prints details (e.g., '❌ Dota 2 window not found!').
+            print("Dota 2 monitor capture failed for this iteration. Will retry.")
+            # No comparison is done. Loop will sleep and then try again.
+
         time.sleep(1)  # Adjust interval as needed
 
 def main():
