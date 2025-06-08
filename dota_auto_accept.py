@@ -47,30 +47,35 @@ class DotaAutoAccept:
 
         self.setup_ui()
 
+    def _normalize_device_name(self, name):
+        # Use only the first 12 characters, lowercase, and remove extra spaces for duplicate detection
+        name = name.lower()
+        name = name[:12]
+        name = ' '.join(name.split())
+        return name.strip()
+
     def init_audio_system(self):
-        """Initialize the audio system and discover only active output devices"""
+        """Initialize the audio system and discover only active output devices, removing similar duplicates by first 12 chars"""
         try:
             # Get available audio output devices
             devices = sd.query_devices()
             self.audio_devices = []
-            
+            seen_normalized = set()
             for i, device in enumerate(devices):
                 # Filter for active output devices only
                 if (device['max_output_channels'] > 0 and 
                     device['hostapi'] >= 0 and 
                     device['default_samplerate'] > 0):
-                    
-                    # Additional filtering to remove inactive or problematic devices
                     device_name = device['name'].strip()
-                    
                     # Skip devices that are typically inactive or cause issues
                     skip_keywords = ['communications', 'comm', 'recording', 'input', 'line in', 'microphone']
                     if any(keyword in device_name.lower() for keyword in skip_keywords):
                         continue
-                    
+                    norm_name = self._normalize_device_name(device_name)
+                    if norm_name in seen_normalized:
+                        continue
                     # Check if device is actually available by trying to query it
                     try:
-                        # Test if device is accessible
                         sd.check_output_settings(device=i, channels=1, samplerate=44100)
                         self.audio_devices.append({
                             'id': i,
@@ -78,12 +83,11 @@ class DotaAutoAccept:
                             'channels': device['max_output_channels'],
                             'samplerate': device['default_samplerate']
                         })
+                        seen_normalized.add(norm_name)
                         print(f"Active output device found: {device_name}")
                     except Exception:
-                        # Device not accessible, skip it
                         continue
-            
-            print(f"Found {len(self.audio_devices)} active audio output devices")
+            print(f"Found {len(self.audio_devices)} active audio output devices (no similar duplicates by first 12 chars)")
             
             # Set default device if none selected
             if not self.selected_device_id and self.audio_devices:
@@ -161,51 +165,41 @@ class DotaAutoAccept:
                 self.test_audio_device()
 
     def test_audio_device(self):
-        """Test the selected audio device with the dota2.mp3 file"""
+        """Test the selected audio device with the dota2.mp3 file or a 3s beep"""
         try:
             if self.selected_device_id is not None:
-                # Try to use dota2.mp3 for testing first
                 mp3_path = self.resource_path("dota2.mp3")
                 if os.path.exists(mp3_path):
                     try:
-                        # Initialize pygame mixer if not already done
                         if not self.pygame_initialized:
                             pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
                             self.pygame_initialized = True
-                        
-                        # Load and play a short portion of the MP3 file
                         sound = pygame.mixer.Sound(mp3_path)
                         sound_array = pygame.sndarray.array(sound)
-                        
-                        # Convert to float32 and normalize
                         if sound_array.dtype != np.float32:
                             if sound_array.dtype == np.int16:
                                 sound_array = sound_array.astype(np.float32) / 32768.0
                             else:
                                 sound_array = sound_array.astype(np.float32)
-                        
-                        # Play only first 1 second for testing
                         sample_rate = pygame.mixer.get_init()[0]
-                        test_length = min(sample_rate, len(sound_array))  # 1 second or file length
-                        test_audio = sound_array[:test_length] * 0.8  # Slightly lower volume for test
-                        
+                        # Play up to 3 seconds for test
+                        test_length = min(sample_rate * 3, len(sound_array))
+                        test_audio = sound_array[:test_length] * 0.8
                         sd.play(test_audio, samplerate=sample_rate, device=self.selected_device_id)
-                        sd.wait()  # Wait until the sound finishes
-                        print("Audio test successful using dota2.mp3")
+                        sd.wait()
+                        print("Audio test successful using dota2.mp3 (3s)")
                         return
                     except Exception as mp3_error:
                         print(f"MP3 test failed: {mp3_error}, using fallback beep")
-                
-                # Fallback to generated beep if MP3 fails
+                # Fallback: 3s beep
                 sample_rate = 44100
-                duration = 0.2
+                duration = 3.0
                 freq = 800
                 t = np.linspace(0, duration, int(sample_rate * duration), False)
                 tone = (np.sin(2 * np.pi * freq * t) * 0.3).astype(np.float32)
-                
                 sd.play(tone, samplerate=sample_rate, device=self.selected_device_id)
-                sd.wait()  # Wait until the sound finishes
-                print("Audio test successful using fallback beep")
+                sd.wait()
+                print("Audio test successful using fallback beep (3s)")
         except Exception as e:
             print(f"Audio test failed: {e}")
             messagebox.showwarning("Audio Test", f"Failed to test audio device: {e}")
