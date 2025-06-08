@@ -62,6 +62,23 @@
         "documentation": {}
     },
     {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "structural_similarity",
+        "importPath": "skimage.metrics",
+        "description": "skimage.metrics",
+        "isExtraImport": true,
+        "detail": "skimage.metrics",
+        "documentation": {}
+    },
+    {
         "label": "threading",
         "kind": 6,
         "isExtraImport": true,
@@ -93,15 +110,6 @@
         "description": "tkinter",
         "isExtraImport": true,
         "detail": "tkinter",
-        "documentation": {}
-    },
-    {
-        "label": "os",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "os",
-        "description": "os",
-        "detail": "os",
         "documentation": {}
     },
     {
@@ -185,11 +193,38 @@
         "documentation": {}
     },
     {
+        "label": "compare_images",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def compare_images(img1_path, img2_path):\n    img1 = cv2.imread(img1_path)\n    img2 = cv2.imread(img2_path)\n    if img1 is None or img2 is None:\n        return 0.0\n    img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)\n    img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)\n    # Resize to the same size\n    if img1_gray.shape != img2_gray.shape:\n        img2_gray = cv2.resize(img2_gray, (img1_gray.shape[1], img1_gray.shape[0]))",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "keep_last_n_files",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def keep_last_n_files(folder, n):\n    files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.png')]\n    files.sort(key=os.path.getmtime, reverse=True)\n    for f in files[n:]:\n        os.remove(f)\ndef main_loop():\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "main_loop",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def main_loop():\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'\n    while True:\n        filename = os.path.join(folder, f'screenshot_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n        if not save_dota2_monitor_screenshot(filename):\n            filename = os.path.join(folder, f'fullscreen_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n            save_fullscreen_screenshot(filename)",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
         "label": "main",
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    main()",
+        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    main_loop()",
         "detail": "accept",
         "documentation": {}
     },
