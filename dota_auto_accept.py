@@ -53,19 +53,14 @@ class DotaAutoAccept:
         self.audio_devices = []
         self.selected_device_id = None
         self.settings_file = self.resource_path("audio_settings.json")
-        self.pygame_initialized = False
-
-        # Initialize alert volume
+        self.pygame_initialized = False        # Initialize alert volume
         self.alert_volume = 1.0  # Default to 100%
         self.volume_settings_file = self.resource_path("alert_volume.json")
         self.load_volume_setting()
         
-        # Monitor selection variables
+        # Monitor info
         self.monitors = []
-        self.selected_monitor_index = None
-        self.monitor_settings_file = self.resource_path("monitor_settings.json")
         self.load_monitors()
-        self.load_monitor_settings()
 
         # Initialize audio system
         self.init_audio_system()
@@ -554,29 +549,38 @@ class DotaAutoAccept:
         monitor_printed = False
         
         while self.running:
-            try:
-                # Use selected monitor instead of automatically detecting
-                if self.selected_monitor_index is None or self.selected_monitor_index >= len(self.monitors):
-                    print("⚠️ No monitor selected. Stopping detection.")
-                    messagebox.showerror("Error", "No monitor selected. Please select a monitor first.")
-                    self.stop_script()
-                    return
-                
-                # Get the selected monitor
-                monitor = self.monitors[self.selected_monitor_index]
-                left, top, width, height = monitor.x, monitor.y, monitor.width, monitor.height
+            try:                # Use automatic monitor detection
+                dota_monitor = self.get_dota_monitor()
+                if dota_monitor is None:
+                    print("⚠️ Dota 2 window not found. Will keep checking...")
+                    if hasattr(self, 'monitor_info_label') and self.monitor_info_label:
+                        self.monitor_info_label.config(text="Waiting for Dota 2...")
+                    time.sleep(3)  # Wait a bit before trying again
+                    continue
+                    
+                # Get monitor coordinates from detection
+                left, top, width, height = dota_monitor
                 
                 # Print monitor info
                 if not monitor_printed:
-                    is_primary = " (PRIMARY)" if hasattr(monitor, 'is_primary') and monitor.is_primary else ""
-                    print(f"\n----- USING SELECTED MONITOR -----")
-                    print(f"Monitor {self.selected_monitor_index}{is_primary}: {monitor.name}")
+                    print(f"\n----- USING DETECTED DOTA 2 MONITOR -----")
                     print(f"Position: ({left}, {top}) - Size: {width}x{height}")
                     print("----- END MONITOR INFO -----\n")
                     
                     print(f"\n----- SCREENSHOT DEBUG -----")
                     print(f"Taking screenshot of region: ({left}, {top}, {width}, {height})")
                     monitor_printed = True
+                    
+                    # Update the monitor info label with detected monitor
+                    if hasattr(self, 'monitor_info_label') and self.monitor_info_label:
+                        monitor_idx = next((i for i, m in enumerate(self.monitors) 
+                                           if m.x == left and m.y == top and m.width == width and m.height == height), -1)
+                        if monitor_idx >= 0:
+                            monitor = self.monitors[monitor_idx]
+                            is_primary = " (PRIMARY)" if hasattr(monitor, 'is_primary') and monitor.is_primary else ""
+                            self.monitor_info_label.config(
+                                text=f"Using Monitor {monitor_idx}{is_primary}: {monitor.name} - Position: ({left}, {top})"
+                            )
 
                 screenshot = pyautogui.screenshot(
                     region=(left, top, width, height))
@@ -723,14 +727,8 @@ class DotaAutoAccept:
                 traceback.print_exc()
 
             time.sleep(1)
-
+            
     def start_script(self):
-        # Check if a monitor is selected before starting
-        if self.selected_monitor_index is None or self.selected_monitor_index >= len(self.monitors):
-            messagebox.showwarning(
-                "Warning", "No monitor selected. Please select a monitor first.")
-            return  # Don't start if no monitor is selected
-        
         # Check for Dota 2 window before starting
         if self.get_dota_monitor() is None:
             messagebox.showwarning(
@@ -765,22 +763,11 @@ class DotaAutoAccept:
                 is_primary = " (PRIMARY)" if hasattr(m, 'is_primary') and m.is_primary else ""
                 print(f"  Monitor {i}: {m.name}{is_primary} - Position: ({m.x}, {m.y}) - Size: {m.width}x{m.height}")
             
-            # Set default monitor to primary or first available
-            if not self.selected_monitor_index and self.monitors:
-                # Try to find primary monitor
-                for i, m in enumerate(self.monitors):
-                    if hasattr(m, 'is_primary') and m.is_primary:
-                        self.selected_monitor_index = i
-                        print(f"Using primary monitor: {m.name}")
-                        break
-                # If no primary monitor found, use first one
-                if self.selected_monitor_index is None and self.monitors:
-                    self.selected_monitor_index = 0
-                    print(f"No primary monitor found, using first monitor")
+            # (Removed monitor selection logic)
         except Exception as e:
             print(f"Error initializing monitors: {e}")
             messagebox.showwarning("Monitor Warning", f"Could not detect monitors: {e}")
-
+            
     def load_monitors(self):
         """Load all available monitors"""
         try:
@@ -789,74 +776,13 @@ class DotaAutoAccept:
             for i, m in enumerate(self.monitors):
                 is_primary = " (PRIMARY)" if hasattr(m, 'is_primary') and m.is_primary else ""
                 print(f"  Monitor {i}: {m.name}{is_primary} - Position: ({m.x}, {m.y}) - Size: {m.width}x{m.height}")
-            
-            # Set default monitor to primary if none selected
-            if self.selected_monitor_index is None and self.monitors:
-                # Try to find primary monitor
-                for i, m in enumerate(self.monitors):
-                    if hasattr(m, 'is_primary') and m.is_primary:
-                        self.selected_monitor_index = i
-                        print(f"Using primary monitor: {m.name}")
-                        break
-                # If no primary monitor found, use first one
-                if self.selected_monitor_index is None and self.monitors:
-                    self.selected_monitor_index = 0
-                    print(f"No primary monitor found, using first monitor")
         except Exception as e:
             print(f"Error loading monitors: {e}")
             messagebox.showwarning("Monitor Warning", f"Could not detect monitors: {e}")
 
-    def load_monitor_settings(self):
-        """Load saved monitor settings from file"""
-        try:
-            if os.path.exists(self.monitor_settings_file):
-                with open(self.monitor_settings_file, 'r') as f:
-                    settings = json.load(f)
-                    saved_monitor_index = settings.get('selected_monitor_index')
-                    
-                    # Validate that the saved monitor index is valid
-                    if saved_monitor_index is not None and 0 <= saved_monitor_index < len(self.monitors):
-                        self.selected_monitor_index = saved_monitor_index
-                        monitor = self.monitors[saved_monitor_index]
-                        print(f"Loaded saved monitor: {monitor.name} (Index: {saved_monitor_index})")
-                    else:
-                        print("Saved monitor index no longer valid, using default")
-        except Exception as e:
-            print(f"Error loading monitor settings: {e}")
-
-    def save_monitor_settings(self):
-        """Save monitor settings to file"""
-        try:
-            settings = {
-                'selected_monitor_index': self.selected_monitor_index
-            }
-            with open(self.monitor_settings_file, 'w') as f:
-                json.dump(settings, f, indent=2)
+    # Removed save_monitor_settings (no longer needed)
             
-            # Find monitor name for logging
-            if self.selected_monitor_index is not None and 0 <= self.selected_monitor_index < len(self.monitors):
-                monitor = self.monitors[self.selected_monitor_index]
-                print(f"Saved monitor settings: Monitor {self.selected_monitor_index} ({monitor.name})")
-            else:
-                print(f"Saved monitor settings: Index {self.selected_monitor_index}")
-        except Exception as e:
-            print(f"Error saving monitor settings: {e}")
-            
-    def on_monitor_change(self, event=None):
-        """Handle monitor selection change"""
-        if hasattr(self, 'monitor_combo') and self.monitor_combo:
-            selected_idx = self.monitor_combo.current()
-            if 0 <= selected_idx < len(self.monitors):
-                self.selected_monitor_index = selected_idx
-                self.save_monitor_settings()
-                monitor = self.monitors[selected_idx]
-                print(f"Monitor changed to: {monitor.name} (Index: {selected_idx})")
-                
-                # Update info label
-                if hasattr(self, 'monitor_info_label') and self.monitor_info_label:
-                    self.monitor_info_label.config(
-                        text=f"Position: ({monitor.x}, {monitor.y}) - Size: {monitor.width}x{monitor.height}"
-                    )
+    # Removed on_monitor_change (no longer needed)
 
     def setup_ui(self):
         # Clean light theme colors
@@ -1001,58 +927,22 @@ class DotaAutoAccept:
                                 bg=accent_primary, fg='white', font=("Segoe UI", 9, "bold"),
                                 relief=tk.FLAT, bd=0, padx=15, pady=8,
                                 activebackground='#6fa8ff', activeforeground='white', cursor='hand2')
-        test_button.pack(side=tk.RIGHT)
-
-        # Monitor selection section
-        monitor_card = tk.Frame(main_frame, bg=bg_secondary, relief=tk.GROOVE, bd=1, 
-                               highlightbackground=accent_secondary, highlightthickness=1)
-        monitor_card.pack(fill=tk.X, pady=(0, 18), padx=10, ipady=10, ipadx=10)
-        monitor_card.configure(borderwidth=0, highlightcolor=accent_secondary)
-
-        # Monitor settings header
-        monitor_header = tk.Label(monitor_card, text="🖥️ Monitor Settings", 
-                                fg=accent_primary, bg=bg_secondary, font=("Segoe UI", 12, "bold"))
-        monitor_header.pack(anchor=tk.W, pady=(0, 12))
-
-        # Monitor selection section
-        monitor_section = tk.Frame(monitor_card, bg=bg_secondary)
-        monitor_section.pack(fill=tk.X, pady=(0, 8))
+        test_button.pack(side=tk.RIGHT)        # Add info about auto-detection of monitors
+        monitor_info_frame = tk.Frame(main_frame, bg=bg_primary)
+        monitor_info_frame.pack(fill=tk.X, pady=(0, 18), padx=10)
         
-        monitor_label = tk.Label(monitor_section, text="Select Monitor", 
-                               fg=text_secondary, bg=bg_secondary, font=("Segoe UI", 10))
-        monitor_label.pack(anchor=tk.W, pady=(0, 3))
+        monitor_info_label = tk.Label(monitor_info_frame, 
+                                    text="🖥️ Auto-detecting monitor with Dota 2", 
+                                    fg=accent_primary, bg=bg_primary, 
+                                    font=("Segoe UI", 10, "italic"))
+        monitor_info_label.pack(pady=(0, 3))
         
-        monitor_container = tk.Frame(monitor_section, bg=bg_secondary)
-        monitor_container.pack(fill=tk.X)
-        
-        self.monitor_combo = ttk.Combobox(monitor_container, state="readonly", width=35,
-                                         style='Light.TCombobox', font=("Segoe UI", 9))
-        
-        # Prepare monitor names for display
-        monitor_names = []
-        for i, m in enumerate(self.monitors):
-            is_primary = " (PRIMARY)" if hasattr(m, 'is_primary') and m.is_primary else ""
-            monitor_names.append(f"Monitor {i}: {m.name}{is_primary} - {m.width}x{m.height}")
-        
-        self.monitor_combo['values'] = monitor_names
-        
-        # Set current selection based on saved monitor index
-        if self.selected_monitor_index is not None and 0 <= self.selected_monitor_index < len(self.monitors):
-            self.monitor_combo.current(self.selected_monitor_index)
-            
-        self.monitor_combo.bind('<<ComboboxSelected>>', self.on_monitor_change)
-        self.monitor_combo.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
-        
-        # Monitor info label
-        if self.selected_monitor_index is not None and 0 <= self.selected_monitor_index < len(self.monitors):
-            monitor = self.monitors[self.selected_monitor_index]
-            info_text = f"Position: ({monitor.x}, {monitor.y})"
-        else:
-            info_text = "No monitor selected"
-            
-        self.monitor_info_label = tk.Label(monitor_section, text=info_text,
-                                         fg=text_secondary, bg=bg_secondary, font=("Segoe UI", 8))
-        self.monitor_info_label.pack(anchor=tk.W, pady=(3, 0))
+        # Add monitor info label that will be updated when detection runs
+        self.monitor_info_label = tk.Label(monitor_info_frame, 
+                                         text="Waiting for Dota 2...",
+                                         fg=text_secondary, bg=bg_primary, 
+                                         font=("Segoe UI", 8))
+        self.monitor_info_label.pack(pady=(0, 5))
 
         # Control buttons section with padding and side-by-side
         controls_frame = tk.Frame(main_frame, bg=bg_primary)
