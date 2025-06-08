@@ -276,7 +276,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume\n    win = tk.Tk()\n    win.title(\"Audio Settings\")\n    win.geometry(\"400x200\")\n    win.resizable(False, False)\n    devices = get_output_devices()\n    device_names = [d['name'] for d in devices]\n    current_device = tk.StringVar()\n    # Try to restore last used device",
+        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume, is_running, detection_thread\n    win = tk.Tk()\n    win.title(\"Dota 2 Auto Accept - Control Panel\")\n    win.geometry(\"450x400\")\n    win.resizable(False, False)\n    # Try to set the icon\n    try:\n        if os.path.exists('icon.ico'):\n            win.iconbitmap('icon.ico')",
         "detail": "accept",
         "documentation": {}
     },
@@ -285,7 +285,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def main_loop():\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'\n    while True:\n        filename = os.path.join(folder, f'screenshot_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n        if not save_dota2_monitor_screenshot(filename):\n            filename = os.path.join(folder, f'fullscreen_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n            save_fullscreen_screenshot(filename)",
+        "peekOfCode": "def main_loop():\n    global is_running, match_found\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'\n    while is_running:\n        filename = os.path.join(folder, f'screenshot_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')\n        if not save_dota2_monitor_screenshot(filename):\n            filename = os.path.join(folder, f'fullscreen_{time.strftime(\"%Y%m%d-%H%M%S\")}.png')",
         "detail": "accept",
         "documentation": {}
     },
@@ -294,7 +294,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    load_audio_settings()\n    show_audio_settings()\n    main_loop()",
+        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    load_audio_settings()\n    show_audio_settings()",
         "detail": "accept",
         "documentation": {}
     },
@@ -303,7 +303,7 @@
         "kind": 5,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "selected_device_id = None\nalert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')",
+        "peekOfCode": "selected_device_id = None\nalert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)",
         "detail": "accept",
         "documentation": {}
     },
@@ -312,7 +312,7 @@
         "kind": 5,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "alert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:",
+        "peekOfCode": "alert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")",
         "detail": "accept",
         "documentation": {}
     },
@@ -321,7 +321,34 @@
         "kind": 5,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "SETTINGS_FILE = 'alert_volume.json'\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')",
+        "peekOfCode": "SETTINGS_FILE = 'alert_volume.json'\nis_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "is_running",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "is_running = False\ndetection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "detection_thread",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "detection_thread = None\nmatch_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "match_found",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "match_found = False\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')",
         "detail": "accept",
         "documentation": {}
     },

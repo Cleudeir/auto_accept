@@ -11,10 +11,14 @@ import sounddevice as sd
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
+import threading
 
 selected_device_id = None
 alert_volume = 1.0
 SETTINGS_FILE = 'alert_volume.json'
+is_running = False
+detection_thread = None
+match_found = False
 
 def save_fullscreen_screenshot(filename):
     screenshot = pyautogui.screenshot()
@@ -156,11 +160,18 @@ def save_audio_settings():
         print(f"Error saving audio settings: {e}")
 
 def show_audio_settings():
-    global selected_device_id, alert_volume
+    global selected_device_id, alert_volume, is_running, detection_thread
     win = tk.Tk()
-    win.title("Audio Settings")
-    win.geometry("400x200")
+    win.title("Dota 2 Auto Accept - Control Panel")
+    win.geometry("450x400")
     win.resizable(False, False)
+    
+    # Try to set the icon
+    try:
+        if os.path.exists('icon.ico'):
+            win.iconbitmap('icon.ico')
+    except:
+        pass
 
     devices = get_output_devices()
     device_names = [d['name'] for d in devices]
@@ -194,31 +205,94 @@ def show_audio_settings():
         alert_volume = int(val) / 100.0
         save_audio_settings()
 
-    tk.Label(win, text="Output Device:").pack(pady=(10,0))
-    combo = ttk.Combobox(win, values=device_names, state="readonly")
+    def update_status():
+        if is_running:
+            status_label.config(text="Status: Running Detection", fg="green")
+            start_btn.config(state="disabled")
+            stop_btn.config(state="normal")
+        elif match_found:
+            status_label.config(text="Status: Match Found! Detection Stopped", fg="blue")
+            start_btn.config(state="normal")
+            stop_btn.config(state="disabled")
+        else:
+            status_label.config(text="Status: Stopped", fg="red")
+            start_btn.config(state="normal")
+            stop_btn.config(state="disabled")
+        win.after(500, update_status)  # Update every 500ms
+
+    def start_detection():
+        global is_running, detection_thread, match_found
+        if not is_running:
+            is_running = True
+            match_found = False
+            detection_thread = threading.Thread(target=main_loop, daemon=True)
+            detection_thread.start()
+            print("Detection started!")
+
+    def stop_detection():
+        global is_running
+        is_running = False
+        print("Detection stopped!")
+
+    def on_closing():
+        global is_running
+        is_running = False
+        win.destroy()
+
+    win.protocol("WM_DELETE_WINDOW", on_closing)
+
+    # Status label
+    status_label = tk.Label(win, text="Status: Stopped", font=("Arial", 12, "bold"), fg="red")
+    status_label.pack(pady=(10, 5))
+
+    # Audio settings frame
+    audio_frame = tk.LabelFrame(win, text="Audio Settings", padx=10, pady=10)
+    audio_frame.pack(fill="x", padx=10, pady=5)
+
+    tk.Label(audio_frame, text="Output Device:").pack(pady=(5,0))
+    combo = ttk.Combobox(audio_frame, values=device_names, state="readonly")
     combo.pack(pady=5)
     combo.current(initial_idx)
     combo.bind('<<ComboboxSelected>>', on_device_change)
 
-    tk.Label(win, text="Volume:").pack(pady=(10,0))
-    slider = tk.Scale(win, from_=0, to=100, orient=tk.HORIZONTAL, command=on_volume_change)
+    tk.Label(audio_frame, text="Volume:").pack(pady=(10,0))
+    slider = tk.Scale(audio_frame, from_=0, to=100, orient=tk.HORIZONTAL, command=on_volume_change)
     slider.set(int(alert_volume * 100))
     slider.pack(pady=5)
 
-    test_btn = tk.Button(win, text="Test Sound", command=test_alert_sound)
-    test_btn.pack(pady=10)
+    test_btn = tk.Button(audio_frame, text="🎵 Test Sound", command=test_alert_sound)
+    test_btn.pack(pady=5)
 
-    close_btn = tk.Button(win, text="Close", command=win.destroy)
-    close_btn.pack(pady=5)
+    # Control buttons frame
+    control_frame = tk.LabelFrame(win, text="Detection Control", padx=10, pady=10)
+    control_frame.pack(fill="x", padx=10, pady=5)
 
+    button_frame = tk.Frame(control_frame)
+    button_frame.pack()
+
+    start_btn = tk.Button(button_frame, text="▶ Start Detection", command=start_detection,
+                         bg="green", fg="white", font=("Arial", 10, "bold"), padx=20, pady=5)
+    start_btn.pack(side="left", padx=5)
+
+    stop_btn = tk.Button(button_frame, text="⏹ Stop Detection", command=stop_detection,
+                        bg="red", fg="white", font=("Arial", 10, "bold"), padx=20, pady=5, state="disabled")
+    stop_btn.pack(side="left", padx=5)
+
+    # Info label
+    info_label = tk.Label(win, text="Note: Detection will automatically stop when a match is found",
+                         font=("Arial", 8), fg="gray")
+    info_label.pack(pady=(10, 5))
+
+    update_status()
     win.mainloop()
 
 def main_loop():
+    global is_running, match_found
     folder = 'debug_screenshots'
     os.makedirs(folder, exist_ok=True)
     ref1 = 'dota.png'
     ref2 = 'print.png'
-    while True:
+    while is_running:
         filename = os.path.join(folder, f'screenshot_{time.strftime("%Y%m%d-%H%M%S")}.png')
         if not save_dota2_monitor_screenshot(filename):
             filename = os.path.join(folder, f'fullscreen_{time.strftime("%Y%m%d-%H%M%S")}.png')
@@ -231,7 +305,9 @@ def main_loop():
             print("Detected match! Pressing Enter and playing sound.")
             play_alert_sound()
             pyautogui.press('enter')
-            break  # Stop script after match found
+            match_found = True
+            is_running = False  # Stop detection after match found
+            break
         time.sleep(1)  # Adjust interval as needed
 
 def main():
@@ -244,5 +320,4 @@ def main():
 if __name__ == "__main__":
     load_audio_settings()
     show_audio_settings()
-    main_loop()
 
