@@ -216,16 +216,19 @@ def show_audio_settings():
     def update_status():
         if is_running:
             status_label.config(text="Status: Running Detection", fg="green")
-            start_btn.config(state="disabled")
-            stop_btn.config(state="normal")
+            start_btn.pack_forget()
+            stop_btn.pack(side="left", padx=5)
+            stop_btn.config(state="normal", text="⏹ Stop Detection", bg="red")
         elif match_found:
             status_label.config(text="Status: Match Found! Detection Stopped", fg="blue")
-            start_btn.config(state="normal")
-            stop_btn.config(state="disabled")
+            stop_btn.pack_forget()
+            start_btn.pack(side="left", padx=5)
+            start_btn.config(state="normal", text="▶ Start New Detection", bg="green")
         else:
             status_label.config(text="Status: Stopped", fg="red")
-            start_btn.config(state="normal")
-            stop_btn.config(state="disabled")
+            stop_btn.pack_forget()
+            start_btn.pack(side="left", padx=5)
+            start_btn.config(state="normal", text="▶ Start Detection", bg="green")
         win.after(500, update_status)  # Update every 500ms
 
     def start_detection():
@@ -284,7 +287,9 @@ def show_audio_settings():
 
     stop_btn = tk.Button(button_frame, text="⏹ Stop Detection", command=stop_detection,
                         bg="red", fg="white", font=("Arial", 10, "bold"), padx=20, pady=5, state="disabled")
-    stop_btn.pack(side="left", padx=5)    # Info frame with instructions
+    stop_btn.pack(side="left", padx=5)
+
+    # Info frame with instructions
     info_frame = tk.Frame(win)
     info_frame.pack(fill="x", padx=10, pady=5)
     
