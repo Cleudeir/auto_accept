@@ -112,7 +112,7 @@ def play_alert_sound():
     try:
         import pygame
         import time as _time
-        mp3_path = 'dota2.mp3'
+        mp3_path = os.path.join('bin', 'dota2.mp3')
         if os.path.exists(mp3_path):
             pygame.mixer.init()
             sound = pygame.mixer.Sound(mp3_path)
@@ -157,7 +157,7 @@ def test_alert_sound():
     try:
         import pygame
         import time as _time
-        mp3_path = 'dota2.mp3'
+        mp3_path = os.path.join('bin', 'dota2.mp3')
         if os.path.exists(mp3_path):
             pygame.mixer.init()
             sound = pygame.mixer.Sound(mp3_path)
@@ -232,11 +232,11 @@ def show_audio_settings():
     y = (screen_height // 2) - (window_height // 2)
     win.geometry(f"{window_width}x{window_height}+{x}+{y}")
     win.resizable(False, False)
-    
-    # Try to set the icon
+      # Try to set the icon
     try:
-        if os.path.exists('icon.ico'):
-            win.iconbitmap('icon.ico')
+        icon_path = os.path.join('bin', 'icon.ico')
+        if os.path.exists(icon_path):
+            win.iconbitmap(icon_path)
     except:
         pass
 
@@ -431,8 +431,8 @@ def main_loop():
     global is_running, match_found, selected_monitor_capture_setting
     folder = 'debug_screenshots'
     os.makedirs(folder, exist_ok=True)
-    ref1 = 'dota.png'
-    ref2 = 'print.png'
+    ref1 = os.path.join('bin', 'dota.png')
+    ref2 = os.path.join('bin', 'print.png')
     logger.info("Detection loop started")
     while is_running:
         # Use a more specific name for the screenshot attempt for clarity
