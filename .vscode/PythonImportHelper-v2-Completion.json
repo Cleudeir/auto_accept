@@ -70,6 +70,22 @@
         "documentation": {}
     },
     {
+        "label": "messagebox",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "ttk",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
         "label": "os",
         "kind": 6,
         "isExtraImport": true,
@@ -94,6 +110,14 @@
         "importPath": "win32gui",
         "description": "win32gui",
         "detail": "win32gui",
+        "documentation": {}
+    },
+    {
+        "label": "get_monitors",
+        "importPath": "screeninfo",
+        "description": "screeninfo",
+        "isExtraImport": true,
+        "detail": "screeninfo",
         "documentation": {}
     },
     {
@@ -147,6 +171,24 @@
         "description": "dota_auto_accept",
         "peekOfCode": "def main():\n    root = tk.Tk()\n    app = DotaAutoAccept(root)\n    app.start_script()\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
         "detail": "dota_auto_accept",
+        "documentation": {}
+    },
+    {
+        "label": "DotaAutoAccept",
+        "kind": 6,
+        "importPath": "dota_auto_accept_fixed",
+        "description": "dota_auto_accept_fixed",
+        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"450x420\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#2c3e50')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        self.reference_image_plus_path = self.resource_path(\"dota2-plus.jpeg\")",
+        "detail": "dota_auto_accept_fixed",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "dota_auto_accept_fixed",
+        "description": "dota_auto_accept_fixed",
+        "peekOfCode": "def main():\n    root = tk.Tk()\n    app = DotaAutoAccept(root)\n    app.start_script()\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
+        "detail": "dota_auto_accept_fixed",
         "documentation": {}
     }
 ]
