@@ -1,4 +1,16 @@
-# Dota Auto Accept Script
+# Dota 2 Auto Accept Script
+
+A GUI application that automatically detects and accepts Dota 2 match invitations with audio alerts and configurable settings.
+
+## Features
+
+- **Automatic Match Detection**: Monitors your screen for Dota 2 match accept dialogs
+- **Audio Alerts**: Plays customizable sound alerts when matches are found
+- **Device Selection**: Choose your preferred audio output device
+- **Volume Control**: Adjustable alert volume with real-time testing
+- **Start/Stop Controls**: Easy-to-use interface with status display
+- **Auto-Stop**: Automatically stops detection after accepting a match
+- **Settings Persistence**: Saves your audio preferences between sessions
 
 ## Interface Preview
 
@@ -99,7 +111,46 @@ This script sends a notification via WhatsApp when a match is accepted by callin
    - Keep your `.env` file secure and do not commit it to version control.
    - Ensure your API endpoint is properly secured and requires authentication (using the `password` parameter or other methods).
 
-### Troubleshooting
+## Usage
+
+### Running the Application
+1. Execute the script:
+   ```
+   python accept.py
+   ```
+
+2. The Dota 2 Auto Accept Control Panel will open with the following features:
+
+### Control Panel Features
+
+#### Status Display
+- **Running Detection**: Green status indicates the script is actively monitoring for matches
+- **Stopped**: Red status indicates the script is idle
+- **Match Found! Detection Stopped**: Blue status indicates a match was detected and accepted
+
+#### Audio Settings
+- **Output Device**: Select your preferred audio device from the dropdown
+- **Volume**: Adjust the alert volume using the slider (0-100%)
+- **Test Sound**: Click to test your current audio settings
+
+#### Detection Control
+- **▶ Start Detection**: Begin monitoring for Dota 2 match invitations
+- **⏹ Stop Detection**: Stop the monitoring process
+- **Auto-Stop**: Detection automatically stops after accepting a match
+
+#### Settings Persistence
+- Your audio device and volume preferences are automatically saved
+- Settings are restored when you restart the application
+
+### How It Works
+1. The script takes screenshots of your monitor where Dota 2 is running
+2. Compares screenshots with reference images (`dota.png` and `print.png`)
+3. When similarity exceeds 70%, it:
+   - Plays the configured alert sound
+   - Automatically presses Enter to accept the match
+   - Stops detection to prevent multiple accepts
+
+## Troubleshooting
 - Ensure all dependencies are installed
 - Verify the reference image path is correct
 - Check screen resolution compatibility

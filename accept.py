@@ -163,7 +163,15 @@ def show_audio_settings():
     global selected_device_id, alert_volume, is_running, detection_thread
     win = tk.Tk()
     win.title("Dota 2 Auto Accept - Control Panel")
-    win.geometry("450x400")
+    
+    # Center window on screen
+    window_width = 450
+    window_height = 450
+    screen_width = win.winfo_screenwidth()
+    screen_height = win.winfo_screenheight()
+    x = (screen_width // 2) - (window_width // 2)
+    y = (screen_height // 2) - (window_height // 2)
+    win.geometry(f"{window_width}x{window_height}+{x}+{y}")
     win.resizable(False, False)
     
     # Try to set the icon
@@ -276,12 +284,27 @@ def show_audio_settings():
 
     stop_btn = tk.Button(button_frame, text="⏹ Stop Detection", command=stop_detection,
                         bg="red", fg="white", font=("Arial", 10, "bold"), padx=20, pady=5, state="disabled")
-    stop_btn.pack(side="left", padx=5)
-
-    # Info label
-    info_label = tk.Label(win, text="Note: Detection will automatically stop when a match is found",
-                         font=("Arial", 8), fg="gray")
-    info_label.pack(pady=(10, 5))
+    stop_btn.pack(side="left", padx=5)    # Info frame with instructions
+    info_frame = tk.Frame(win)
+    info_frame.pack(fill="x", padx=10, pady=5)
+    
+    info_text = "Instructions:\n• Start detection before launching Dota 2\n• Detection stops automatically after finding a match\n• Use Test Sound to verify your audio settings\n\nKeyboard Shortcuts: F1=Start | F2=Stop | F3=Test Sound"
+    info_label = tk.Label(info_frame, text=info_text, font=("Arial", 8), fg="gray", justify="left")
+    info_label.pack()
+    
+    # Keyboard shortcuts
+    def on_key_press(event):
+        if event.keysym == 'F1':  # F1 to start
+            if not is_running:
+                start_detection()
+        elif event.keysym == 'F2':  # F2 to stop
+            if is_running:
+                stop_detection()
+        elif event.keysym == 'F3':  # F3 to test sound
+            test_alert_sound()
+    
+    win.bind('<KeyPress>', on_key_press)
+    win.focus_set()  # Make sure window can receive key events
 
     update_status()
     win.mainloop()

@@ -276,7 +276,7 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume, is_running, detection_thread\n    win = tk.Tk()\n    win.title(\"Dota 2 Auto Accept - Control Panel\")\n    win.geometry(\"450x400\")\n    win.resizable(False, False)\n    # Try to set the icon\n    try:\n        if os.path.exists('icon.ico'):\n            win.iconbitmap('icon.ico')",
+        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume, is_running, detection_thread\n    win = tk.Tk()\n    win.title(\"Dota 2 Auto Accept - Control Panel\")\n    # Center window on screen\n    window_width = 450\n    window_height = 450\n    screen_width = win.winfo_screenwidth()\n    screen_height = win.winfo_screenheight()\n    x = (screen_width // 2) - (window_width // 2)",
         "detail": "accept",
         "documentation": {}
     },
