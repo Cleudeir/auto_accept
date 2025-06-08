@@ -71,6 +71,25 @@ def keep_last_n_files(folder, n):
     for f in files[n:]:
         os.remove(f)
 
+def play_alert_sound():
+    try:
+        import pygame
+        import time as _time
+        mp3_path = 'dota2.mp3'
+        if os.path.exists(mp3_path):
+            pygame.mixer.init()
+            sound = pygame.mixer.Sound(mp3_path)
+            sound.set_volume(1.0)
+            sound.play()
+            _time.sleep(min(3, sound.get_length()))
+            pygame.mixer.quit()
+        else:
+            # fallback beep
+            import winsound
+            winsound.Beep(1000, 500)
+    except Exception as e:
+        print(f"Error playing alert sound: {e}")
+
 def main_loop():
     folder = 'debug_screenshots'
     os.makedirs(folder, exist_ok=True)
@@ -86,8 +105,10 @@ def main_loop():
         sim2 = compare_images(filename, ref2)
         print(f"Similarity with {ref1}: {sim1:.2f}, with {ref2}: {sim2:.2f}")
         if sim1 > 0.7 or sim2 > 0.7:
-            print("Detected match! Pressing Enter.")
+            print("Detected match! Pressing Enter and playing sound.")
+            play_alert_sound()
             pyautogui.press('enter')
+            break  # Stop script after match found
         time.sleep(1)  # Adjust interval as needed
 
 def main():
@@ -99,5 +120,4 @@ def main():
 
 if __name__ == "__main__":
     main_loop()
-    
-    
+

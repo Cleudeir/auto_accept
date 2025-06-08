@@ -206,7 +206,16 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def keep_last_n_files(folder, n):\n    files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.png')]\n    files.sort(key=os.path.getmtime, reverse=True)\n    for f in files[n:]:\n        os.remove(f)\ndef main_loop():\n    folder = 'debug_screenshots'\n    os.makedirs(folder, exist_ok=True)\n    ref1 = 'dota.png'\n    ref2 = 'print.png'",
+        "peekOfCode": "def keep_last_n_files(folder, n):\n    files = [os.path.join(folder, f) for f in os.listdir(folder) if f.endswith('.png')]\n    files.sort(key=os.path.getmtime, reverse=True)\n    for f in files[n:]:\n        os.remove(f)\ndef play_alert_sound():\n    try:\n        import pygame\n        import time as _time\n        mp3_path = 'dota2.mp3'",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "play_alert_sound",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def play_alert_sound():\n    try:\n        import pygame\n        import time as _time\n        mp3_path = 'dota2.mp3'\n        if os.path.exists(mp3_path):\n            pygame.mixer.init()\n            sound = pygame.mixer.Sound(mp3_path)\n            sound.set_volume(1.0)\n            sound.play()",
         "detail": "accept",
         "documentation": {}
     },
