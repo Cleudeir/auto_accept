@@ -1061,172 +1061,23 @@ class DotaAutoAccept:
             return None
 
     def run_monitor_diagnostics(self):
-        """Run detailed diagnostics on all monitors and Dota 2 window detection"""
+        """Run diagnostics: save screenshot of Dota 2 monitor or fallback to fullscreen, using test.py logic."""
         try:
-            print("\n===== DETAILED MONITOR DIAGNOSTICS =====")
-
-            # Get all monitors
-            monitors = get_monitors()
-            print(f"Found {len(monitors)} monitors:")
-
-            # Check if primary monitor is correctly identified
-            primary_monitor = None
-            for i, m in enumerate(monitors):
-                is_primary = hasattr(m, 'is_primary') and m.is_primary
-                primary_text = " (PRIMARY)" if is_primary else ""
-                if is_primary:
-                    primary_monitor = m
-                print(f"  Monitor {i}: {m.name}{primary_text}")
-                print(f"    Position: ({m.x}, {m.y})")
-                print(f"    Size: {m.width}x{m.height}")
-                print(f"    Work area: {getattr(m, 'work_area', 'Unknown')}")
-                print(f"    Attributes: {dir(m)}")
-
-            # Find Dota 2 window
-            print("\nLooking for Dota 2 window:")
-            hwnd = win32gui.FindWindow(None, "Dota 2")
-
-            if hwnd == 0:
-                print(
-                    "❌ Dota 2 window not found! Make sure the game is running with the title 'Dota 2'")
-                print("\nAll open windows with titles:")
-
-                def enum_windows_callback(hwnd, results):
-                    if win32gui.IsWindowVisible(hwnd):
-                        window_title = win32gui.GetWindowText(hwnd)
-                        if window_title and len(window_title.strip()) > 0:
-                            results.append(f"- {window_title}")
-                    return True
-
-                window_titles = []
-                win32gui.EnumWindows(enum_windows_callback, window_titles)
-                for title in sorted(window_titles):
-                    print(f"  {title}")
+            filename = f"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png"
+            result = self.save_dota2_monitor_screenshot(filename)
+            if result:
+                print(f"✅ Dota 2 monitor screenshot saved to {result}")
             else:
-                # Get window details
-                rect = win32gui.GetWindowRect(hwnd)
-                window_x, window_y, window_right, window_bottom = rect
-                window_width = window_right - window_x
-                window_height = window_bottom - window_y
-
-                print(f"✅ Dota 2 window found!")
-                print(f"  Position: ({window_x}, {window_y})")
-                print(f"  Size: {window_width}x{window_height}")
-
-                # Check which monitor contains the window
-                containing_monitor = None
-                for i, m in enumerate(monitors):
-                    if (m.x <= window_x < m.x + m.width and
-                            m.y <= window_y < m.y + m.height):
-                        containing_monitor = (i, m)
-                        break
-
-                if containing_monitor:
-                    idx, monitor = containing_monitor
-                    is_primary = hasattr(
-                        monitor, 'is_primary') and monitor.is_primary
-                    print(
-                        f"✅ Window is on Monitor {idx}{
-                            ' (PRIMARY)' if is_primary else ''}: {
-                            monitor.name}")
-                    print(
-                        f"  Monitor region: ({
-                            monitor.x}, {
-                            monitor.y}, {
-                            monitor.width}, {
-                            monitor.height})")
-                    print(
-                        f"  Window position relative to monitor: ({
-                            window_x -
-                            monitor.x}, {
-                            window_y -
-                            monitor.y})")
-                else:
-                    print("❌ Window is not fully within any monitor boundary!")
-                    # Take screenshots only of the monitor where Dota 2 is
-                    # running (if found)
-                    print(
-                        "  This can happen when the window is partially visible across multiple monitors.")
-            print("\nTaking screenshots for diagnostics:")
-            if hwnd != 0 and containing_monitor:
-                # We found Dota 2 and it's on a specific monitor
-                idx, monitor = containing_monitor
-                try:
-                    # Take a screenshot of the whole monitor where Dota 2 is
-                    # running
-                    screenshot = pyautogui.screenshot(
-                        region=(monitor.x, monitor.y, monitor.width, monitor.height))
-                    screenshot_np = cv2.cvtColor(
-                        np.array(screenshot), cv2.COLOR_RGB2BGR)
-                    filename = f"dota_monitor_{idx}_diagnostic.png"
-                    path = self.save_debug_screenshot(screenshot_np, filename)
-                    print(
-                        f"  ✅ Dota 2 monitor {idx} screenshot saved to {path}")
-
-                    # Also take a screenshot of just the Dota 2 window
-                    window_width = window_right - window_x
-                    window_height = window_bottom - window_y
-                    window_screenshot = pyautogui.screenshot(
-                        region=(window_x, window_y, window_width, window_height))
-                    window_np = cv2.cvtColor(
-                        np.array(window_screenshot), cv2.COLOR_RGB2BGR)
-                    window_filename = f"dota_window_diagnostic.png"
-                    window_path = self.save_debug_screenshot(
-                        window_np, window_filename)
-                    print(
-                        f"  ✅ Dota 2 window screenshot saved to {window_path}")
-
-                    # Create a visual to highlight the window position on the
-                    # monitor
-                    highlight_np = screenshot_np.copy()
-                    # Draw a rectangle around the Dota 2 window relative to the
-                    # monitor
-                    rel_x = window_x - monitor.x
-                    rel_y = window_y - monitor.y
-                    cv2.rectangle(highlight_np, (rel_x, rel_y),
-                                  (rel_x + window_width, rel_y + window_height),
-                                  (0, 255, 0), 3)
-                    # Add text label
-                    cv2.putText(highlight_np, "Dota 2 Window", (rel_x, rel_y - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-                    highlight_filename = f"dota_monitor_{idx}_with_window_highlight.png"
-                    highlight_path = self.save_debug_screenshot(
-                        highlight_np, highlight_filename)
-                    print(
-                        f"  ✅ Highlighted monitor screenshot saved to {highlight_path}")
-                except Exception as e:
-                    print(
-                        f"  ❌ Failed to capture Dota 2 monitor/window screenshots: {e}")
-            else:
-                # Dota 2 not found, take screenshots of all monitors for
-                # troubleshooting
-                print(
-                    "  ℹ️ Dota 2 not found - taking screenshots of all monitors to help diagnose:")
-                for i, m in enumerate(monitors):
-                    try:
-                        screenshot = pyautogui.screenshot(
-                            region=(m.x, m.y, m.width, m.height))
-                        screenshot_np = cv2.cvtColor(
-                            np.array(screenshot), cv2.COLOR_RGB2BGR)
-                        filename = f"monitor_{i}_diagnostic.png"
-                        path = self.save_debug_screenshot(
-                            screenshot_np, filename)
-                        print(f"  Monitor {i} screenshot saved to {path}")
-                    except Exception as e:
-                        print(
-                            f"  ❌ Failed to capture Monitor {i} screenshot: {e}")
-
-            print("\n===== END MONITOR DIAGNOSTICS =====")
-            messagebox.showinfo("Diagnostics Complete",
-                                "Monitor diagnostics complete. Check the console output and debug_screenshots folder.\n\nNote: A maximum of 10 debug screenshots are kept to save disk space.")
+                # fallback to fullscreen screenshot
+                filename = f"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png"
+                screenshot = pyautogui.screenshot()
+                screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+                cv2.imwrite(filename, screenshot_np)
+                print(f"✅ Fullscreen screenshot saved to {filename}")
+            messagebox.showinfo("Diagnostics Complete", "Screenshot saved. Check the file in your folder.")
         except Exception as e:
             print(f"❌ Error in monitor diagnostics: {e}")
-            import traceback
-            traceback.print_exc()
-            print("===== END MONITOR DIAGNOSTICS (WITH ERRORS) =====")
-            messagebox.showerror(
-                "Diagnostics Error",
-                f"Error during monitor diagnostics: {e}")
+            messagebox.showerror("Diagnostics Error", f"Error during monitor diagnostics: {e}")
 
 
 def main():

@@ -36,6 +36,32 @@
         "documentation": {}
     },
     {
+        "label": "pygetwindow",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pygetwindow",
+        "description": "pygetwindow",
+        "detail": "pygetwindow",
+        "documentation": {}
+    },
+    {
+        "label": "ImageGrab",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "mss",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "mss",
+        "description": "mss",
+        "detail": "mss",
+        "documentation": {}
+    },
+    {
         "label": "threading",
         "kind": 6,
         "isExtraImport": true,
@@ -132,29 +158,39 @@
         "documentation": {}
     },
     {
-        "label": "pygetwindow",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "pygetwindow",
-        "description": "pygetwindow",
-        "detail": "pygetwindow",
+        "label": "save_fullscreen_screenshot",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False",
+        "detail": "accept",
         "documentation": {}
     },
     {
-        "label": "ImageGrab",
-        "importPath": "PIL",
-        "description": "PIL",
-        "isExtraImport": true,
-        "detail": "PIL",
+        "label": "save_dota2_window_screenshot",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False\n    win = windows[0]\n    if win.isMinimized:\n        print('❌ Dota 2 window is minimized!')\n        return False\n    bbox = (win.left, win.top, win.right, win.bottom)",
+        "detail": "accept",
         "documentation": {}
     },
     {
-        "label": "mss",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "mss",
-        "description": "mss",
-        "detail": "mss",
+        "label": "save_dota2_monitor_screenshot",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def save_dota2_monitor_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False\n    win = windows[0]\n    if win.isMinimized:\n        print('❌ Dota 2 window is minimized!')\n        return False\n    # Find which monitor the window is on",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    main()",
+        "detail": "accept",
         "documentation": {}
     },
     {
@@ -173,42 +209,6 @@
         "description": "dota_auto_accept",
         "peekOfCode": "def main():\n    root = tk.Tk()\n    app = DotaAutoAccept(root)\n    app.start_script()\n    root.mainloop()\nif __name__ == \"__main__\":\n    main()",
         "detail": "dota_auto_accept",
-        "documentation": {}
-    },
-    {
-        "label": "save_fullscreen_screenshot",
-        "kind": 2,
-        "importPath": "test",
-        "description": "test",
-        "peekOfCode": "def save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False",
-        "detail": "test",
-        "documentation": {}
-    },
-    {
-        "label": "save_dota2_window_screenshot",
-        "kind": 2,
-        "importPath": "test",
-        "description": "test",
-        "peekOfCode": "def save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False\n    win = windows[0]\n    if win.isMinimized:\n        print('❌ Dota 2 window is minimized!')\n        return False\n    bbox = (win.left, win.top, win.right, win.bottom)",
-        "detail": "test",
-        "documentation": {}
-    },
-    {
-        "label": "save_dota2_monitor_screenshot",
-        "kind": 2,
-        "importPath": "test",
-        "description": "test",
-        "peekOfCode": "def save_dota2_monitor_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')\n        return False\n    win = windows[0]\n    if win.isMinimized:\n        print('❌ Dota 2 window is minimized!')\n        return False\n    # Find which monitor the window is on",
-        "detail": "test",
-        "documentation": {}
-    },
-    {
-        "label": "main",
-        "kind": 2,
-        "importPath": "test",
-        "description": "test",
-        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    main()",
-        "detail": "test",
         "documentation": {}
     }
 ]
