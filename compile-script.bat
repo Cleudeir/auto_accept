@@ -87,13 +87,20 @@ if not exist "%ICON_NAME%" (
     set ICON_PARAM=--icon="%ICON_NAME%"
 )
 
+:: Validate audio file exists
+if not exist "dota2.mp3" (
+    echo Error: Audio file dota2.mp3 not found in current directory.
+    pause
+    exit /b 1
+)
+
 :: Create dist and build directories if they don't exist
 if not exist "dist" mkdir dist
 if not exist "build" mkdir build
 
 :: Compile the script with additional data files
 echo Compiling %SCRIPT_NAME%...
-python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "%APP_NAME%" --add-data "%REFERENCE_IMAGE%;." --add-data "%PLUS_IMAGE%;." --add-data "%ENV_FILE%;." --clean --distpath "dist" --workpath "build" "%SCRIPT_NAME%"
+python -m PyInstaller --onefile --windowed %ICON_PARAM% --name "%APP_NAME%" --add-data "%REFERENCE_IMAGE%;." --add-data "%PLUS_IMAGE%;." --add-data "%ENV_FILE%;." --add-data "dota2.mp3;." --clean --distpath "dist" --workpath "build" "%SCRIPT_NAME%"
 
 :: Check compilation result
 if %errorlevel% equ 0 (
