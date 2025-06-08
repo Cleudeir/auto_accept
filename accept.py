@@ -15,7 +15,7 @@ import threading
 
 selected_device_id = None
 alert_volume = 1.0
-SETTINGS_FILE = 'alert_volume.json'
+SETTINGS_FILE = 'config.json'  # Changed from 'alert_volume.json'
 selected_monitor_capture_setting = 1 # Default to monitor 1
 is_running = False
 detection_thread = None
