@@ -25,7 +25,7 @@ class DotaAutoAccept:
     def __init__(self, root):
         self.root = root
         self.root.title("Dota 2 Auto Accept")
-        self.root.geometry("520x380")
+        self.root.geometry("520x420")
         self.root.resizable(False, False)
         self.root.configure(bg='#1a1a2e')
 
@@ -599,22 +599,38 @@ class DotaAutoAccept:
                               activebackground='#6fa8ff', activeforeground='white', cursor='hand2')
         test_button.pack(side=tk.RIGHT)
 
-        # Control buttons section
+        # Control buttons section with padding and side-by-side
         controls_frame = tk.Frame(main_frame, bg=bg_primary)
-        controls_frame.pack(pady=18)
+        controls_frame.pack(pady=24)
 
+        button_style = {
+            'font': ("Segoe UI", 13, "bold"),
+            'relief': tk.FLAT,
+            'bd': 0,
+            'padx': 30,
+            'pady': 14,
+            'cursor': 'hand2',
+            'highlightthickness': 0,
+        }
+        # Start Button
         self.start_button = tk.Button(
             controls_frame, text="▶ Start Detection", command=self.start_script, 
-            bg=success_color, fg='white', font=("Segoe UI", 12, "bold"), 
-            relief=tk.FLAT, bd=0, padx=25, pady=12,
-            activebackground='#5edc9a', activeforeground='white', cursor='hand2')
-        self.start_button.pack(side=tk.LEFT, padx=10)
+            bg=success_color, fg='white', activebackground='#5edc9a', activeforeground='white',
+            **button_style)
+        self.start_button.pack(side=tk.LEFT, padx=(0, 18), ipadx=8, ipady=2)
+        self.start_button.bind("<Enter>", lambda e: self.start_button.config(bg="#5edc9a"))
+        self.start_button.bind("<Leave>", lambda e: self.start_button.config(bg=success_color))
+        self.start_button.config(highlightbackground="#d4f5e9")
 
+        # Stop Button
         self.stop_button = tk.Button(
             controls_frame, text="⏹ Stop", command=self.stop_script, 
-            bg=danger_color, fg='white', font=("Segoe UI", 12, "bold"), 
-            relief=tk.FLAT, bd=0, padx=25, pady=12,
-            activebackground='#ff8787', activeforeground='white', cursor='hand2')
+            bg=danger_color, fg='white', activebackground='#ff8787', activeforeground='white',
+            **button_style)
+        self.stop_button.pack(side=tk.LEFT, padx=(0, 0), ipadx=8, ipady=2)
+        self.stop_button.bind("<Enter>", lambda e: self.stop_button.config(bg="#ff8787"))
+        self.stop_button.bind("<Leave>", lambda e: self.stop_button.config(bg=danger_color))
+        self.stop_button.config(highlightbackground="#ffd6d6")
 
         # Info section at bottom
         info_frame = tk.Frame(main_frame, bg=bg_primary)

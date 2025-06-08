@@ -160,7 +160,7 @@
         "kind": 6,
         "importPath": "dota_auto_accept",
         "description": "dota_auto_accept",
-        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"520x380\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#1a1a2e')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        self.reference_image_plus_path = self.resource_path(\"dota2-plus.jpeg\")",
+        "peekOfCode": "class DotaAutoAccept:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Dota 2 Auto Accept\")\n        self.root.geometry(\"520x420\")\n        self.root.resizable(False, False)\n        self.root.configure(bg='#1a1a2e')\n        self.reference_image_path = self.resource_path(\"dota.png\")\n        self.reference_image = cv2.imread(self.reference_image_path, cv2.IMREAD_COLOR)\n        self.reference_image_plus_path = self.resource_path(\"dota2-plus.jpeg\")",
         "detail": "dota_auto_accept",
         "documentation": {}
     },
