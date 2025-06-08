@@ -17,7 +17,7 @@ class DotaAutoAccept:
     def __init__(self, root):
         self.root = root
         self.root.title("Dota 2 Auto Accept")
-        self.root.geometry("450x420")
+        self.root.geometry("450x280")
         self.root.resizable(False, False)
         self.root.configure(bg='#2c3e50')
 
@@ -367,9 +367,12 @@ class DotaAutoAccept:
 
                 if found:
                     print(f"Detected ACCEPT screen! Confidence: {max_val:.2f}")
-                    self.play_high_beep()
-                    pyautogui.press('enter')
-                    print("Match Accepted!")
+                    for i in range(3):
+                        self.play_high_beep()
+                        pyautogui.press('enter')
+                        print(f"Match Accepted! (Attempt {i+1}/3)")
+                        if i < 2:
+                            time.sleep(3)  # 3 second delay between attempts
                     time.sleep(5)
                     self.stop_script() # Stop the script after finding the match.
                     return # exit the function
