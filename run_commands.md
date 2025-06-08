@@ -1,0 +1,1 @@
+not use concatenate commands "&&" use ";"
