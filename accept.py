@@ -31,6 +31,7 @@ selected_device_id = None
 alert_volume = 1.0
 SETTINGS_FILE = 'config.json'  # Changed from 'alert_volume.json'
 selected_monitor_capture_setting = 1 # Default to monitor 1
+always_on_top = True # Default to always on top
 is_running = False
 detection_thread = None
 match_found = False
@@ -176,12 +177,13 @@ def test_alert_sound():
         messagebox.showerror("Test Error", str(e))
 
 def load_audio_settings():
-    global selected_device_id, alert_volume, selected_monitor_capture_setting
+    global selected_device_id, alert_volume, selected_monitor_capture_setting, always_on_top
     
     # Set defaults before trying to load
     selected_monitor_capture_setting = 1 # Default to monitor 1
     alert_volume = 1.0
     selected_device_id = None
+    always_on_top = True  # Default to always on top
 
     try:
         if os.path.exists(SETTINGS_FILE):
@@ -197,6 +199,8 @@ def load_audio_settings():
                 else:
                     logger.warning(f"Invalid monitor setting '{loaded_monitor_setting}' in config. Defaulting to Monitor 1.")
                     selected_monitor_capture_setting = 1
+                    
+                always_on_top = data.get('always_on_top', True)
         else:
             logger.info(f"Settings file {SETTINGS_FILE} not found. Using default settings.")
             # Defaults are already set above
@@ -206,12 +210,13 @@ def load_audio_settings():
         # Defaults are already set above
 
 def save_audio_settings():
-    global selected_monitor_capture_setting, alert_volume, selected_device_id
+    global selected_monitor_capture_setting, alert_volume, selected_device_id, always_on_top
     try:
         data = {
             'alert_volume': alert_volume,
             'selected_device_id': selected_device_id,
-            'selected_monitor_capture_setting': selected_monitor_capture_setting # This will be an int
+            'selected_monitor_capture_setting': selected_monitor_capture_setting, # This will be an int
+            'always_on_top': always_on_top
         }
         with open(SETTINGS_FILE, 'w') as f:
             json.dump(data, f)
@@ -219,7 +224,8 @@ def save_audio_settings():
         logger.error(f"Error saving settings: {e}")
 
 def show_audio_settings():
-    global selected_device_id, alert_volume, is_running, detection_thread, selected_monitor_capture_setting
+    global selected_device_id, alert_volume, is_running, detection_thread, selected_monitor_capture_setting, always_on_top
+    
     win = tk.Tk()
     win.title("Dota 2 Auto Accept - Control Panel")
     
@@ -232,7 +238,11 @@ def show_audio_settings():
     y = (screen_height // 2) - (window_height // 2)
     win.geometry(f"{window_width}x{window_height}+{x}+{y}")
     win.resizable(False, False)
-      # Try to set the icon
+    
+    # Set window to always stay on top
+    win.attributes('-topmost', always_on_top)
+    
+    # Try to set the icon
     try:
         icon_path = os.path.join('bin', 'icon.ico')
         if os.path.exists(icon_path):
@@ -387,6 +397,18 @@ def show_audio_settings():
     
     monitor_combo.bind('<<ComboboxSelected>>', on_monitor_select)
 
+    # Always on top option
+    always_on_top_var = tk.BooleanVar(value=always_on_top)
+    def toggle_always_on_top():
+        global always_on_top
+        always_on_top = always_on_top_var.get()
+        win.attributes('-topmost', always_on_top)
+        save_audio_settings()
+        logger.info(f"Always on top set to: {always_on_top}")
+    
+    always_on_top_check = tk.Checkbutton(monitor_frame, text="Keep window on top", variable=always_on_top_var, command=toggle_always_on_top)
+    always_on_top_check.pack(pady=5)
+    
     # Control buttons frame
     control_frame = tk.LabelFrame(win, text="Detection Control", padx=10, pady=10)
     control_frame.pack(fill="x", padx=10, pady=5)
@@ -444,7 +466,7 @@ def main_loop():
             sim1 = compare_images(screenshot_filename, ref1)
             sim2 = compare_images(screenshot_filename, ref2)
             logger.info(f"Similarity with {ref1}: {sim1:.2f}, with {ref2}: {sim2:.2f}")
-            if sim1 > 0.7 or sim2 > 0.7:
+            if sim1 > 0.8 or sim2 > 0.8:
                 logger.info("Match detected! Pressing Enter and playing sound.")
                 play_alert_sound()
                 pyautogui.press('enter')
