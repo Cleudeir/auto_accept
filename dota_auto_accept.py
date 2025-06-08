@@ -12,6 +12,14 @@ from screeninfo import get_monitors
 import pygame
 import sounddevice as sd
 import json
+# Add pycaw imports for volume control
+try:
+    from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+    import comtypes
+    from ctypes import cast, POINTER
+    pycaw_available = True
+except ImportError:
+    pycaw_available = False
 
 class DotaAutoAccept:
     def __init__(self, root):
@@ -204,33 +212,92 @@ class DotaAutoAccept:
             print(f"Audio test failed: {e}")
             messagebox.showwarning("Audio Test", f"Failed to test audio device: {e}")
 
-    def play_high_beep(self):
-        """Play dota2.mp3 sound using the selected audio device at maximum volume"""
+    def set_device_volume_max(self):
+        """Set the selected audio device's volume to maximum using pycaw (Windows only). Returns previous volume (0.0-1.0) or None on error."""
+        if not pycaw_available:
+            print("pycaw not available, cannot set device volume programmatically.")
+            return None
         try:
+            devices = AudioUtilities.GetSpeakers()
+            interface = devices.Activate(
+                IAudioEndpointVolume._iid_, comtypes.CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            prev_vol = volume.GetMasterVolumeLevelScalar()
+            volume.SetMasterVolumeLevelScalar(1.0, None)  # 1.0 = 100%
+            print(f"Set system default output device volume to 100% (max), previous was {prev_vol:.2f}")
+            return prev_vol
+        except Exception as e:
+            print(f"Failed to set device volume: {e}")
+            return None
+
+    def restore_device_volume(self, prev_vol):
+        """Restore the system default output device volume to previous value using pycaw."""
+        if not pycaw_available or prev_vol is None:
+            return
+        try:
+            devices = AudioUtilities.GetSpeakers()
+            interface = devices.Activate(
+                IAudioEndpointVolume._iid_, comtypes.CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            volume.SetMasterVolumeLevelScalar(prev_vol, None)
+            print(f"Restored system default output device volume to {prev_vol:.2f}")
+        except Exception as e:
+            print(f"Failed to restore device volume: {e}")
+
+    def stop_other_audio(self):
+        """Stop all other audio sessions except this process (using pycaw, Windows only)."""
+        if not pycaw_available:
+            return
+        try:
+            sessions = AudioUtilities.GetAllSessions()
+            for session in sessions:
+                if session.Process and session.Process.pid != os.getpid():
+                    try:
+                        session.SimpleAudioVolume.SetMute(1, None)
+                        print(f"Muted audio session: {session.Process.name()}")
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"Failed to mute other audio sessions: {e}")
+
+    def unmute_other_audio(self):
+        """Unmute all audio sessions previously muted (using pycaw, Windows only)."""
+        if not pycaw_available:
+            return
+        try:
+            sessions = AudioUtilities.GetAllSessions()
+            for session in sessions:
+                if session.Process and session.Process.pid != os.getpid():
+                    try:
+                        session.SimpleAudioVolume.SetMute(0, None)
+                        print(f"Unmuted audio session: {session.Process.name()}")
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"Failed to unmute other audio sessions: {e}")
+
+    def play_high_beep(self):
+        """Play dota2.mp3 sound using the selected audio device at maximum volume, then restore previous volume and unmute others."""
+        prev_vol = None
+        try:
+            # Save current volume and set to max
+            prev_vol = self.set_device_volume_max()
+            # Mute other audio sessions
+            self.stop_other_audio()
             if self.selected_device_id is None:
                 print("No audio device selected, using fallback")
                 self.play_fallback_beep()
                 return
-            
-            # Load the dota2.mp3 file
             mp3_path = self.resource_path("dota2.mp3")
             if not os.path.exists(mp3_path):
                 print("dota2.mp3 not found, using fallback beep")
                 self.play_fallback_beep()
                 return
-                
-            # Initialize pygame mixer if not already done
             if not self.pygame_initialized:
                 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
                 self.pygame_initialized = True
-            
-            # Get the audio data using pygame's sound loading
             sound = pygame.mixer.Sound(mp3_path)
-            
-            # Convert pygame sound to numpy array for sounddevice
             sound_array = pygame.sndarray.array(sound)
-            
-            # Normalize and maximize volume (ensure it uses full dynamic range)
             if sound_array.dtype != np.float32:
                 if sound_array.dtype == np.int16:
                     sound_array = sound_array.astype(np.float32) / 32768.0
@@ -238,29 +305,21 @@ class DotaAutoAccept:
                     sound_array = sound_array.astype(np.float32) / 2147483648.0
                 else:
                     sound_array = sound_array.astype(np.float32)
-            
-            # Normalize to maximum volume (1.0 = 0dB, maximum without clipping)
             max_val = np.max(np.abs(sound_array))
             if max_val > 0:
-                sound_array = sound_array / max_val  # Normalize to max range
-            
-            # Get sample rate from the loaded sound
+                sound_array = sound_array / max_val
             sample_rate = pygame.mixer.get_init()[0]
-            
             print(f"Playing dota2.mp3 at maximum volume on device {self.selected_device_id}")
-            
-            # Play the complete sound on the selected device at maximum volume
             sd.play(sound_array, samplerate=sample_rate, device=self.selected_device_id)
-            
-            # Wait for completion in a separate thread to not block UI
-            threading.Thread(target=lambda: sd.wait(), daemon=True).start()
-            
+            sd.wait()  # Wait for sound to finish before restoring volume
             print("dota2.mp3 played successfully at maximum volume")
-            
         except Exception as e:
             print(f"Error playing dota2.mp3: {e}")
-            # Fallback to pygame if sounddevice fails
             self.play_fallback_beep()
+        finally:
+            # Restore previous volume and unmute others
+            self.restore_device_volume(prev_vol)
+            self.unmute_other_audio()
 
     def play_fallback_beep(self):
         """Fallback beep using pygame mixer - try MP3 first, then generated beep"""
@@ -269,40 +328,6 @@ class DotaAutoAccept:
                 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
                 self.pygame_initialized = True
             
-            # Try to play dota2.mp3 first
-            mp3_path = self.resource_path("dota2.mp3")
-            if os.path.exists(mp3_path):
-                try:
-                    pygame.mixer.music.load(mp3_path)
-                    pygame.mixer.music.set_volume(1.0)  # Maximum volume
-                    pygame.mixer.music.play()
-                    print("Fallback: dota2.mp3 played using pygame")
-                    return
-                except Exception as mp3_error:
-                    print(f"Failed to play MP3 in fallback: {mp3_error}")
-            
-            # If MP3 fails, generate a 1kHz beep for 300ms
-            sample_rate = 44100
-            duration = 0.3
-            freq = 1000
-            t = np.linspace(0, duration, int(sample_rate * duration), False)
-            tone = (np.sin(2 * np.pi * freq * t) * 32767 * 1.0).astype(np.int16)  # Maximum volume
-            sound = pygame.sndarray.make_sound(tone)
-            sound.set_volume(1.0)  # Maximum volume
-            sound.play()
-            
-            print("Fallback beep played at maximum volume")
-        except Exception as e:
-            print(f"Error playing fallback beep: {e}")
-
-    def get_dota_monitor(self):
-        try:
-            hwnd = win32gui.FindWindow(None, "Dota 2")
-            if hwnd == 0:
-                print("Dota 2 window not found.")
-                return None
-
-            rect = win32gui.GetWindowRect(hwnd)
             window_x, window_y, _, _ = rect
 
             for monitor in get_monitors():
