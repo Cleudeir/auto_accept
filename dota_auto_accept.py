@@ -328,6 +328,40 @@ class DotaAutoAccept:
                 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
                 self.pygame_initialized = True
             
+            # Try to play dota2.mp3 first
+            mp3_path = self.resource_path("dota2.mp3")
+            if os.path.exists(mp3_path):
+                try:
+                    pygame.mixer.music.load(mp3_path)
+                    pygame.mixer.music.set_volume(1.0)  # Maximum volume
+                    pygame.mixer.music.play()
+                    print("Fallback: dota2.mp3 played using pygame")
+                    return
+                except Exception as mp3_error:
+                    print(f"Failed to play MP3 in fallback: {mp3_error}")
+            
+            # If MP3 fails, generate a 1kHz beep for 300ms
+            sample_rate = 44100
+            duration = 0.3
+            freq = 1000
+            t = np.linspace(0, duration, int(sample_rate * duration), False)
+            tone = (np.sin(2 * np.pi * freq * t) * 32767 * 1.0).astype(np.int16)  # Maximum volume
+            sound = pygame.sndarray.make_sound(tone)
+            sound.set_volume(1.0)  # Maximum volume
+            sound.play()
+            
+            print("Fallback beep played at maximum volume")
+        except Exception as e:
+            print(f"Error playing fallback beep: {e}")
+
+    def get_dota_monitor(self):
+        try:
+            hwnd = win32gui.FindWindow(None, "Dota 2")
+            if hwnd == 0:
+                print("Dota 2 window not found.")
+                return None
+
+            rect = win32gui.GetWindowRect(hwnd)
             window_x, window_y, _, _ = rect
 
             for monitor in get_monitors():
@@ -392,11 +426,12 @@ class DotaAutoAccept:
 
                 if found:
                     print(f"Detected ACCEPT screen! Confidence: {max_val:.2f}")
-                    for i in range(3):
+                    repeat_count = 2  # Number of times to repeat the beep
+                    for i in range(repeat_count):
                         self.play_high_beep()
                         pyautogui.press('enter')
-                        print(f"Match Accepted! (Attempt {i+1}/3)")
-                        if i < 2:
+                        print(f"Match Accepted! (Attempt {i+1}/{repeat_count})")
+                        if i < repeat_count - 1:
                             time.sleep(3)  # 3 second delay between attempts
                     time.sleep(5)
                     self.stop_script() # Stop the script after finding the match.
