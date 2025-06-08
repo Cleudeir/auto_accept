@@ -48,25 +48,61 @@ class DotaAutoAccept:
         self.setup_ui()
 
     def init_audio_system(self):
-        """Initialize the audio system and discover available devices"""
+        """Initialize the audio system and discover only active output devices"""
         try:
             # Get available audio output devices
             devices = sd.query_devices()
             self.audio_devices = []
             
             for i, device in enumerate(devices):
-                if device['max_output_channels'] > 0:  # Output devices only
-                    self.audio_devices.append({
-                        'id': i,
-                        'name': device['name'],
-                        'channels': device['max_output_channels']
-                    })
+                # Filter for active output devices only
+                if (device['max_output_channels'] > 0 and 
+                    device['hostapi'] >= 0 and 
+                    device['default_samplerate'] > 0):
+                    
+                    # Additional filtering to remove inactive or problematic devices
+                    device_name = device['name'].strip()
+                    
+                    # Skip devices that are typically inactive or cause issues
+                    skip_keywords = ['communications', 'comm', 'recording', 'input', 'line in', 'microphone']
+                    if any(keyword in device_name.lower() for keyword in skip_keywords):
+                        continue
+                    
+                    # Check if device is actually available by trying to query it
+                    try:
+                        # Test if device is accessible
+                        sd.check_output_settings(device=i, channels=1, samplerate=44100)
+                        self.audio_devices.append({
+                            'id': i,
+                            'name': device_name,
+                            'channels': device['max_output_channels'],
+                            'samplerate': device['default_samplerate']
+                        })
+                        print(f"Active output device found: {device_name}")
+                    except Exception:
+                        # Device not accessible, skip it
+                        continue
             
-            print(f"Found {len(self.audio_devices)} audio output devices")
+            print(f"Found {len(self.audio_devices)} active audio output devices")
             
             # Set default device if none selected
             if not self.selected_device_id and self.audio_devices:
-                self.selected_device_id = sd.default.device[1]  # Default output device
+                try:
+                    default_output = sd.default.device[1]  # Default output device
+                    # Check if default device is in our filtered list
+                    for device in self.audio_devices:
+                        if device['id'] == default_output:
+                            self.selected_device_id = default_output
+                            print(f"Using system default device: {device['name']}")
+                            break
+                    # If default not found, use first available device
+                    if self.selected_device_id is None:
+                        self.selected_device_id = self.audio_devices[0]['id']
+                        print(f"Using first available device: {self.audio_devices[0]['name']}")
+                except Exception:
+                    if self.audio_devices:
+                        self.selected_device_id = self.audio_devices[0]['id']
+                        print(f"Using first available device: {self.audio_devices[0]['name']}")
                 
         except Exception as e:
             print(f"Error initializing audio system: {e}")
@@ -78,8 +114,17 @@ class DotaAutoAccept:
             if os.path.exists(self.settings_file):
                 with open(self.settings_file, 'r') as f:
                     settings = json.load(f)
-                    self.selected_device_id = settings.get('selected_device_id', self.selected_device_id)
-                    print(f"Loaded audio device: {self.selected_device_id}")
+                    saved_device_id = settings.get('selected_device_id')
+                    
+                    # Validate that the saved device still exists in our active devices list
+                    if saved_device_id is not None:
+                        for device in self.audio_devices:
+                            if device['id'] == saved_device_id:
+                                self.selected_device_id = saved_device_id
+                                print(f"Loaded saved audio device: {device['name']}")
+                                return
+                        print("Saved audio device no longer available, using default")
+                    
         except Exception as e:
             print(f"Error loading audio settings: {e}")
 
@@ -90,8 +135,16 @@ class DotaAutoAccept:
                 'selected_device_id': self.selected_device_id
             }
             with open(self.settings_file, 'w') as f:
-                json.dump(settings, f)
-            print(f"Saved audio device: {self.selected_device_id}")
+                json.dump(settings, f, indent=2)
+            
+            # Find device name for logging
+            device_name = "Unknown"
+            for device in self.audio_devices:
+                if device['id'] == self.selected_device_id:
+                    device_name = device['name']
+                    break
+            
+            print(f"Saved audio device: {device_name} (ID: {self.selected_device_id})")
         except Exception as e:
             print(f"Error saving audio settings: {e}")
 
@@ -129,7 +182,8 @@ class DotaAutoAccept:
         """Play a high-pitched beep using the selected audio device"""
         try:
             if self.selected_device_id is None:
-                print("No audio device selected")
+                print("No audio device selected, using fallback")
+                self.play_fallback_beep()
                 return
                 
             # Generate a 1kHz beep for 500ms with fade in/out
@@ -298,7 +352,7 @@ class DotaAutoAccept:
         audio_frame = tk.Frame(main_frame, bg='#2c3e50')
         audio_frame.pack(pady=10, fill=tk.X)
 
-        audio_label = tk.Label(audio_frame, text="Audio Output Device:", 
+        audio_label = tk.Label(audio_frame, text="Audio Output Device (Active Only):", 
                               fg="white", bg='#2c3e50', font=("Arial", 10, "bold"))
         audio_label.pack(anchor=tk.W)
 
@@ -310,14 +364,29 @@ class DotaAutoAccept:
         device_names = [device['name'] for device in self.audio_devices]
         self.device_combo['values'] = device_names
         
-        # Set current selection
+        # Set current selection based on saved device ID
+        current_selection = 0  # Default to first device
         if self.selected_device_id is not None:
             for i, device in enumerate(self.audio_devices):
                 if device['id'] == self.selected_device_id:
-                    self.device_combo.current(i)
+                    current_selection = i
+                    print(f"Restored saved device: {device['name']}")
                     break
-        elif device_names:
-            self.device_combo.current(0)
+            else:
+                # Saved device not found, save the current default
+                if self.audio_devices:
+                    self.selected_device_id = self.audio_devices[0]['id']
+                    self.save_audio_settings()
+                    print(f"Saved device not found, using: {self.audio_devices[0]['name']}")
+        elif self.audio_devices:
+            # No saved device, use first available
+            current_selection = 0
+            self.selected_device_id = self.audio_devices[0]['id']
+            self.save_audio_settings()
+            print(f"No saved device, using: {self.audio_devices[0]['name']}")
+            
+        if device_names:
+            self.device_combo.current(current_selection)
             
         self.device_combo.bind('<<ComboboxSelected>>', self.on_device_change)
         self.device_combo.pack(side=tk.LEFT, padx=(0, 10))
@@ -348,7 +417,7 @@ class DotaAutoAccept:
                              fg="#f1c40f", bg='#2c3e50', font=("Arial", 10))
         info_label.pack()
 
-        device_count_label = tk.Label(info_frame, text=f"Found {len(self.audio_devices)} audio devices", 
+        device_count_label = tk.Label(info_frame, text=f"Found {len(self.audio_devices)} active audio devices", 
                                      fg="#95a5a6", bg='#2c3e50', font=("Arial", 8))
         device_count_label.pack()
 
