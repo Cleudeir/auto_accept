@@ -483,16 +483,16 @@ class DotaAutoAccept:
         self.start_button.pack(side=tk.LEFT, padx=10)
 
     def setup_ui(self):
-        # Clean light theme colors
-        bg_primary = '#f7f9fa'      # Very light gray background
-        bg_secondary = '#ffffff'    # White for cards/sections
-        accent_primary = '#4f8cff'  # Soft blue accent
-        accent_secondary = '#e0e7ff' # Light blue accent
-        text_primary = '#222b45'    # Dark text
-        text_secondary = '#6b778c'  # Muted text
-        success_color = '#43b581'   # Green
-        danger_color = '#ff5c5c'    # Red
-        warning_color = '#f7b731'   # Yellow
+        # Modern dark theme colors
+        bg_primary = '#1a1a2e'      # Dark navy background
+        bg_secondary = '#16213e'    # Slightly lighter for cards
+        accent_primary = '#0f3460'   # Blue accent
+        accent_secondary = '#533483' # Purple accent
+        text_primary = '#ffffff'     # White text
+        text_secondary = '#b8bcc8'   # Light gray text
+        success_color = '#00d4aa'    # Teal green
+        danger_color = '#ff6b6b'     # Coral red
+        warning_color = '#feca57'    # Yellow
 
         # Main container with padding
         main_frame = tk.Frame(self.root, bg=bg_primary, padx=25, pady=25)
@@ -500,7 +500,7 @@ class DotaAutoAccept:
 
         # Header section
         header_frame = tk.Frame(main_frame, bg=bg_primary)
-        header_frame.pack(fill=tk.X, pady=(0, 18))
+        header_frame.pack(fill=tk.X, pady=(0, 20))
         
         # Status with modern styling
         self.status_label = tk.Label(header_frame, text="● Not Running", fg=text_secondary, 
@@ -508,30 +508,29 @@ class DotaAutoAccept:
         self.status_label.pack()
 
         # Card-style container for audio settings
-        audio_card = tk.Frame(main_frame, bg=bg_secondary, relief=tk.GROOVE, bd=1, highlightbackground=accent_secondary, highlightthickness=1)
-        audio_card.pack(fill=tk.X, pady=(0, 18), padx=10, ipady=10, ipadx=10)
-        audio_card.configure(borderwidth=0, highlightcolor=accent_secondary)
+        audio_card = tk.Frame(main_frame, bg=bg_secondary, relief=tk.FLAT, bd=0)
+        audio_card.pack(fill=tk.X, pady=(0, 20), padx=10, ipady=15, ipadx=15)
 
         # Audio settings header
         audio_header = tk.Label(audio_card, text="🔊 Audio Settings", 
-                              fg=accent_primary, bg=bg_secondary, font=("Segoe UI", 12, "bold"))
-        audio_header.pack(anchor=tk.W, pady=(0, 12))
+                              fg=text_primary, bg=bg_secondary, font=("Segoe UI", 12, "bold"))
+        audio_header.pack(anchor=tk.W, pady=(0, 15))
 
         # Volume control section
         volume_section = tk.Frame(audio_card, bg=bg_secondary)
-        volume_section.pack(fill=tk.X, pady=(0, 12))
+        volume_section.pack(fill=tk.X, pady=(0, 15))
         
         volume_label = tk.Label(volume_section, text="Alert Volume", 
                               fg=text_secondary, bg=bg_secondary, font=("Segoe UI", 10))
-        volume_label.pack(anchor=tk.W, pady=(0, 3))
+        volume_label.pack(anchor=tk.W, pady=(0, 5))
         
         volume_container = tk.Frame(volume_section, bg=bg_secondary)
         volume_container.pack(fill=tk.X)
         
         self.volume_slider = tk.Scale(volume_container, from_=0, to=100, orient=tk.HORIZONTAL, 
-                                    length=250, bg=bg_secondary, fg=accent_primary, 
-                                    highlightbackground=bg_secondary, troughcolor=accent_secondary,
-                                    activebackground=accent_primary, font=("Segoe UI", 9),
+                                    length=250, bg=bg_secondary, fg=text_primary, 
+                                    highlightbackground=bg_secondary, troughcolor=accent_primary,
+                                    activebackground=accent_secondary, font=("Segoe UI", 9),
                                     showvalue=True, relief=tk.FLAT, bd=0, sliderrelief=tk.FLAT)
         self.volume_slider.set(int(self.alert_volume * 100))
         self.volume_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
@@ -543,11 +542,11 @@ class DotaAutoAccept:
 
         # Device selection section
         device_section = tk.Frame(audio_card, bg=bg_secondary)
-        device_section.pack(fill=tk.X, pady=(0, 8))
+        device_section.pack(fill=tk.X, pady=(0, 10))
         
         device_label = tk.Label(device_section, text="Output Device", 
                               fg=text_secondary, bg=bg_secondary, font=("Segoe UI", 10))
-        device_label.pack(anchor=tk.W, pady=(0, 3))
+        device_label.pack(anchor=tk.W, pady=(0, 5))
         
         device_container = tk.Frame(device_section, bg=bg_secondary)
         device_container.pack(fill=tk.X)
@@ -555,15 +554,15 @@ class DotaAutoAccept:
         # Modern dropdown styling
         style = ttk.Style()
         style.theme_use('clam')
-        style.configure('Light.TCombobox',
-                       fieldbackground=bg_secondary,
-                       background=bg_secondary,
+        style.configure('Modern.TCombobox',
+                       fieldbackground=accent_primary,
+                       background=accent_primary,
                        foreground=text_primary,
                        borderwidth=0,
                        relief=tk.FLAT)
         
         self.device_combo = ttk.Combobox(device_container, state="readonly", width=35,
-                                       style='Light.TCombobox', font=("Segoe UI", 9))
+                                       style='Modern.TCombobox', font=("Segoe UI", 9))
         device_names = [device['name'] for device in self.audio_devices]
         self.device_combo['values'] = device_names
         
@@ -594,34 +593,34 @@ class DotaAutoAccept:
 
         # Modern test button
         test_button = tk.Button(device_container, text="🎵 Test", command=self.test_audio_device,
-                              bg=accent_primary, fg='white', font=("Segoe UI", 9, "bold"), 
+                              bg=accent_secondary, fg=text_primary, font=("Segoe UI", 9, "bold"), 
                               relief=tk.FLAT, bd=0, padx=15, pady=8,
-                              activebackground='#6fa8ff', activeforeground='white', cursor='hand2')
+                              activebackground='#6c5ce7', activeforeground=text_primary)
         test_button.pack(side=tk.RIGHT)
 
         # Control buttons section
         controls_frame = tk.Frame(main_frame, bg=bg_primary)
-        controls_frame.pack(pady=18)
+        controls_frame.pack(pady=20)
 
         self.start_button = tk.Button(
             controls_frame, text="▶ Start Detection", command=self.start_script, 
             bg=success_color, fg='white', font=("Segoe UI", 12, "bold"), 
             relief=tk.FLAT, bd=0, padx=25, pady=12,
-            activebackground='#5edc9a', activeforeground='white', cursor='hand2')
+            activebackground='#00b894', activeforeground='white')
         self.start_button.pack(side=tk.LEFT, padx=10)
 
         self.stop_button = tk.Button(
             controls_frame, text="⏹ Stop", command=self.stop_script, 
             bg=danger_color, fg='white', font=("Segoe UI", 12, "bold"), 
             relief=tk.FLAT, bd=0, padx=25, pady=12,
-            activebackground='#ff8787', activeforeground='white', cursor='hand2')
+            activebackground='#e55656', activeforeground='white')
 
         # Info section at bottom
         info_frame = tk.Frame(main_frame, bg=bg_primary)
-        info_frame.pack(side=tk.BOTTOM, pady=(24, 0))
+        info_frame.pack(side=tk.BOTTOM, pady=(30, 0))
 
         info_label = tk.Label(info_frame, text="🎮 Auto-accepting Dota 2 matches with audio alerts", 
-                             fg=accent_primary, bg=bg_primary, font=("Segoe UI", 10, "italic"))
+                             fg=warning_color, bg=bg_primary, font=("Segoe UI", 10, "italic"))
         info_label.pack()
 
         device_count_label = tk.Label(info_frame, text=f"📊 {len(self.audio_devices)} active audio devices detected", 
