@@ -79,12 +79,12 @@
         "documentation": {}
     },
     {
-        "label": "threading",
+        "label": "sounddevice",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "threading",
-        "description": "threading",
-        "detail": "threading",
+        "importPath": "sounddevice",
+        "description": "sounddevice",
+        "detail": "sounddevice",
         "documentation": {}
     },
     {
@@ -93,6 +93,22 @@
         "isExtraImport": true,
         "importPath": "tkinter",
         "description": "tkinter",
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "ttk",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "messagebox",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
         "detail": "tkinter",
         "documentation": {}
     },
@@ -110,6 +126,24 @@
         "description": "tkinter",
         "isExtraImport": true,
         "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
         "documentation": {}
     },
     {
@@ -145,24 +179,6 @@
         "importPath": "pygame",
         "description": "pygame",
         "detail": "pygame",
-        "documentation": {}
-    },
-    {
-        "label": "sounddevice",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "sounddevice",
-        "description": "sounddevice",
-        "detail": "sounddevice",
-        "documentation": {}
-    },
-    {
-        "label": "json",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "json",
-        "description": "json",
-        "detail": "json",
         "documentation": {}
     },
     {
@@ -215,7 +231,52 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def play_alert_sound():\n    try:\n        import pygame\n        import time as _time\n        mp3_path = 'dota2.mp3'\n        if os.path.exists(mp3_path):\n            pygame.mixer.init()\n            sound = pygame.mixer.Sound(mp3_path)\n            sound.set_volume(1.0)\n            sound.play()",
+        "peekOfCode": "def play_alert_sound():\n    try:\n        import pygame\n        import time as _time\n        mp3_path = 'dota2.mp3'\n        if os.path.exists(mp3_path):\n            pygame.mixer.init()\n            sound = pygame.mixer.Sound(mp3_path)\n            arr = pygame.sndarray.array(sound)\n            # Apply volume to the audio array",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "get_output_devices",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def get_output_devices():\n    devices = sd.query_devices()\n    output_devices = []\n    for i, d in enumerate(devices):\n        if d['max_output_channels'] > 0:\n            output_devices.append({'id': i, 'name': d['name']})\n    return output_devices\ndef test_alert_sound():\n    try:\n        import pygame",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "test_alert_sound",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def test_alert_sound():\n    try:\n        import pygame\n        import time as _time\n        mp3_path = 'dota2.mp3'\n        if os.path.exists(mp3_path):\n            pygame.mixer.init()\n            sound = pygame.mixer.Sound(mp3_path)\n            arr = pygame.sndarray.array(sound)\n            # Apply volume to the audio array",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "load_audio_settings",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def load_audio_settings():\n    global selected_device_id, alert_volume\n    try:\n        if os.path.exists(SETTINGS_FILE):\n            with open(SETTINGS_FILE, 'r') as f:\n                data = json.load(f)\n                alert_volume = float(data.get('alert_volume', 1.0))\n                selected_device_id = data.get('selected_device_id', None)\n    except Exception as e:\n        print(f\"Error loading audio settings: {e}\")",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "save_audio_settings",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def save_audio_settings():\n    try:\n        data = {\n            'alert_volume': alert_volume,\n            'selected_device_id': selected_device_id\n        }\n        with open(SETTINGS_FILE, 'w') as f:\n            json.dump(data, f)\n    except Exception as e:\n        print(f\"Error saving audio settings: {e}\")",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "show_audio_settings",
+        "kind": 2,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "def show_audio_settings():\n    global selected_device_id, alert_volume\n    win = tk.Tk()\n    win.title(\"Audio Settings\")\n    win.geometry(\"400x200\")\n    win.resizable(False, False)\n    devices = get_output_devices()\n    device_names = [d['name'] for d in devices]\n    current_device = tk.StringVar()\n    # Try to restore last used device",
         "detail": "accept",
         "documentation": {}
     },
@@ -233,7 +294,34 @@
         "kind": 2,
         "importPath": "accept",
         "description": "accept",
-        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    main_loop()",
+        "peekOfCode": "def main():\n    filename = f\"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n    if not save_dota2_monitor_screenshot(filename):\n        # fallback to fullscreen screenshot\n        filename = f\"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png\"\n        save_fullscreen_screenshot(filename)\nif __name__ == \"__main__\":\n    load_audio_settings()\n    show_audio_settings()\n    main_loop()",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "selected_device_id",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "selected_device_id = None\nalert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "alert_volume",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "alert_volume = 1.0\nSETTINGS_FILE = 'alert_volume.json'\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:",
+        "detail": "accept",
+        "documentation": {}
+    },
+    {
+        "label": "SETTINGS_FILE",
+        "kind": 5,
+        "importPath": "accept",
+        "description": "accept",
+        "peekOfCode": "SETTINGS_FILE = 'alert_volume.json'\ndef save_fullscreen_screenshot(filename):\n    screenshot = pyautogui.screenshot()\n    screenshot_np = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)\n    cv2.imwrite(filename, screenshot_np)\n    print(f\"✅ Fullscreen screenshot saved to {filename}\")\ndef save_dota2_window_screenshot(filename):\n    windows = gw.getWindowsWithTitle('Dota 2')\n    if not windows:\n        print('❌ Dota 2 window not found!')",
         "detail": "accept",
         "documentation": {}
     },
