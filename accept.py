@@ -31,7 +31,7 @@ selected_device_id = None
 alert_volume = 1.0
 SETTINGS_FILE = 'config.json'  # Changed from 'alert_volume.json'
 selected_monitor_capture_setting = 1 # Default to monitor 1
-always_on_top = True # Default to always on top
+always_on_top = True
 is_running = False
 detection_thread = None
 match_found = False
@@ -178,12 +178,11 @@ def test_alert_sound():
 
 def load_audio_settings():
     global selected_device_id, alert_volume, selected_monitor_capture_setting, always_on_top
-    
-    # Set defaults before trying to load
+      # Set defaults before trying to load
     selected_monitor_capture_setting = 1 # Default to monitor 1
     alert_volume = 1.0
     selected_device_id = None
-    always_on_top = True  # Default to always on top
+    always_on_top = False  # Default to not always on top
 
     try:
         if os.path.exists(SETTINGS_FILE):
@@ -191,7 +190,6 @@ def load_audio_settings():
                 data = json.load(f)
                 alert_volume = float(data.get('alert_volume', 1.0))
                 selected_device_id = data.get('selected_device_id', None)
-                
                 loaded_monitor_setting = data.get('selected_monitor_capture_setting', 1)
                 if isinstance(loaded_monitor_setting, int) and loaded_monitor_setting > 0:
                     # We'll validate if this index is currently available in show_audio_settings
@@ -200,7 +198,7 @@ def load_audio_settings():
                     logger.warning(f"Invalid monitor setting '{loaded_monitor_setting}' in config. Defaulting to Monitor 1.")
                     selected_monitor_capture_setting = 1
                     
-                always_on_top = data.get('always_on_top', True)
+                always_on_top = data.get('always_on_top', False)
         else:
             logger.info(f"Settings file {SETTINGS_FILE} not found. Using default settings.")
             # Defaults are already set above
