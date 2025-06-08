@@ -8,3 +8,5 @@ pyinstaller==6.12.0
 setuptools
 wheel
 requests
+pygame
+sounddevice

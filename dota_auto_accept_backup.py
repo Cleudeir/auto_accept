@@ -12,6 +12,7 @@ from screeninfo import get_monitors
 import pygame
 import sounddevice as sd
 import json
+from pycaw.pycaw import AudioUtilities, AudioEndpointVolume, ISimpleAudioVolume
 
 class DotaAutoAccept:
     def __init__(self, root):
@@ -157,8 +158,7 @@ class DotaAutoAccept:
             
             # Optional: wait for completion in a separate thread to not block UI
             threading.Thread(target=lambda: sd.wait(), daemon=True).start()
-            
-            print("Beep played successfully")
+              print("Beep played successfully")
             
         except Exception as e:
             print(f"Error playing beep: {e}")
@@ -285,9 +285,7 @@ class DotaAutoAccept:
         self.running = False
         self.status_label.config(text="Stopped", fg="#e74c3c")
         self.stop_button.pack_forget()
-        self.start_button.pack(side=tk.LEFT, padx=10)
-
-    def setup_ui(self):
+        self.start_button.pack(side=tk.LEFT, padx=10)    def setup_ui(self):
         main_frame = tk.Frame(self.root, bg='#2c3e50', padx=20, pady=20)
         main_frame.pack(fill=tk.BOTH, expand=True)
 
