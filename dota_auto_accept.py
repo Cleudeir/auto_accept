@@ -49,6 +49,11 @@ class DotaAutoAccept:
         self.settings_file = self.resource_path("audio_settings.json")
         self.pygame_initialized = False
         
+        # Initialize alert volume
+        self.alert_volume = 1.0  # Default to 100%
+        self.volume_settings_file = self.resource_path("alert_volume.json")
+        self.load_volume_setting()
+        
         # Initialize audio system
         self.init_audio_system()
         self.load_audio_settings()
@@ -160,6 +165,40 @@ class DotaAutoAccept:
         except Exception as e:
             print(f"Error saving audio settings: {e}")
 
+    def load_volume_setting(self):
+        try:
+            if os.path.exists(self.volume_settings_file):
+                with open(self.volume_settings_file, 'r') as f:
+                    data = json.load(f)
+                    self.alert_volume = float(data.get('alert_volume', 1.0))
+        except Exception:
+            self.alert_volume = 1.0
+
+    def save_volume_setting(self):
+        try:
+            with open(self.volume_settings_file, 'w') as f:
+                json.dump({'alert_volume': self.alert_volume}, f)
+        except Exception:
+            pass
+
+    def set_device_volume(self, vol):
+        """Set the selected audio device's volume to vol (0.0-1.0) using pycaw. Returns previous volume or None."""
+        if not pycaw_available:
+            print("pycaw not available, cannot set device volume programmatically.")
+            return None
+        try:
+            devices = AudioUtilities.GetSpeakers()
+            interface = devices.Activate(
+                IAudioEndpointVolume._iid_, comtypes.CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            prev_vol = volume.GetMasterVolumeLevelScalar()
+            volume.SetMasterVolumeLevelScalar(vol, None)
+            print(f"Set system default output device volume to {vol:.2f}, previous was {prev_vol:.2f}")
+            return prev_vol
+        except Exception as e:
+            print(f"Failed to set device volume: {e}")
+            return None
+
     def on_device_change(self, event=None):
         """Handle audio device selection change"""
         if hasattr(self, 'device_combo') and self.device_combo:
@@ -173,8 +212,11 @@ class DotaAutoAccept:
                 self.test_audio_device()
 
     def test_audio_device(self):
-        """Test the selected audio device with the dota2.mp3 file or a 3s beep"""
+        """Test the selected audio device with the dota2.mp3 file or a 3s beep, using user volume and pausing other audio."""
+        prev_vol = None
         try:
+            prev_vol = self.set_device_volume(self.alert_volume)
+            self.stop_other_audio()
             if self.selected_device_id is not None:
                 mp3_path = self.resource_path("dota2.mp3")
                 if os.path.exists(mp3_path):
@@ -211,6 +253,9 @@ class DotaAutoAccept:
         except Exception as e:
             print(f"Audio test failed: {e}")
             messagebox.showwarning("Audio Test", f"Failed to test audio device: {e}")
+        finally:
+            self.restore_device_volume(prev_vol)
+            self.unmute_other_audio()
 
     def set_device_volume_max(self):
         """Set the selected audio device's volume to maximum using pycaw (Windows only). Returns previous volume (0.0-1.0) or None on error."""
@@ -277,12 +322,10 @@ class DotaAutoAccept:
             print(f"Failed to unmute other audio sessions: {e}")
 
     def play_high_beep(self):
-        """Play dota2.mp3 sound using the selected audio device at maximum volume, then restore previous volume and unmute others."""
+        """Play dota2.mp3 sound using the selected audio device at user-defined volume, then restore previous volume and unmute others."""
         prev_vol = None
         try:
-            # Save current volume and set to max
-            prev_vol = self.set_device_volume_max()
-            # Mute other audio sessions
+            prev_vol = self.set_device_volume(self.alert_volume)
             self.stop_other_audio()
             if self.selected_device_id is None:
                 print("No audio device selected, using fallback")
@@ -309,15 +352,14 @@ class DotaAutoAccept:
             if max_val > 0:
                 sound_array = sound_array / max_val
             sample_rate = pygame.mixer.get_init()[0]
-            print(f"Playing dota2.mp3 at maximum volume on device {self.selected_device_id}")
+            print(f"Playing dota2.mp3 at user volume {self.alert_volume:.2f} on device {self.selected_device_id}")
             sd.play(sound_array, samplerate=sample_rate, device=self.selected_device_id)
-            sd.wait()  # Wait for sound to finish before restoring volume
-            print("dota2.mp3 played successfully at maximum volume")
+            sd.wait()
+            print("dota2.mp3 played successfully at user volume")
         except Exception as e:
             print(f"Error playing dota2.mp3: {e}")
             self.play_fallback_beep()
         finally:
-            # Restore previous volume and unmute others
             self.restore_device_volume(prev_vol)
             self.unmute_other_audio()
 
@@ -475,10 +517,21 @@ class DotaAutoAccept:
                               fg="white", bg='#2c3e50', font=("Arial", 10, "bold"))
         audio_label.pack(anchor=tk.W)
 
+        # Volume slider
+        volume_frame = tk.Frame(audio_frame, bg='#2c3e50')
+        volume_frame.pack(fill=tk.X, pady=(5, 0))
+        tk.Label(volume_frame, text="Alert Volume:", fg="white", bg='#2c3e50', font=("Arial", 9)).pack(side=tk.LEFT)
+        self.volume_slider = tk.Scale(volume_frame, from_=0, to=100, orient=tk.HORIZONTAL, length=180, bg='#2c3e50', fg='white', highlightbackground='#2c3e50', troughcolor='#34495e', showvalue=True)
+        self.volume_slider.set(int(self.alert_volume * 100))
+        self.volume_slider.pack(side=tk.LEFT, padx=(5, 0))
+        def on_volume_change(val):
+            self.alert_volume = int(val) / 100.0
+            self.save_volume_setting()
+        self.volume_slider.config(command=on_volume_change)
+
         # Audio device dropdown
         device_frame = tk.Frame(audio_frame, bg='#2c3e50')
         device_frame.pack(fill=tk.X, pady=(5, 0))
-
         self.device_combo = ttk.Combobox(device_frame, state="readonly", width=40)
         device_names = [device['name'] for device in self.audio_devices]
         self.device_combo['values'] = device_names
