@@ -10,3 +10,7 @@ wheel
 requests
 pygame
 sounddevice
+pillow==11.2.1
+mss==10.0.0
+scikit-image==0.25.2
+pygetwindow
