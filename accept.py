@@ -535,10 +535,12 @@ def show_audio_settings():
     log_text.config(yscrollcommand=scrollbar.set)
 
     # Configure the text widget to be read-only
-    log_text.config(state=tk.DISABLED)
+    log_text.config(state=tk.DISABLED)  # Function to refresh log content
 
-    # Function to refresh log content
     def refresh_logs():
+        # Trim log file periodically to prevent it from growing too large
+        keep_log_file_size(log_file, 1000)
+
         if os.path.exists(log_file):
             try:
                 # Read the last 20 lines from the log file
@@ -605,28 +607,40 @@ def show_audio_settings():
                     files.sort(key=os.path.getmtime, reverse=True)
                     latest_file = files[0]
 
-                    # Load and resize the image to fit the preview area
-                    img = Image.open(latest_file)
-                    width, height = img.size
+                    try:
+                        # Load and resize the image to fit the preview area
+                        img = Image.open(latest_file)
 
-                    # Calculate new dimensions to fit in the preview
-                    max_width = 400
-                    max_height = 200
-                    ratio = min(max_width / width, max_height / height)
-                    new_width = int(width * ratio)
-                    new_height = int(height * ratio)
+                        # Verify the image is valid by accessing its data
+                        img.verify()
 
-                    img = img.resize((new_width, new_height), Image.LANCZOS)
-                    photo = ImageTk.PhotoImage(img)
+                        # Need to reopen after verify
+                        img = Image.open(latest_file)
 
-                    # Update the label
-                    screenshot_label.config(image=photo)
-                    screenshot_label.image = (
-                        photo  # Keep a reference to prevent garbage collection
-                    )
+                        width, height = img.size
 
-                    # Show the filename
-                    filename_label.config(text=os.path.basename(latest_file))
+                        # Calculate new dimensions to fit in the preview
+                        max_width = 400
+                        max_height = 200
+                        ratio = min(max_width / width, max_height / height)
+                        new_width = int(width * ratio)
+                        new_height = int(height * ratio)
+
+                        img = img.resize((new_width, new_height), Image.LANCZOS)
+                        photo = ImageTk.PhotoImage(img)
+
+                        # Update the label
+                        screenshot_label.config(image=photo)
+                        screenshot_label.image = (
+                            photo  # Keep a reference to prevent garbage collection
+                        )
+
+                        # Show the filename
+                        filename_label.config(text=os.path.basename(latest_file))
+                    except Exception as e:
+                        logger.error(f"Error displaying screenshot: {e}")
+                        screenshot_label.config(image=None, text=f"Error: {str(e)}")
+                        filename_label.config(text="")
                 else:
                     screenshot_label.config(image=None, text="No screenshots available")
                     filename_label.config(text="")
@@ -674,6 +688,29 @@ def show_audio_settings():
     win.mainloop()
 
 
+def keep_log_file_size(log_file_path, max_lines=1000):
+    """
+    Keeps the log file from growing too large by limiting the number of lines.
+    Only keeps the most recent lines up to max_lines.
+    """
+    if not os.path.exists(log_file_path):
+        return
+
+    try:
+        # Read all lines from the log file
+        with open(log_file_path, "r", encoding="utf-8") as file:
+            lines = file.readlines()
+
+        # If the number of lines exceeds the maximum, keep only the most recent ones
+        if len(lines) > max_lines:
+            with open(log_file_path, "w", encoding="utf-8") as file:
+                file.writelines(lines[-max_lines:])
+            logger.info(f"Log file trimmed to {max_lines} lines")
+    except Exception as e:
+        # Don't log this to avoid potential infinite recursion
+        print(f"Error trimming log file: {e}")
+
+
 def main_loop():
     global is_running, match_found, selected_monitor_capture_setting
     folder = "debug_screenshots"
@@ -681,6 +718,8 @@ def main_loop():
     ref1 = os.path.join("bin", "dota.png")
     ref2 = os.path.join("bin", "print.png")
     logger.info("Detection loop started")
+    # Keep log file size manageable
+    keep_log_file_size(log_file, 1000)
     while is_running:
         # Use a more specific name for the screenshot attempt for clarity
         screenshot_filename = os.path.join(
@@ -691,9 +730,8 @@ def main_loop():
             screenshot_filename, selected_monitor_capture_setting
         ):
             # Successfully captured Dota 2 monitor; proceed with comparison
-            keep_last_n_files(
-                folder, 5
-            )  # Manage screenshots in the folder            sim1 = compare_images(screenshot_filename, ref1)
+            keep_last_n_files(folder, 5)  # Manage screenshots in the folder
+            sim1 = compare_images(screenshot_filename, ref1)
             sim2 = compare_images(screenshot_filename, ref2)
             logger.info(f"Similarity with {ref1}: {sim1:.2f}, with {ref2}: {sim2:.2f}")
             if sim1 > 0.8 or sim2 > 0.8:
@@ -741,6 +779,8 @@ def main():
 
 if __name__ == "__main__":
     logger.info("Application starting")
+    # Trim log file to prevent it from growing too large
+    keep_log_file_size(log_file, 1000)
     load_audio_settings()
     is_running = True
     match_found = False
@@ -748,3 +788,26 @@ if __name__ == "__main__":
     detection_thread.start()
     show_audio_settings()
     logger.info("Application exiting")
+
+
+def keep_log_file_size(log_file_path, max_lines=1000):
+    """
+    Keeps the log file from growing too large by limiting the number of lines.
+    Only keeps the most recent lines up to max_lines.
+    """
+    if not os.path.exists(log_file_path):
+        return
+
+    try:
+        # Read all lines from the log file
+        with open(log_file_path, "r", encoding="utf-8") as file:
+            lines = file.readlines()
+
+        # If the number of lines exceeds the maximum, keep only the most recent ones
+        if len(lines) > max_lines:
+            with open(log_file_path, "w", encoding="utf-8") as file:
+                file.writelines(lines[-max_lines:])
+            logger.info(f"Log file trimmed to {max_lines} lines")
+    except Exception as e:
+        # Don't log this to avoid potential infinite recursion
+        print(f"Error trimming log file: {e}")
