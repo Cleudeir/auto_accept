@@ -717,6 +717,7 @@ def main_loop():
     os.makedirs(folder, exist_ok=True)
     ref1 = os.path.join("bin", "dota.png")
     ref2 = os.path.join("bin", "print.png")
+    ref3 = os.path.join("bin", "read-check.jpg")
     logger.info("Detection loop started")
     # Keep log file size manageable
     keep_log_file_size(log_file, 1000)
@@ -733,13 +734,18 @@ def main_loop():
             keep_last_n_files(folder, 5)  # Manage screenshots in the folder
             sim1 = compare_images(screenshot_filename, ref1)
             sim2 = compare_images(screenshot_filename, ref2)
-            logger.info(f"Similarity with {ref1}: {sim1:.2f}, with {ref2}: {sim2:.2f}")
+            sim3 = compare_images(screenshot_filename, ref3)
+            logger.info(
+                f"Comparing {screenshot_filename} with reference images: {ref1}, {ref2}, {ref3}"
+            )
+            dota_windows = gw.getWindowsWithTitle("Dota 2")
+            if sim3 > 0.8:
+                pyautogui.press("enter")
             if sim1 > 0.8 or sim2 > 0.8:
                 logger.info(
                     "Match detected! Focusing Dota 2 window, pressing Enter and playing sound."
                 )
                 play_alert_sound()
-
                 # Find and focus the Dota 2 window before pressing Enter
                 dota_windows = gw.getWindowsWithTitle("Dota 2")
                 if dota_windows:
@@ -764,7 +770,7 @@ def main_loop():
             logger.warning("Monitor capture failed for this iteration. Will retry.")
             # No comparison is done. Loop will sleep and then try again.
 
-        time.sleep(1)  # Adjust interval as needed
+        time.sleep(5)  # Adjust interval as needed
 
     logger.info("Detection loop ended")
 
