@@ -44,7 +44,7 @@ class MainView:
         
         # Window configuration
         window_width = 420
-        window_height = 900
+        window_height = 720
         
         # Center window on screen
         screen_width = self.window.winfo_screenwidth()
@@ -63,8 +63,7 @@ class MainView:
         self._create_settings_sections()
         self._create_control_section()
         self._create_log_section()
-        self._create_info_section()
-        
+     
         # Setup keyboard shortcuts
         self._setup_keyboard_shortcuts()
         
@@ -230,25 +229,7 @@ class MainView:
         
         # Make read-only
         self.log_text.config(state=tk.DISABLED)
-    
-    def _create_info_section(self):
-        """Create info section with instructions"""
-        info_frame = tk.Frame(self.window)
-        info_frame.pack(fill="x", padx=10, pady=5)
-        
-        info_text = ("Instructions:\n• Start detection before launching Dota 2\n"
-                    "• Detection stops automatically after finding a match\n"
-                    "• Use Test Sound to verify your audio settings\n\n"
-                    "Keyboard Shortcuts: F1=Start | F2=Stop | F3=Test Sound | F4=Manual Screenshot")
-        
-        info_label = tk.Label(
-            info_frame, 
-            text=info_text, 
-            font=("Arial", 8), 
-            fg="gray", 
-            justify="left"
-        )
-        info_label.pack()
+   
     
     def _setup_keyboard_shortcuts(self):
         """Setup keyboard shortcuts"""

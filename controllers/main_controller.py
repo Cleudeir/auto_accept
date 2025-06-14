@@ -128,7 +128,7 @@ class MainController:
                     
                     # Calculate center position on second monitor
                     window_width = 420
-                    window_height = 900
+                    window_height = 720
                     x = second_monitor['left'] + (second_monitor['width'] // 2) - (window_width // 2)
                     y = second_monitor['top'] + (second_monitor['height'] // 2) - (window_height // 2)
                     
