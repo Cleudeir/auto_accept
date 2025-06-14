@@ -20,7 +20,8 @@ class DetectionModel:
         references = {
             "dota": os.path.join("bin", "dota.png"),
             "print": os.path.join("bin", "print.png"),
-            "read_check": os.path.join("bin", "read-check.jpg")
+            "read_check": os.path.join("bin", "read-check.jpg"),
+            "long_time": os.path.join("bin", "long-time.png")
         }
         
         # Verify all reference images exist
@@ -94,12 +95,14 @@ class DetectionModel:
             if os.path.exists(ref_path):
                 score = self.compare_image_with_reference(img, ref_path)
                 scores[name] = score
-                
-                # Check for matches based on thresholds
+                  # Check for matches based on thresholds
                 if name in ["dota", "print"] and score > 0.8:
                     match_found = True
                 elif name == "read_check" and score > 0.8:
                     # Special case for read-check (different action)
+                    match_found = True
+                elif name == "long_time" and score > 0.8:
+                    # Special case for long matchmaking wait dialog
                     match_found = True
             else:
                 scores[name] = 0.0
@@ -124,6 +127,19 @@ class DetectionModel:
             self.logger.error(f"Error focusing Dota 2 window: {e}")
             return False
     
+    def click_ok_button(self):
+        """Click the OK button in dialogs"""
+        try:
+            # Focus Dota 2 window first
+            self.focus_dota2_window()
+            # Wait a moment for the window to be focused
+            import time
+            time.sleep(0.5)
+            # Press Enter to click OK (most dialogs accept Enter as OK)            pyautogui.press("enter")
+            self.logger.info("OK button clicked (Enter key pressed)")
+        except Exception as e:
+            self.logger.error(f"Error clicking OK button: {e}")
+
     def send_enter_key(self):
         """Send Enter key press"""
         try:
@@ -136,8 +152,13 @@ class DetectionModel:
         """Process detection results and return action taken"""
         action = "none"
         
+        # Check for long matchmaking wait dialog first
+        if scores.get("long_time", 0) > 0.8:
+            self.click_ok_button()
+            action = "long_time_dialog_detected"
+        
         # Check for read-check pattern (different action)
-        if scores.get("read_check", 0) > 0.8:
+        elif scores.get("read_check", 0) > 0.8:
             self.send_enter_key()
             action = "read_check_detected"
         

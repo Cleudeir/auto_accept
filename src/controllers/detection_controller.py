@@ -62,13 +62,14 @@ class DetectionController:
                     # Log similarity scores
                     score_str = ", ".join([f"{k}={v:.2f}" for k, v in scores.items()])
                     self.logger.info(f"Similarity scores: {score_str}")
-                    
-                    # Process detection results
+                      # Process detection results
                     if match_found:
                         action = self.detection_model.process_detection_result(scores)
                         
                         if action == "read_check_detected":
                             self.logger.info("Read-check pattern detected! Pressing Enter.")
+                        elif action == "long_time_dialog_detected":
+                            self.logger.info("Long matchmaking wait dialog detected! Clicking OK button.")
                         elif action == "match_detected":
                             self.logger.info("Match detected! Focusing Dota 2 window, pressing Enter and playing sound.")
                             # Play alert sound
