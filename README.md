@@ -90,7 +90,7 @@ src/
 │   ├── dota2-plus.jpeg        # Additional detection reference
 │   ├── dota2.mp3              # Alert sound when match is found
 │   ├── icon.ico               # Application icon
-│   ├── long-time.png          # Long queue time detection image
+│   ├── long_time.png          # Long queue time detection image
 │   ├── print.png              # Additional detection reference
 │   └── read-check.jpg         # Ready check detection image
 ├── logs/                      # Application logs
