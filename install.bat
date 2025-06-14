@@ -1,112 +1,181 @@
-
 @echo off
-setlocal enabledelayedexpansion
+setlocal enableDelayedExpansion
 
-echo ====================================================
-echo            Dota 2 Auto Accept Installer
-echo ====================================================
-echo.
+echo Starting installation process...
 
-:: Check if Python is installed
-
-python --version >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo Python is not installed. Downloading and installing Python...
-    
-    :: Check if PowerShell is available
-    powershell -Command "Get-Command" >nul 2>&1
-    if %ERRORLEVEL% NEQ 0 (
-        echo PowerShell is required but not available.
-        echo Please install Python 3.9 or later manually from https://www.python.org/downloads/
-        pause
-        exit /b 1
-    )
-    
-    echo Downloading Python installer...
-    powershell -Command "& {Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe' -OutFile '%TEMP%\python-installer.exe'}"
-    
-    if %ERRORLEVEL% NEQ 0 (
-        echo Failed to download Python installer.
-        echo Please install Python 3.9 or later manually from https://www.python.org/downloads/
-        pause
-        exit /b 1
-    )
-    
-    echo Installing Python...
-    %TEMP%\python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-    
-    if %ERRORLEVEL% NEQ 0 (
-        echo Failed to install Python.
-        echo Please install Python 3.9 or later manually from https://www.python.org/downloads/
-        pause
-        exit /b 1
-    )
-    
-    echo Python has been installed successfully.
-    
-    :: Refresh environment variables
-    echo Refreshing environment variables...
-    call refreshenv.cmd >nul 2>&1
-    if %ERRORLEVEL% NEQ 0 (
-        :: If refreshenv isn't available, notify user to restart command prompt
-        echo Please close this command prompt and open a new one to continue with installation.
-        pause
-        exit /b 0
-    )
-) else (
-    echo Python is already installed.
+REM ==========================================================================
+REM Check and Install curl
+REM ==========================================================================
+echo(
+echo [1/3] Checking for curl...
+where curl >nul 2>&1
+if !ERRORLEVEL! equ 0 (
+    echo   curl is already installed.
+    goto :PYTHON_CHECK
 )
 
-:: Verify Python is in PATH
-python --version >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo Python was installed, but isn't available in the current session.
-    echo Please restart this script to continue.
-    pause
-    exit /b 0
+echo   curl not found. Attempting to install using winget...
+where winget >nul 2>&1
+if !ERRORLEVEL! neq 0 (
+    echo   winget is not available.
+    echo   Please install curl manually (e.g., from https://curl.se/windows/) ^& ensure it's in your PATH.
+    goto :EOF_ERROR
 )
 
-:: Install required packages
-echo.
-echo Installing required Python packages...
-python -m pip install --upgrade pip
-python -m pip install -r src/requirements.txt
-
-if %ERRORLEVEL% NEQ 0 (
-    echo Failed to install some Python packages.
-    echo You may need to run this script as administrator.
-    pause
-    exit /b 1
+winget search Microsoft.Curl >nul 2>&1
+if !ERRORLEVEL! neq 0 (
+    echo   Microsoft.Curl package not found via winget.
+    echo   Please install curl manually (e.g., from https://curl.se/windows/) ^& ensure it's in your PATH.
+    goto :EOF_ERROR
 )
 
-echo.
-echo Creating desktop shortcut...
-
-:: Create a batch file to launch the application
-echo @echo off > "%~dp0auto_accept.bat"
-echo cd "%~dp0src" >> "%~dp0auto_accept.bat"
-echo start /min pythonw main.py >> "%~dp0auto_accept.bat"
-
-:: Create desktop shortcut
-set "desktopPath=%USERPROFILE%\Desktop"
-set "iconPath=%~dp0src\bin\icon.ico"
-set "scriptPath=%~dp0auto_accept.bat"
-set "shortcutName=Dota 2 Auto Accept.lnk"
-
-powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%desktopPath%\%shortcutName%'); $Shortcut.TargetPath = '%scriptPath%'; $Shortcut.IconLocation = '%iconPath%'; $Shortcut.Save()"
-
-if %ERRORLEVEL% NEQ 0 (
-    echo Failed to create desktop shortcut.
-) else (
-    echo Desktop shortcut created successfully.
+echo   Attempting to install Microsoft.Curl via winget...
+winget install -e --id Microsoft.Curl --source winget --accept-package-agreements --accept-source-agreements
+if !ERRORLEVEL! neq 0 (
+    echo   Failed to install curl using winget (Errorlevel: !ERRORLEVEL!).
+    echo   Please try installing curl manually (e.g., from https://curl.se/windows/) ^& ensure it's in your PATH.
+    goto :EOF_ERROR
 )
 
-echo.
-echo ====================================================
-echo Installation completed successfully!
-echo.
-echo To run Dota 2 Auto Accept, double-click on the desktop shortcut
-echo or run auto_accept.bat from the installation folder.
-echo ====================================================
-echo.
+echo   curl installed successfully via winget.
+echo   You might need to open a new command prompt for changes to take effect.
+REM Re-check if curl is now available in the current session
+where curl >nul 2>&1
+if !ERRORLEVEL! neq 0 (
+    echo   curl still not found in PATH after winget install. Please open a new command prompt ^& re-run this script.
+    goto :EOF_ERROR
+)
+
+:PYTHON_CHECK
+REM ==========================================================================
+REM Check and Install Python
+REM ==========================================================================
+echo(
+echo [2/3] Checking for Python...
+set "PYTHON_EXE="
+where python >nul 2>&1
+if !ERRORLEVEL! equ 0 (
+    echo   Python is installed.
+    set "PYTHON_EXE=python"
+    goto :PIP_INSTALL_CHECK
+)
+
+where py >nul 2>&1
+if !ERRORLEVEL! equ 0 (
+    echo   Python (via py launcher) is installed.
+    set "PYTHON_EXE=py"
+    goto :PIP_INSTALL_CHECK
+)
+
+echo   Python not found. Attempting to install Python 3 using winget...
+where winget >nul 2>&1
+if !ERRORLEVEL! neq 0 (
+    echo   winget is not available.
+    echo   Please install Python 3 manually (from https://www.python.org/downloads/) ^& ensure it's added to your PATH.
+    goto :EOF_ERROR
+)
+
+winget search Python.Python.3 >nul 2>&1
+if !ERRORLEVEL! neq 0 (
+    echo   Python.Python.3 package not found via winget.
+    echo   Please install Python 3 manually (from https://www.python.org/downloads/) ^& ensure it's added to your PATH.
+    goto :EOF_ERROR
+)
+
+echo   Attempting to install Python.Python.3 via winget...
+winget install -e --id Python.Python.3 --source winget --accept-package-agreements --accept-source-agreements
+if !ERRORLEVEL! neq 0 (
+    echo   Failed to install Python using winget (Errorlevel: !ERRORLEVEL!).
+    echo   Please install Python 3 manually (from https://www.python.org/downloads/) ^& ensure it's added to your PATH.
+    goto :EOF_ERROR
+)
+
+echo   Python 3 installed successfully via winget.
+echo   You MIGHT need to open a new command prompt for Python to be available in PATH.
+REM Try to find python or py again
+where python >nul 2>&1
+if !ERRORLEVEL! equ 0 (
+    set "PYTHON_EXE=python"
+    goto :PIP_INSTALL_CHECK
+)
+where py >nul 2>&1
+if !ERRORLEVEL! equ 0 (
+    set "PYTHON_EXE=py"
+    goto :PIP_INSTALL_CHECK
+)
+
+echo   Python still not found in PATH even after winget install.
+echo   Please open a new command prompt ^& re-run this script, or ensure Python is correctly installed ^& in PATH.
+goto :EOF_ERROR
+
+:PIP_INSTALL_CHECK
+if not defined PYTHON_EXE (
+    echo   Could not determine Python executable. Please ensure Python is installed ^& in PATH.
+    goto :EOF_ERROR
+)
+echo   Using !PYTHON_EXE! for Python commands.
+
+REM ==========================================================================
+REM Install/Upgrade pip and install pycurl
+REM ==========================================================================
+echo(
+echo [3/3] Installing/Upgrading pip ^& installing pycurl...
+
+echo   Ensuring pip is available ^& upgrading it...
+!PYTHON_EXE! -m ensurepip --upgrade
+if !ERRORLEVEL! neq 0 (
+    echo   Failed to ensure/upgrade pip using '!PYTHON_EXE! -m ensurepip --upgrade'. (Errorlevel: !ERRORLEVEL!)
+    goto :EOF_ERROR
+)
+
+!PYTHON_EXE! -m pip install --upgrade pip
+if !ERRORLEVEL! neq 0 (
+    echo   Failed to upgrade pip using '!PYTHON_EXE! -m pip install --upgrade pip'. (Errorlevel: !ERRORLEVEL!)
+    echo   Continuing with pycurl installation, but pip might be outdated.
+)
+
+echo   Attempting to install pycurl...
+!PYTHON_EXE! -m pip install pycurl
+if !ERRORLEVEL! neq 0 (
+    echo   --------------------------------------------------------------------
+    echo   ERROR: Failed to install pycurl (Errorlevel: !ERRORLEVEL!).
+    echo   pycurl can be difficult to install on Windows due to dependencies
+    echo   on libcurl ^& C compilers.
+    echo(
+    echo   Possible solutions:
+    echo   1. Install Microsoft C++ Build Tools:
+    echo      Go to https://visualstudio.microsoft.com/visual-cpp-build-tools/
+    echo      Download the Build Tools, ^& during installation, select the
+    echo      "C++ build tools" workload.
+    echo(
+    echo   2. Try installing from an unofficial binary wheel if available:
+    echo      Search for "pycurl windows whl" on sites like Christoph Gohlke's
+    echo      Python Extension Packages for Windows (https://www.lfd.uci.edu/~gohlke/pythonlibs/).
+    echo      If you download a .whl file, install it with:
+    echo      !PYTHON_EXE! -m pip install path\to\yourfile.whl
+    echo(
+    echo   3. Consider using the 'requests' library as an alternative for HTTP tasks:
+    echo      !PYTHON_EXE! -m pip install requests
+    echo   --------------------------------------------------------------------
+    goto :EOF_ERROR
+)
+
+echo   pycurl installed successfully.
+
+echo(
+echo ==========================================================================
+echo Installation script completed successfully.
+echo ==========================================================================
+goto :EOF_SUCCESS
+
+:EOF_ERROR
+echo(
+echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+echo   Installation script encountered errors. Please review the messages above.
+echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 pause
+exit /b 1
+
+:EOF_SUCCESS
+pause
+exit /b 0
