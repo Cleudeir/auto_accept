@@ -15,7 +15,7 @@ class ScreenshotModel:
         self.latest_screenshot_img = None
         self.latest_screenshot_time = None
         # Create debug screenshots directory if it doesn't exist
-        os.makedirs("src/debug_screenshots", exist_ok=True)
+        os.makedirs("debug_screenshots", exist_ok=True)
     
     def get_available_monitors(self) -> List[Tuple[str, int]]:
         """Get list of available monitors"""
