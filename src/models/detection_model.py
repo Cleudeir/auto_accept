@@ -11,9 +11,10 @@ from typing import Tuple, Optional
 class DetectionModel:
     """Model for handling image detection and comparison logic"""
     
-    def __init__(self):
+    def __init__(self, screenshot_model=None):
         self.logger = logging.getLogger("Dota2AutoAccept.DetectionModel")
         self.reference_images = self._load_reference_images()
+        self.screenshot_model = screenshot_model  # Optional, for monitor-aware screenshots
     
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""
@@ -146,25 +147,26 @@ class DetectionModel:
         """Process detection results and return action taken using only OCR and Enter key"""
         action = "none"
         # Check for long matchmaking wait dialog first
-        if scores.get("long_time", 0) > 0.8:
+        if scores.get("long_time", 0) > 0.9:
             print(f"Long matchmaking wait dialog detected with score {scores['long_time']:.2f}")
-            self.send_enter_key_if_text_found(["OK", "READY", "NO", "ACCEPT"])
+            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "long_time_dialog_detected"
         # Check for read-check pattern (different action)
-        elif scores.get("read_check", 0) > 0.8:
+        elif scores.get("read_check", 0) > 0.9:
             print(f"Read-check pattern detected with score {scores['read_check']:.2f}")
-            self.send_enter_key_if_text_found(["OK", "READY", "NO", "ACCEPT"])
+            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "read_check_detected"
         # Check for main match patterns
-        elif scores.get("dota", 0) > 0.8 or scores.get("print", 0) > 0.8:
+        elif scores.get("dota", 0) > 0.9 or scores.get("print", 0) > 0.9:
             print(f"Match detected with scores: Dota={scores.get('dota', 0):.2f}, Print={scores.get('print', 0):.2f}")
             self.focus_dota2_window()
-            self.send_enter_key_if_text_found(["OK", "READY", "NO", "ACCEPT"])
+            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "match_detected"
         return action
 
     def send_enter_key_if_text_found(self, search_strings):
-        """Use OCR to find text and press Enter if found, otherwise always press Enter as fallback."""
+        
+        print(f"Searching for text: {search_strings}")
         result = self.find_string_in_image(search_strings)
         pyautogui.press("enter")
         if result:
@@ -172,26 +174,63 @@ class DetectionModel:
         else:
             self.logger.info(f"No relevant text found, pressed Enter as fallback.")
 
-    def find_string_in_image(self, search_strings, screenshot: Optional[np.ndarray] = None) -> Optional[Tuple[str, Tuple[int, int]]]:
-        """Find the given string(s) in a screenshot using EasyOCR. Returns (string, (x, y) center) if found and clicks the position."""
+    def find_string_in_image(self, search_strings, monitor_index: Optional[int] = None) -> Optional[Tuple[str, Tuple[int, int], bool]]:
+        """Find the given string(s) in a screenshot from the selected monitor using EasyOCR. Returns (string, (x, y) center, is_button) if found and clicks the position. Always uses ScreenshotModel for the monitor."""
         import easyocr
-        if screenshot is None:
-            screenshot = pyautogui.screenshot()
-            screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
-        # Convert screenshot to RGB for EasyOCR
+        import json
+        # Fallback: if screenshot_model is not set, try to import and instantiate it
+        if self.screenshot_model is None:
+            try:
+                from models.screenshot_model import ScreenshotModel
+                self.screenshot_model = ScreenshotModel()
+            except Exception as e:
+                self.logger.error(f"Could not initialize ScreenshotModel: {e}")
+                return None
+        # If monitor_index is not set, read from config.json
+        if monitor_index is None:
+            try:
+                config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                monitor_index = config.get('selected_monitor_capture_setting', 1)
+            except Exception as e:
+                self.logger.error(f"Could not read monitor index from config.json: {e}")
+                monitor_index = 1
+        img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
+        if img is None:
+            self.logger.warning(f"Could not capture screenshot from monitor {monitor_index}")
+            return None
+        screenshot = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img_rgb = cv2.cvtColor(screenshot, cv2.COLOR_BGR2RGB)
-        reader = easyocr.Reader(['en'], gpu=False)
+        reader = easyocr.Reader(['en'], gpu=True)
         results = reader.readtext(img_rgb)
+        # Get monitor offset for absolute coordinates
+        x_offset, y_offset = 0, 0
+        try:
+            with self.screenshot_model._get_mss() as sct:
+                monitors = sct.monitors
+                if 0 < monitor_index < len(monitors):
+                    mon = monitors[monitor_index]
+                    x_offset, y_offset = mon['left'], mon['top']
+        except Exception:
+            pass
+        found_strings = []
+        button_like = [s.lower() for s in search_strings]
         for (bbox, text, conf) in results:
+            found_strings.append(text)
             for search in search_strings:
                 if search.lower() in text.lower():
-                    # bbox: [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
-                    x = int((bbox[0][0] + bbox[2][0]) / 2)
-                    y = int((bbox[0][1] + bbox[2][1]) / 2)
-                    self.logger.info(f"Found '{search}' at ({x}, {y}) in image with EasyOCR. Clicking...")
-                    self.move_mouse_and_click(x, y)
-                    return (search, (x, y))
-        self.logger.info(f"None of the strings {search_strings} found in image (EasyOCR).")
+                    x = int((bbox[0][0] + bbox[2][0]) / 2) + x_offset
+                    y = int((bbox[0][1] + bbox[2][1]) / 2) + y_offset
+                    is_button = text.strip().lower() in button_like
+                    self.logger.info(f"Found '{text}' at ({x}, {y}) in image with EasyOCR. Button-like: {is_button}.")
+                    if is_button:
+                        self.move_mouse_and_click(x, y)
+                        self.logger.info(f"Clicked on button-like text '{text}' at ({x}, {y})")
+                        print(f"Button found: {text}")
+                        return (text, (x, y), True)
+        print(f"OCR found strings: {found_strings}")
+        self.logger.info(f"None of the button-like strings {search_strings} found in image (EasyOCR).")
         return None
 
     def move_mouse_and_click(self, x: int, y: int, duration: float = 0.5):
@@ -199,6 +238,21 @@ class DetectionModel:
         try:
             pyautogui.moveTo(x, y, duration=duration)
             pyautogui.click(x, y)
+            
+            
+            
+            print(f"Clicked at ({x}, {y})")
             self.logger.info(f"Moved mouse to ({x}, {y}) over {duration}s and clicked.")
         except Exception as e:
             self.logger.error(f"Error moving mouse and clicking: {e}")
+
+# Patch ScreenshotModel to add _get_mss if not present
+try:
+    from models.screenshot_model import ScreenshotModel
+    if not hasattr(ScreenshotModel, '_get_mss'):
+        import mss
+        def _get_mss(self):
+            return mss.mss()
+        ScreenshotModel._get_mss = _get_mss
+except Exception:
+    pass
