@@ -2,8 +2,6 @@
 
 A utility that automatically detects and accepts Dota 2 match pop-ups, saving you from missing queue accepts while you're AFK.
 
-![Dota 2 Auto Accept](src/bin/icon.ico)
-
 ## Features
 
 - **Automatic Match Acceptance**: Detects when a Dota 2 match is found and automatically accepts it
@@ -17,28 +15,28 @@ A utility that automatically detects and accepts Dota 2 match pop-ups, saving yo
 
 ### Option 1: Download and Run the Executable
 
-1. Download the latest release from [Releases](https://github.com/yourusername/dota2-auto-accept/releases) (if published)
+1. Download the latest release from the [Releases](https://github.com/yourusername/dota2-auto-accept/releases) section (if available)
 2. Extract the ZIP file to any location on your computer
-3. Run `auto_accept.bat` to start the application
+3. Run `start.bat` to start the application
 
 ### Option 2: Install from Source
 
 1. Clone the repository or download the source code
 2. Right-click on `install.bat` and select "Run as administrator"
    - This script will:
-     - Check if Python is installed (and install Python 3.11.7 if not)
+     - Check if Python is installed (and install Python 3.11+ if not)
      - Install all required Python packages
-     - Create an `auto_accept.bat` file
-     - Create a desktop shortcut
+     - Create a `start.bat` file
+     - Create a desktop shortcut (if applicable)
 3. After installation completes, you can start the application by:
-   - Double-clicking the desktop shortcut "Dota 2 Auto Accept"
-   - Or running `auto_accept.bat` from the installation folder
+   - Running `start.bat` from the installation folder
+   - Or double-clicking any created desktop shortcut
 
 > **Note**: If the installation encounters issues, you may need to manually install Python 3.9+ from [python.org](https://www.python.org/downloads/) and run `pip install -r src/requirements.txt` in a command prompt.
 
 ## Usage
 
-1. Launch the application by running the desktop shortcut or `auto_accept.bat`
+1. Launch the application by running `start.bat` or any created desktop shortcut
 2. The application runs minimized in the system tray by default
    - You can access the main window by clicking on the tray icon
 3. Configure settings as needed:
@@ -65,7 +63,7 @@ The application uses a configuration file (`config.json`) to store your preferen
 
 The application automatically saves screenshots when it's trying to detect match accept buttons:
 
-- Screenshots are saved in the `debug_screenshots/` folder
+- Screenshots are saved in the `src/debug_screenshots/` folder
 - Each screenshot is named with a timestamp: `dota2_monitor_capture_YYYYMMDD-HHMMSS.png`
 - These screenshots are useful for troubleshooting if the application isn't correctly detecting match popups
 - The most recent screenshots can help identify why detection might be failing
@@ -89,13 +87,17 @@ src/
 │   └── detection_controller.py # Detection logic controller
 ├── bin/                       # Binary resources (images, sounds, icons)
 │   ├── dota.png               # Reference image for match detection
+│   ├── dota2-plus.jpeg        # Additional detection reference
 │   ├── dota2.mp3              # Alert sound when match is found
 │   ├── icon.ico               # Application icon
-│   └── print.png              # Reference image for match detection
+│   ├── long-time.png          # Long queue time detection image
+│   ├── print.png              # Additional detection reference
+│   └── read-check.jpg         # Ready check detection image
 ├── logs/                      # Application logs
 │   └── dota2_auto_accept.log  # Main log file
-└── debug_screenshots/         # Debug screenshots
-    └── dota2_monitor_capture_*.png  # Timestamped screenshots
+└── src/                       # Source directory (development)
+    └── debug_screenshots/     # Debug screenshots
+        └── dota2_monitor_capture_*.png  # Timestamped screenshots
 ```
 
 ## Troubleshooting
@@ -107,7 +109,7 @@ If the application isn't detecting matches correctly:
    - Main logs: `logs/dota2_auto_accept.log`
    - Look for errors or "Match found" messages
 3. Check debug screenshots:
-   - Screenshots are saved in `debug_screenshots/` folder
+   - Screenshots are saved in `src/debug_screenshots/` folder
    - Files are named with timestamp: `dota2_monitor_capture_YYYYMMDD-HHMMSS.png`
    - Compare these with the expected Dota 2 accept button appearance
 4. Verify that your Dota 2 UI hasn't been modified by mods or updates
@@ -120,12 +122,20 @@ If the application isn't detecting matches correctly:
 - **Operating System**: Windows 10/11
 - **Python**: Version 3.9 or higher (automatically installed by the installer)
 - **Required Libraries**: (automatically installed by the installer)
-  - OpenCV
+  - python-dotenv
+  - pywin32
+  - screeninfo
   - PyAutoGUI
+  - OpenCV
   - NumPy
-  - PyGame
-  - MSS
+  - PyInstaller
+  - setuptools
+  - wheel
+  - requests
+  - pygame
+  - sounddevice
   - Pillow
+  - MSS
   - scikit-image
   - PyGetWindow
 - **Screen Resolution**: 1080p or higher recommended
