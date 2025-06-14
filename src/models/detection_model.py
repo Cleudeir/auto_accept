@@ -28,6 +28,18 @@ class DetectionModel:
         for name, path in references.items():
             if not os.path.exists(path):
                 self.logger.warning(f"Reference image not found: {path}")
+        # Also check for button images
+        button_images = [
+            os.path.join("bin", "dota.png"),
+            os.path.join("bin", "long-time.png"),
+            os.path.join("bin", "ready_button.png"),
+            os.path.join("bin", "no_button.png"),
+        ]
+        for btn_path in button_images:
+            if not os.path.exists(btn_path):
+                self.logger.warning(f"Reference image not found: {btn_path}")
+            else:
+                self.logger.info(f"Reference image found: {btn_path}")
         
         return references
     
@@ -127,18 +139,51 @@ class DetectionModel:
             self.logger.error(f"Error focusing Dota 2 window: {e}")
             return False
     
+    def detect_ok_button_position(self, screenshot: Optional[np.ndarray] = None) -> Optional[Tuple[int, int]]:
+        """Detect the position of any button (OK, ACCEPT, READY, NO) using template matching. Returns (x, y) center or None."""
+        button_templates = [
+            os.path.join("bin", "ok_button.png"),
+            os.path.join("bin", "accept_button.png"),
+            os.path.join("bin", "ready_button.png"),
+            os.path.join("bin", "no_button.png"),
+        ]
+        if screenshot is None:
+            screenshot = pyautogui.screenshot()
+            screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+        threshold = 0.8
+        for path in button_templates:
+            if not os.path.exists(path):
+                continue
+            template = cv2.imread(path)
+            if template is None:
+                continue
+            res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            if max_val >= threshold:
+                tH, tW = template.shape[:2]
+                center_x = max_loc[0] + tW // 2
+                center_y = max_loc[1] + tH // 2
+                return (center_x, center_y)
+        self.logger.info("No button detected (OK, ACCEPT, READY, NO)")
+        return None
+
     def click_ok_button(self):
-        """Click the OK button in dialogs"""
+        """Detect and click the OK button, or fallback to pressing Enter."""
         try:
-            # Focus Dota 2 window first
             self.focus_dota2_window()
-            # Wait a moment for the window to be focused
             import time
             time.sleep(0.5)
-            # Press Enter to click OK (most dialogs accept Enter as OK)            pyautogui.press("enter")
-            self.logger.info("OK button clicked (Enter key pressed)")
+            pos = self.detect_ok_button_position()
+            if pos:
+                pyautogui.click(pos[0], pos[1])
+                self.logger.info(f"Clicked OK button at {pos}")
+            else:
+                pyautogui.press("enter")
+                time.sleep(0.5)
+                pyautogui.press("enter")
+                self.logger.info("OK button confirmed by pressing Enter (fallback)")
         except Exception as e:
-            self.logger.error(f"Error clicking OK button: {e}")
+            self.logger.error(f"Error confirming OK button: {e}")
 
     def send_enter_key(self):
         """Send Enter key press"""
@@ -154,18 +199,102 @@ class DetectionModel:
         
         # Check for long matchmaking wait dialog first
         if scores.get("long_time", 0) > 0.8:
-            self.click_ok_button()
+            self.click_any_button()
             action = "long_time_dialog_detected"
-        
         # Check for read-check pattern (different action)
         elif scores.get("read_check", 0) > 0.8:
-            self.send_enter_key()
+            self.click_ok_button()
             action = "read_check_detected"
-        
         # Check for main match patterns
         elif scores.get("dota", 0) > 0.8 or scores.get("print", 0) > 0.8:
             self.focus_dota2_window()
-            self.send_enter_key()
+            self.click_ok_button()
             action = "match_detected"
         
         return action
+
+    def detect_buttons_position(self, screenshot: Optional[np.ndarray] = None) -> Optional[Tuple[str, Tuple[int, int]]]:
+        """Detect the position and label of the first found button (ACCEPT, OK, READY, NO) using template matching."""
+        button_templates = {
+            "ACCEPT": os.path.join("bin", "dota.png"),          
+            "ACCEPT": os.path.join("bin", "dota2-plus.jpeg"),
+            "OK": os.path.join("bin", "long-time.png"),
+            "READY": os.path.join("bin", "ready_button.png"),
+            "NO": os.path.join("bin", "watch-game.png"),
+        }
+        if screenshot is None:
+            screenshot = pyautogui.screenshot()
+            screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+        threshold = 0.8
+        for label, path in button_templates.items():
+            if not os.path.exists(path):
+                continue
+            template = cv2.imread(path)
+            if template is None:
+                continue
+            res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            if max_val >= threshold:
+                tH, tW = template.shape[:2]
+                center_x = max_loc[0] + tW // 2
+                center_y = max_loc[1] + tH // 2
+                return (label, (center_x, center_y))
+        return None
+
+    def click_any_button(self):
+        """Detect and click any button (OK, ACCEPT, READY, NO) using template matching or OCR. Fallback to pressing Enter if not found."""
+        try:
+            self.focus_dota2_window()
+            import time
+            time.sleep(0.5)
+            # Try template matching first
+            pos = self.detect_ok_button_position()
+            if pos:
+                pyautogui.click(pos[0], pos[1])
+                self.logger.info(f"Clicked button at {pos} (template match)")
+                return
+            # Try OCR if template matching fails
+            result = self.find_string_in_image(["OK", "ACCEPT", "READY", "NO"])
+            if result:
+                _, (x, y) = result
+                pyautogui.click(x, y)
+                self.logger.info(f"Clicked button at ({x}, {y}) (OCR)")
+                return
+            # Fallback
+            pyautogui.press("enter")
+            time.sleep(0.5)
+            pyautogui.press("enter")
+            self.logger.info("No button detected, pressed Enter as fallback")
+        except Exception as e:
+            self.logger.error(f"Error clicking any button: {e}")
+
+    def find_string_in_image(self, search_strings, screenshot: Optional[np.ndarray] = None) -> Optional[Tuple[str, Tuple[int, int]]]:
+        """Find the given string(s) in a screenshot using OCR. Returns (string, (x, y) center) if found."""
+        try:
+            import pytesseract
+        except ImportError:
+            self.logger.error("pytesseract is required for OCR. Please install it with 'pip install pytesseract'.")
+            return None
+        if screenshot is None:
+            screenshot = pyautogui.screenshot()
+            screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+        gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+        data = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
+        for i, text in enumerate(data['text']):
+            for search in search_strings:
+                if search.lower() in text.lower():
+                    x = data['left'][i] + data['width'][i] // 2
+                    y = data['top'][i] + data['height'][i] // 2
+                    self.logger.info(f"Found '{search}' at ({x}, {y}) in image.")
+                    return (search, (x, y))
+        self.logger.info(f"None of the strings {search_strings} found in image.")
+        return None
+
+    def move_mouse_and_click(self, x: int, y: int, duration: float = 0.5):
+        """Move the mouse to (x, y) slowly and click."""
+        try:
+            pyautogui.moveTo(x, y, duration=duration)
+            pyautogui.click(x, y)
+            self.logger.info(f"Moved mouse to ({x}, {y}) over {duration}s and clicked.")
+        except Exception as e:
+            self.logger.error(f"Error moving mouse and clicking: {e}")
