@@ -1,0 +1,282 @@
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+import mss
+from typing import List, Tuple
+
+from models.config_model import ConfigModel
+from models.audio_model import AudioModel
+from models.screenshot_model import ScreenshotModel
+from models.detection_model import DetectionModel
+from views.main_view import MainView
+from controllers.detection_controller import DetectionController
+
+class MainController:
+    """Main controller that coordinates between models and views"""
+    
+    def __init__(self):
+        self.logger = self._setup_logging()
+        self.logger.info("Application starting")
+        
+        # Initialize models
+        self.config_model = ConfigModel()
+        self.audio_model = AudioModel()
+        self.screenshot_model = ScreenshotModel()
+        self.detection_model = DetectionModel()
+        
+        # Initialize controllers
+        self.detection_controller = DetectionController(
+            self.detection_model,
+            self.screenshot_model,
+            self.audio_model,
+            self.config_model
+        )
+        
+        # Initialize view
+        self.view = MainView()
+        
+        # Setup callbacks
+        self._setup_callbacks()
+        
+        # Initialize UI
+        self._initialize_ui()
+        
+        # Setup periodic updates
+        self._setup_periodic_updates()
+    
+    def _setup_logging(self):
+        """Setup logging configuration"""
+        # Create logs directory if it doesn't exist
+        os.makedirs("logs", exist_ok=True)
+        
+        log_file = os.path.join("logs", "dota2_auto_accept.log")
+        logger = logging.getLogger("Dota2AutoAccept")
+        logger.setLevel(logging.INFO)
+        
+        # Check if handler already exists to avoid duplicates
+        if not logger.handlers:
+            handler = RotatingFileHandler(
+                log_file, maxBytes=1024 * 1024, backupCount=5
+            )
+            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
+        
+        return logger
+    
+    def _setup_callbacks(self):
+        """Setup callbacks between controllers and views"""
+        # View callbacks
+        self.view.on_start_detection = self._on_start_detection
+        self.view.on_stop_detection = self._on_stop_detection
+        self.view.on_test_sound = self._on_test_sound
+        self.view.on_take_screenshot = self._on_take_screenshot
+        self.view.on_device_change = self._on_device_change
+        self.view.on_volume_change = self._on_volume_change
+        self.view.on_monitor_change = self._on_monitor_change
+        self.view.on_always_on_top_change = self._on_always_on_top_change
+        self.view.on_closing = self._on_closing
+        
+        # Detection controller callbacks
+        self.detection_controller.on_match_found = self._on_match_found
+        self.detection_controller.on_detection_update = self._on_detection_update
+    
+    def _initialize_ui(self):
+        """Initialize UI with current settings"""
+        self.view.create_window()
+        
+        # Setup audio devices
+        devices = self.audio_model.get_output_devices()
+        device_names = [d["name"] for d in devices]
+        selected_device_index = 0
+        
+        if devices and self.config_model.selected_device_id is not None:
+            for i, d in enumerate(devices):
+                if d["id"] == self.config_model.selected_device_id:
+                    selected_device_index = i
+                    break
+        
+        self.view.set_device_options(device_names, selected_device_index)
+        
+        # Start detection automatically when app starts
+        self.detection_controller.start_detection()
+        
+        # Setup monitors
+        monitors = self.screenshot_model.get_available_monitors()
+        monitor_names = [m[0] for m in monitors]
+        selected_monitor_index = 0
+        
+        if monitors:
+            for i, (_, monitor_id) in enumerate(monitors):
+                if monitor_id == self.config_model.selected_monitor_capture_setting:
+                    selected_monitor_index = i
+                    break
+        
+        self.view.set_monitor_options(monitor_names, selected_monitor_index)
+        
+        # Setup other settings
+        self.view.set_volume(int(self.config_model.alert_volume * 100))
+        self.view.set_always_on_top(self.config_model.always_on_top)
+        
+        # Position window on second monitor if available
+        self._position_window_on_second_monitor()
+    
+    def _position_window_on_second_monitor(self):
+        """Position the window on the second monitor if available"""
+        try:
+            with mss.mss() as sct:
+                monitors = sct.monitors
+                if len(monitors) > 2:  # At least two physical monitors
+                    second_monitor = monitors[2]
+                    
+                    # Calculate center position on second monitor
+                    window_width = 420
+                    window_height = 700
+                    x = second_monitor['left'] + (second_monitor['width'] // 2) - (window_width // 2)
+                    y = second_monitor['top'] + (second_monitor['height'] // 2) - (window_height // 2)
+                    
+                    self.view.window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+                    self.logger.info(f"Window positioned on second monitor at {x},{y}")
+        except Exception as e:
+            self.logger.error(f"Error positioning window on second monitor: {e}")
+    
+    def _setup_periodic_updates(self):
+        """Setup periodic UI updates"""
+        self._update_status()
+        self._update_screenshot_preview()
+        self._update_logs()
+    
+    def _update_status(self):
+        """Update detection status in UI"""
+        status = self.detection_controller.get_status()
+        self.view.set_detection_state(status["is_running"], status["match_found"])
+        
+        # Schedule next update
+        self.view.after(500, self._update_status)
+    
+    def _update_screenshot_preview(self):
+        """Update screenshot preview in UI"""
+        img, timestamp = self.screenshot_model.get_latest_screenshot()
+        self.view.update_screenshot(img, timestamp)
+        
+        # Schedule next update
+        self.view.after(1000, self._update_screenshot_preview)
+    
+    def _update_logs(self):
+        """Update log viewer in UI"""
+        self._trim_log_file()
+        
+        log_file = os.path.join("logs", "dota2_auto_accept.log")
+        if os.path.exists(log_file):
+            try:
+                with open(log_file, "r") as f:
+                    lines = f.readlines()
+                    last_lines = lines[-20:] if len(lines) > 20 else lines
+                self.view.update_logs("".join(last_lines))
+            except Exception as e:
+                self.view.update_logs(f"Error reading log file: {str(e)}")
+        else:
+            self.view.update_logs("Log file not found")
+        
+        # Schedule next update
+        self.view.after(1000, self._update_logs)
+    
+    def _trim_log_file(self):
+        """Trim log file to prevent it from growing too large"""
+        log_file = os.path.join("logs", "dota2_auto_accept.log")
+        max_lines = 1000
+        
+        if not os.path.exists(log_file):
+            return
+        
+        try:
+            with open(log_file, "r", encoding="utf-8") as file:
+                lines = file.readlines()
+            
+            if len(lines) > max_lines:
+                with open(log_file, "w", encoding="utf-8") as file:
+                    file.writelines(lines[-max_lines:])
+                self.logger.info(f"Log file trimmed to {max_lines} lines")
+        except Exception as e:
+            # Don't log this to avoid potential infinite recursion
+            print(f"Error trimming log file: {e}")
+    
+    # Event handlers
+    def _on_start_detection(self):
+        """Handle start detection request"""
+        if self.detection_controller.start_detection():
+            self.logger.info("Detection started by user")
+    
+    def _on_stop_detection(self):
+        """Handle stop detection request"""
+        if self.detection_controller.stop_detection():
+            self.logger.info("Detection stopped by user")
+    
+    def _on_test_sound(self):
+        """Handle test sound request"""
+        try:
+            self.audio_model.test_sound(
+                self.config_model.selected_device_id,
+                self.config_model.alert_volume
+            )
+            self.logger.info("Sound test completed")
+        except Exception as e:
+            self.logger.error(f"Sound test failed: {e}")
+            self.view.show_error("Sound Test Error", str(e))
+    
+    def _on_take_screenshot(self):
+        """Handle manual screenshot request"""
+        img = self.screenshot_model.capture_monitor_screenshot(
+            self.config_model.selected_monitor_capture_setting
+        )
+        if img is not None:
+            self.logger.info("Manual screenshot taken")
+        else:
+            self.logger.warning("Manual screenshot failed")
+            self.view.show_error("Screenshot Error", "Failed to capture screenshot")
+    
+    def _on_device_change(self, device_index: int):
+        """Handle audio device change"""
+        devices = self.audio_model.get_output_devices()
+        if 0 <= device_index < len(devices):
+            device_id = devices[device_index]["id"]
+            self.config_model.selected_device_id = device_id
+            self.logger.info(f"Audio device changed to: {devices[device_index]['name']}")
+    
+    def _on_volume_change(self, volume: int):
+        """Handle volume change"""
+        self.config_model.alert_volume = volume / 100.0
+        self.logger.info(f"Volume changed to: {volume}%")
+    
+    def _on_monitor_change(self, monitor_index: int):
+        """Handle monitor change"""
+        monitors = self.screenshot_model.get_available_monitors()
+        if 0 <= monitor_index < len(monitors):
+            monitor_id = monitors[monitor_index][1]
+            self.config_model.selected_monitor_capture_setting = monitor_id
+            self.logger.info(f"Monitor changed to: {monitors[monitor_index][0]}")
+    
+    def _on_always_on_top_change(self, always_on_top: bool):
+        """Handle always on top change"""
+        self.config_model.always_on_top = always_on_top
+        self.view.set_always_on_top(always_on_top)
+        self.logger.info(f"Always on top set to: {always_on_top}")
+    
+    def _on_closing(self):
+        """Handle application closing"""
+        self.detection_controller.stop_detection()
+        self.logger.info("Application closing")
+    
+    def _on_match_found(self):
+        """Handle match found event"""
+        self.logger.info("Match found callback triggered")
+    
+    def _on_detection_update(self, img, scores):
+        """Handle detection update event"""
+        # This is called frequently during detection, so we don't log it
+        pass
+    
+    def run(self):
+        """Run the application"""
+        self.view.mainloop()        
+        self.logger.info("Application exited")

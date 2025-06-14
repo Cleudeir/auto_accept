@@ -1,0 +1,1001 @@
+2025-06-14 09:07:40,599 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:40,931 - INFO - Similarity scores: dota=0.28, print=0.42, read_check=0.31
+2025-06-14 09:07:41,647 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:42,667 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:43,687 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:44,708 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:45,734 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:46,753 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:46,789 - INFO - Similarity scores: dota=0.29, print=0.42, read_check=0.31
+2025-06-14 09:07:47,782 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:48,805 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:49,824 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:50,853 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:51,874 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:52,717 - INFO - Similarity scores: dota=0.28, print=0.42, read_check=0.31
+2025-06-14 09:07:52,908 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:53,930 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:54,959 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:55,984 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:57,009 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:58,030 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:07:58,581 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:07:59,063 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:00,084 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:01,110 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:02,131 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:03,149 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:04,188 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:04,440 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:08:05,219 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:06,071 - INFO - Detection stopped!
+2025-06-14 09:08:06,072 - INFO - Application closing
+2025-06-14 09:08:06,142 - INFO - Application exited
+2025-06-14 09:08:19,140 - INFO - Application starting
+2025-06-14 09:08:19,141 - INFO - Configuration loaded successfully
+2025-06-14 09:08:19,159 - INFO - Sound system initialized successfully
+2025-06-14 09:08:19,538 - INFO - Detection loop started
+2025-06-14 09:08:19,539 - INFO - Detection started!
+2025-06-14 09:08:19,587 - INFO - Window positioned on second monitor at 750,190
+2025-06-14 09:08:19,611 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:19,752 - INFO - Configuration saved successfully
+2025-06-14 09:08:19,752 - INFO - Config updated: alert_volume = 1.0
+2025-06-14 09:08:19,752 - INFO - Volume changed to: 100%
+2025-06-14 09:08:20,499 - INFO - Similarity scores: dota=0.25, print=0.43, read_check=0.27
+2025-06-14 09:08:20,642 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:21,662 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:22,681 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:23,698 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:24,717 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:25,736 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:26,299 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:08:26,767 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:27,254 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,254 - INFO - Config updated: alert_volume = 0.97
+2025-06-14 09:08:27,254 - INFO - Volume changed to: 97%
+2025-06-14 09:08:27,279 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,279 - INFO - Config updated: alert_volume = 0.94
+2025-06-14 09:08:27,279 - INFO - Volume changed to: 94%
+2025-06-14 09:08:27,287 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,287 - INFO - Config updated: alert_volume = 0.93
+2025-06-14 09:08:27,287 - INFO - Volume changed to: 93%
+2025-06-14 09:08:27,303 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,303 - INFO - Config updated: alert_volume = 0.88
+2025-06-14 09:08:27,303 - INFO - Volume changed to: 88%
+2025-06-14 09:08:27,310 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,311 - INFO - Config updated: alert_volume = 0.84
+2025-06-14 09:08:27,311 - INFO - Volume changed to: 84%
+2025-06-14 09:08:27,318 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,318 - INFO - Config updated: alert_volume = 0.79
+2025-06-14 09:08:27,318 - INFO - Volume changed to: 79%
+2025-06-14 09:08:27,324 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,324 - INFO - Config updated: alert_volume = 0.76
+2025-06-14 09:08:27,324 - INFO - Volume changed to: 76%
+2025-06-14 09:08:27,330 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,330 - INFO - Config updated: alert_volume = 0.72
+2025-06-14 09:08:27,330 - INFO - Volume changed to: 72%
+2025-06-14 09:08:27,344 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,344 - INFO - Config updated: alert_volume = 0.71
+2025-06-14 09:08:27,344 - INFO - Volume changed to: 71%
+2025-06-14 09:08:27,351 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,351 - INFO - Config updated: alert_volume = 0.69
+2025-06-14 09:08:27,351 - INFO - Volume changed to: 69%
+2025-06-14 09:08:27,358 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,359 - INFO - Config updated: alert_volume = 0.68
+2025-06-14 09:08:27,359 - INFO - Volume changed to: 68%
+2025-06-14 09:08:27,368 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,368 - INFO - Config updated: alert_volume = 0.65
+2025-06-14 09:08:27,368 - INFO - Volume changed to: 65%
+2025-06-14 09:08:27,375 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,375 - INFO - Config updated: alert_volume = 0.62
+2025-06-14 09:08:27,375 - INFO - Volume changed to: 62%
+2025-06-14 09:08:27,383 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,383 - INFO - Config updated: alert_volume = 0.6
+2025-06-14 09:08:27,383 - INFO - Volume changed to: 60%
+2025-06-14 09:08:27,392 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,392 - INFO - Config updated: alert_volume = 0.56
+2025-06-14 09:08:27,392 - INFO - Volume changed to: 56%
+2025-06-14 09:08:27,399 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,399 - INFO - Config updated: alert_volume = 0.5
+2025-06-14 09:08:27,399 - INFO - Volume changed to: 50%
+2025-06-14 09:08:27,407 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,407 - INFO - Config updated: alert_volume = 0.47
+2025-06-14 09:08:27,407 - INFO - Volume changed to: 47%
+2025-06-14 09:08:27,415 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,415 - INFO - Config updated: alert_volume = 0.44
+2025-06-14 09:08:27,415 - INFO - Volume changed to: 44%
+2025-06-14 09:08:27,422 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,422 - INFO - Config updated: alert_volume = 0.4
+2025-06-14 09:08:27,422 - INFO - Volume changed to: 40%
+2025-06-14 09:08:27,430 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,430 - INFO - Config updated: alert_volume = 0.37
+2025-06-14 09:08:27,430 - INFO - Volume changed to: 37%
+2025-06-14 09:08:27,440 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,440 - INFO - Config updated: alert_volume = 0.35
+2025-06-14 09:08:27,440 - INFO - Volume changed to: 35%
+2025-06-14 09:08:27,447 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,447 - INFO - Config updated: alert_volume = 0.34
+2025-06-14 09:08:27,447 - INFO - Volume changed to: 34%
+2025-06-14 09:08:27,454 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,454 - INFO - Config updated: alert_volume = 0.32
+2025-06-14 09:08:27,454 - INFO - Volume changed to: 32%
+2025-06-14 09:08:27,687 - INFO - Configuration saved successfully
+2025-06-14 09:08:27,687 - INFO - Config updated: alert_volume = 0.31
+2025-06-14 09:08:27,687 - INFO - Volume changed to: 31%
+2025-06-14 09:08:27,800 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:28,103 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,103 - INFO - Config updated: alert_volume = 0.29
+2025-06-14 09:08:28,103 - INFO - Volume changed to: 29%
+2025-06-14 09:08:28,110 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,111 - INFO - Config updated: alert_volume = 0.28
+2025-06-14 09:08:28,111 - INFO - Volume changed to: 28%
+2025-06-14 09:08:28,159 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,159 - INFO - Config updated: alert_volume = 0.26
+2025-06-14 09:08:28,159 - INFO - Volume changed to: 26%
+2025-06-14 09:08:28,206 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,206 - INFO - Config updated: alert_volume = 0.25
+2025-06-14 09:08:28,206 - INFO - Volume changed to: 25%
+2025-06-14 09:08:28,247 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,248 - INFO - Config updated: alert_volume = 0.24
+2025-06-14 09:08:28,248 - INFO - Volume changed to: 24%
+2025-06-14 09:08:28,272 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,272 - INFO - Config updated: alert_volume = 0.22
+2025-06-14 09:08:28,272 - INFO - Volume changed to: 22%
+2025-06-14 09:08:28,303 - INFO - Configuration saved successfully
+2025-06-14 09:08:28,303 - INFO - Config updated: alert_volume = 0.21
+2025-06-14 09:08:28,303 - INFO - Volume changed to: 21%
+2025-06-14 09:08:28,825 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:29,176 - INFO - Configuration saved successfully
+2025-06-14 09:08:29,176 - INFO - Config updated: alert_volume = 0.19
+2025-06-14 09:08:29,176 - INFO - Volume changed to: 19%
+2025-06-14 09:08:29,200 - INFO - Configuration saved successfully
+2025-06-14 09:08:29,200 - INFO - Config updated: alert_volume = 0.18
+2025-06-14 09:08:29,200 - INFO - Volume changed to: 18%
+2025-06-14 09:08:29,774 - INFO - Configuration saved successfully
+2025-06-14 09:08:29,774 - INFO - Config updated: alert_volume = 0.19
+2025-06-14 09:08:29,774 - INFO - Volume changed to: 19%
+2025-06-14 09:08:29,783 - INFO - Configuration saved successfully
+2025-06-14 09:08:29,783 - INFO - Config updated: alert_volume = 0.22
+2025-06-14 09:08:29,783 - INFO - Volume changed to: 22%
+2025-06-14 09:08:29,800 - INFO - Configuration saved successfully
+2025-06-14 09:08:29,800 - INFO - Config updated: alert_volume = 0.24
+2025-06-14 09:08:29,800 - INFO - Volume changed to: 24%
+2025-06-14 09:08:29,817 - INFO - Configuration saved successfully
+2025-06-14 09:08:29,817 - INFO - Config updated: alert_volume = 0.26
+2025-06-14 09:08:29,817 - INFO - Volume changed to: 26%
+2025-06-14 09:08:29,849 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:30,550 - INFO - Configuration saved successfully
+2025-06-14 09:08:30,550 - INFO - Config updated: alert_volume = 0.25
+2025-06-14 09:08:30,550 - INFO - Volume changed to: 25%
+2025-06-14 09:08:30,566 - INFO - Configuration saved successfully
+2025-06-14 09:08:30,566 - INFO - Config updated: alert_volume = 0.24
+2025-06-14 09:08:30,566 - INFO - Volume changed to: 24%
+2025-06-14 09:08:30,876 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:30,893 - INFO - Configuration saved successfully
+2025-06-14 09:08:30,893 - INFO - Config updated: alert_volume = 0.22
+2025-06-14 09:08:30,893 - INFO - Volume changed to: 22%
+2025-06-14 09:08:30,960 - INFO - Configuration saved successfully
+2025-06-14 09:08:30,960 - INFO - Config updated: alert_volume = 0.24
+2025-06-14 09:08:30,960 - INFO - Volume changed to: 24%
+2025-06-14 09:08:30,974 - INFO - Configuration saved successfully
+2025-06-14 09:08:30,974 - INFO - Config updated: alert_volume = 0.25
+2025-06-14 09:08:30,974 - INFO - Volume changed to: 25%
+2025-06-14 09:08:30,983 - INFO - Configuration saved successfully
+2025-06-14 09:08:30,983 - INFO - Config updated: alert_volume = 0.26
+2025-06-14 09:08:30,983 - INFO - Volume changed to: 26%
+2025-06-14 09:08:31,008 - INFO - Configuration saved successfully
+2025-06-14 09:08:31,008 - INFO - Config updated: alert_volume = 0.28
+2025-06-14 09:08:31,008 - INFO - Volume changed to: 28%
+2025-06-14 09:08:31,031 - INFO - Configuration saved successfully
+2025-06-14 09:08:31,031 - INFO - Config updated: alert_volume = 0.31
+2025-06-14 09:08:31,031 - INFO - Volume changed to: 31%
+2025-06-14 09:08:31,054 - INFO - Configuration saved successfully
+2025-06-14 09:08:31,054 - INFO - Config updated: alert_volume = 0.32
+2025-06-14 09:08:31,054 - INFO - Volume changed to: 32%
+2025-06-14 09:08:31,079 - INFO - Configuration saved successfully
+2025-06-14 09:08:31,079 - INFO - Config updated: alert_volume = 0.35
+2025-06-14 09:08:31,079 - INFO - Volume changed to: 35%
+2025-06-14 09:08:31,110 - INFO - Configuration saved successfully
+2025-06-14 09:08:31,110 - INFO - Config updated: alert_volume = 0.37
+2025-06-14 09:08:31,110 - INFO - Volume changed to: 37%
+2025-06-14 09:08:31,724 - INFO - Configuration saved successfully
+2025-06-14 09:08:31,724 - INFO - Config updated: alert_volume = 0.35
+2025-06-14 09:08:31,724 - INFO - Volume changed to: 35%
+2025-06-14 09:08:31,903 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:32,110 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:08:32,931 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:33,271 - INFO - Configuration saved successfully
+2025-06-14 09:08:33,271 - INFO - Config updated: alert_volume = 0.34
+2025-06-14 09:08:33,271 - INFO - Volume changed to: 34%
+2025-06-14 09:08:33,456 - INFO - Configuration saved successfully
+2025-06-14 09:08:33,456 - INFO - Config updated: alert_volume = 0.32
+2025-06-14 09:08:33,456 - INFO - Volume changed to: 32%
+2025-06-14 09:08:33,863 - INFO - Configuration saved successfully
+2025-06-14 09:08:33,863 - INFO - Config updated: alert_volume = 0.31
+2025-06-14 09:08:33,863 - INFO - Volume changed to: 31%
+2025-06-14 09:08:33,942 - INFO - Configuration saved successfully
+2025-06-14 09:08:33,943 - INFO - Config updated: alert_volume = 0.29
+2025-06-14 09:08:33,943 - INFO - Volume changed to: 29%
+2025-06-14 09:08:33,953 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:34,064 - INFO - Configuration saved successfully
+2025-06-14 09:08:34,064 - INFO - Config updated: alert_volume = 0.28
+2025-06-14 09:08:34,064 - INFO - Volume changed to: 28%
+2025-06-14 09:08:34,990 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:35,239 - INFO - Configuration saved successfully
+2025-06-14 09:08:35,239 - INFO - Config updated: alert_volume = 0.31
+2025-06-14 09:08:35,239 - INFO - Volume changed to: 31%
+2025-06-14 09:08:35,254 - INFO - Configuration saved successfully
+2025-06-14 09:08:35,254 - INFO - Config updated: alert_volume = 0.32
+2025-06-14 09:08:35,254 - INFO - Volume changed to: 32%
+2025-06-14 09:08:35,271 - INFO - Configuration saved successfully
+2025-06-14 09:08:35,272 - INFO - Config updated: alert_volume = 0.35
+2025-06-14 09:08:35,272 - INFO - Volume changed to: 35%
+2025-06-14 09:08:35,960 - INFO - Configuration saved successfully
+2025-06-14 09:08:35,960 - INFO - Config updated: alert_volume = 0.34
+2025-06-14 09:08:35,960 - INFO - Volume changed to: 34%
+2025-06-14 09:08:35,974 - INFO - Configuration saved successfully
+2025-06-14 09:08:35,974 - INFO - Config updated: alert_volume = 0.32
+2025-06-14 09:08:35,974 - INFO - Volume changed to: 32%
+2025-06-14 09:08:35,999 - INFO - Configuration saved successfully
+2025-06-14 09:08:35,999 - INFO - Config updated: alert_volume = 0.31
+2025-06-14 09:08:35,999 - INFO - Volume changed to: 31%
+2025-06-14 09:08:36,026 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:37,043 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:37,225 - INFO - Configuration saved successfully
+2025-06-14 09:08:37,225 - INFO - Config updated: alert_volume = 0.29
+2025-06-14 09:08:37,225 - INFO - Volume changed to: 29%
+2025-06-14 09:08:37,915 - INFO - Similarity scores: dota=0.28, print=0.42, read_check=0.30
+2025-06-14 09:08:38,071 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:38,991 - INFO - Configuration saved successfully
+2025-06-14 09:08:38,991 - INFO - Config updated: alert_volume = 0.31
+2025-06-14 09:08:38,991 - INFO - Volume changed to: 31%
+2025-06-14 09:08:39,094 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:39,112 - INFO - Configuration saved successfully
+2025-06-14 09:08:39,112 - INFO - Config updated: alert_volume = 0.32
+2025-06-14 09:08:39,112 - INFO - Volume changed to: 32%
+2025-06-14 09:08:40,118 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:41,137 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:42,154 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:43,174 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:43,711 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:08:44,205 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:45,224 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:46,245 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:47,257 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:48,280 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:49,298 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:49,521 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:08:50,325 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:51,334 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:51,740 - INFO - Manual screenshot taken
+2025-06-14 09:08:52,364 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:53,384 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:54,405 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:55,344 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:08:55,429 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:56,445 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:57,466 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:58,490 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:08:59,508 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:00,527 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:01,154 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:01,557 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:02,577 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:03,596 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:04,614 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:05,635 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:06,653 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:06,953 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:07,684 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:08,702 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:09,719 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:10,737 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:11,755 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:12,751 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:12,794 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:13,812 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:14,829 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:15,849 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:16,868 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:17,887 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:18,563 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:18,912 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:19,929 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:20,949 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:21,965 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:22,985 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:24,002 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:24,380 - INFO - Similarity scores: dota=0.28, print=0.41, read_check=0.30
+2025-06-14 09:09:25,032 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:26,105 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:27,127 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:28,150 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:29,169 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:30,190 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:30,198 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:31,215 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:32,243 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:33,261 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:34,279 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:35,299 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:36,014 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:36,326 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:37,344 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:38,362 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:39,381 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:40,407 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:41,426 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:41,824 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:42,447 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:43,464 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:44,481 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:45,509 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:46,528 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:47,545 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:47,646 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:48,575 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:49,593 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:50,612 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:51,632 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:52,651 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:53,508 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:53,681 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:54,697 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:55,712 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:56,740 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:57,762 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:58,788 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:09:59,322 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:09:59,830 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:00,848 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:01,868 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:02,888 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:03,906 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:04,923 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:05,161 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:05,954 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:06,972 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:07,984 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:09,002 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:10,020 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:10,988 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:11,050 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:12,060 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:13,077 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:14,094 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:15,110 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:16,128 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:16,815 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:17,162 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:18,176 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:19,194 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:20,211 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:21,229 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:22,258 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:22,645 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:23,292 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:24,309 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:25,326 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:26,345 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:27,364 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:28,381 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:28,479 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:29,411 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:30,428 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:31,445 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:32,463 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:33,482 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:34,314 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:34,510 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:35,538 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:36,558 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:37,577 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:38,595 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:39,625 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:40,135 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:40,670 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:41,685 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:42,705 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:43,728 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:44,747 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:45,764 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:45,938 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:46,793 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:47,811 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:48,829 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:49,847 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:50,865 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:51,747 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:51,892 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:52,908 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:53,926 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:54,946 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:55,965 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:56,983 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:57,586 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:10:58,013 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:10:59,029 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:00,059 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:01,075 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:02,095 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:03,112 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:03,411 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:11:04,139 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:05,156 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:06,182 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:07,200 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:08,228 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:09,239 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.30
+2025-06-14 09:11:09,256 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:10,272 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:11,289 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:12,307 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:13,323 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:14,342 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:15,149 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:11:15,370 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:16,388 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:17,404 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:18,425 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:19,444 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:20,465 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:21,122 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:11:21,510 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:22,534 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:23,555 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:24,577 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:25,601 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:26,622 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:27,100 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.30
+2025-06-14 09:11:27,655 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:28,673 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:29,691 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:30,709 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:31,728 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:32,752 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:33,030 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:11:33,781 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:34,796 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:35,830 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:36,842 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:37,861 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:38,893 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:11:38,902 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:39,919 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:40,938 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:41,954 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:42,972 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:43,990 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:44,735 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:11:45,027 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:46,041 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:47,058 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:48,074 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:49,097 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:50,108 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:50,487 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:11:51,126 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:52,140 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:53,157 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:54,173 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:55,248 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:56,267 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:56,367 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.29
+2025-06-14 09:11:57,293 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:58,310 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:11:59,329 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:00,348 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:01,360 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:02,212 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:02,387 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:03,401 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:04,411 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:05,429 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:06,446 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:07,466 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:08,165 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:08,504 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:09,525 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:10,548 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:11,567 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:12,587 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:13,605 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:14,091 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:14,637 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:15,653 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:16,679 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:17,697 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:18,749 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:19,765 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:19,927 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:20,793 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:21,811 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:22,830 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:23,848 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:24,864 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:25,735 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:25,893 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:26,909 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:27,928 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:28,945 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:29,964 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:30,982 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:31,686 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:32,019 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:33,075 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:34,119 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:35,138 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:36,160 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:37,180 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:37,550 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:38,211 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:39,229 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:40,248 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:41,270 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:42,290 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:43,311 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:43,430 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:44,339 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:45,351 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:46,371 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:47,388 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:48,407 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:49,327 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:49,439 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:50,458 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:51,472 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:52,490 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:53,513 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:54,540 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:55,221 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:12:55,574 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:56,598 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:57,619 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:58,638 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:12:59,675 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:00,695 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:01,115 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:01,732 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:02,752 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:03,775 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:04,793 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:05,813 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:06,838 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:07,000 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:07,880 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:08,900 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:09,919 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:10,940 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:11,962 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:12,899 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:12,990 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:14,011 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:15,030 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:16,043 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:17,065 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:18,085 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:18,810 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:19,110 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:20,128 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:21,151 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:22,174 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:23,195 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:24,214 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:24,678 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.29
+2025-06-14 09:13:25,256 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:26,276 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:27,288 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:28,310 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:29,330 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:30,349 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:30,644 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:31,382 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:32,402 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:33,424 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:34,443 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:35,485 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:36,512 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:36,513 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:37,543 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:38,564 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:39,577 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:40,596 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:41,618 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:42,404 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:42,658 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:43,676 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:44,697 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:45,718 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:46,739 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:47,757 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:48,259 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:48,789 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:49,800 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:50,823 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:51,842 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:52,892 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:53,917 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:54,186 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:13:54,952 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:55,973 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:56,992 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:58,013 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:13:59,032 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:00,047 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:00,089 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:01,107 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:02,129 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:03,147 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:04,170 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:05,190 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:05,920 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:06,219 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:07,239 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:08,258 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:09,296 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:10,327 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:11,345 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:11,773 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:12,374 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:13,390 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:14,409 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:15,421 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:16,440 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:17,456 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:17,598 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:18,478 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:19,494 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:20,512 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:21,531 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:22,554 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:23,436 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
+2025-06-14 09:14:23,575 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:24,592 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:25,610 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:26,630 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:27,651 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:28,674 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:29,384 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:29,703 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:30,746 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:31,765 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:32,787 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:33,815 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:34,836 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:35,345 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:35,884 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:36,931 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:37,953 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:38,981 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:40,005 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:41,027 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:41,269 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:42,059 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:43,077 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:44,097 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:45,117 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:46,136 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:47,129 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:47,164 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:48,176 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:49,196 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:50,207 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:51,226 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:52,245 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:52,955 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:14:53,271 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:54,297 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:55,310 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:56,331 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:57,349 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:58,359 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:14:58,790 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.29
+2025-06-14 09:14:59,390 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:00,406 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:01,425 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:02,446 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:03,465 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:04,484 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:04,695 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:05,522 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:06,545 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:07,567 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:08,588 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:09,606 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:10,610 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:10,634 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:11,649 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:12,671 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:13,704 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:14,720 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:15,741 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:16,710 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:16,775 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:17,794 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:18,813 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:19,836 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:20,855 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:21,876 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:22,550 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:22,909 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:23,928 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:24,940 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:25,961 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:26,981 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:28,000 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:28,652 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:29,063 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:30,084 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:31,105 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:32,118 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:33,136 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:34,155 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:34,635 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:35,187 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:36,234 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:37,257 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:38,276 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:39,299 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:40,339 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:40,459 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:41,360 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:42,378 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:43,399 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:44,418 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:45,439 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:46,328 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:46,511 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:47,528 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:48,545 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:49,565 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:50,578 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:51,596 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:52,179 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.29
+2025-06-14 09:15:52,627 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:53,637 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:54,663 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:55,681 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:56,702 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:57,721 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:58,088 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:15:58,754 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:15:59,772 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:00,785 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:01,813 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:02,826 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:03,849 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:04,079 - INFO - Similarity scores: dota=0.25, print=0.51, read_check=0.27
+2025-06-14 09:16:04,882 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:05,896 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:06,913 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:07,956 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:08,976 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:09,889 - INFO - Similarity scores: dota=0.25, print=0.52, read_check=0.28
+2025-06-14 09:16:10,004 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:11,021 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:12,042 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:13,065 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:14,082 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:15,102 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:15,811 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.29
+2025-06-14 09:16:16,133 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:17,157 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:18,199 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:19,217 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:20,239 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:21,263 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:21,775 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:16:22,299 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:23,320 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:24,338 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:25,357 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:26,378 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:27,401 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:27,669 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:16:28,432 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:29,451 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:30,491 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:31,501 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:32,521 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:33,489 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.29
+2025-06-14 09:16:33,548 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:34,566 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:35,586 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:36,600 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:37,617 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:38,638 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:39,312 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:16:39,665 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:40,680 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:41,711 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:42,728 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:43,747 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:44,768 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:45,170 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:16:45,799 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:46,815 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:47,838 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:48,854 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:49,873 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:50,893 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:51,011 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:16:51,922 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:52,940 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:53,964 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:54,986 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:56,015 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:57,039 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:57,070 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:16:58,072 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:16:59,085 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:00,106 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:01,125 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:02,151 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:02,985 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:03,185 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:04,205 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:05,228 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:06,250 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:07,262 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:08,323 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:08,795 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:09,352 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:10,371 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:11,389 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:12,408 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:13,426 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:14,444 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:14,632 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:15,475 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:16,493 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:17,515 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:18,542 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:19,589 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:20,458 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:20,616 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:21,640 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:22,658 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:23,681 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:24,698 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:25,717 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:26,262 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:26,751 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:27,769 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:28,785 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:29,809 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:30,831 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:31,848 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:32,086 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:32,870 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:33,887 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:34,904 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:35,930 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:36,947 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:37,918 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:37,977 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:38,995 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:40,016 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:41,039 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:42,062 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:43,089 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:43,720 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:44,118 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:45,134 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:46,152 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:47,197 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:48,214 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:49,234 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:49,639 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:50,270 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:51,298 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:52,311 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:53,331 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:54,351 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:55,372 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:55,532 - INFO - Similarity scores: dota=0.26, print=0.41, read_check=0.28
+2025-06-14 09:17:56,405 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:57,420 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:58,447 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:17:59,464 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:00,485 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:01,406 - INFO - Similarity scores: dota=0.69, print=0.37, read_check=0.78
+2025-06-14 09:18:01,518 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:02,554 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:03,575 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:04,599 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:05,645 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:06,675 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:07,311 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:18:07,704 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:08,724 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:09,746 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:10,763 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:11,781 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:12,801 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:13,184 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:18:13,831 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:14,847 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:15,864 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:16,882 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:17,900 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:18,919 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:19,024 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:18:19,952 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:20,967 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:21,994 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:23,013 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:24,106 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:24,848 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.78
+2025-06-14 09:18:25,135 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:26,150 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:27,169 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:28,193 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:29,215 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:30,232 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:30,772 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:18:31,272 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:32,289 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:33,310 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:34,327 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:35,354 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:36,380 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:36,911 - INFO - Similarity scores: dota=0.44, print=0.60, read_check=0.49
+2025-06-14 09:18:37,412 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:38,428 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:39,447 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:40,467 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:41,487 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:42,506 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:42,920 - INFO - Similarity scores: dota=0.70, print=0.38, read_check=0.79
+2025-06-14 09:18:43,525 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:44,548 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:45,560 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:46,576 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:47,596 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:48,621 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:48,932 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:18:49,652 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:50,676 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:51,707 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:52,723 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:53,742 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:54,765 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:54,840 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:18:55,801 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:56,822 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:57,844 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:58,873 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:18:59,896 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:00,822 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:19:00,929 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:01,951 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:02,995 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:04,017 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:05,037 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:06,063 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:06,711 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:19:07,108 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:08,125 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:09,144 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:10,162 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:11,185 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:12,206 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:12,587 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:19:13,239 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:14,296 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:15,316 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:16,342 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:17,361 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:18,384 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:18,514 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:19:19,419 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:20,456 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:21,480 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:22,502 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:23,523 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:24,410 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:19:24,560 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:25,581 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:26,603 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:27,625 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:28,649 - INFO - Log file trimmed to 1000 lines
