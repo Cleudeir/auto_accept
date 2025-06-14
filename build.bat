@@ -43,6 +43,9 @@ pyinstaller ^
     --icon "%SRC_DIR%\bin\icon.ico" ^
     --add-data "%SRC_DIR%\bin;bin" ^
     --add-data "%SRC_DIR%\config.json;." ^
+    --add-data "%SRC_DIR%\controllers;controllers" ^
+    --add-data "%SRC_DIR%\models;models" ^
+    --add-data "%SRC_DIR%\views;views" ^
     --distpath "%SCRIPT_DIR%dist" ^
     --workpath "%SCRIPT_DIR%build" ^
     --specpath "%SCRIPT_DIR%build" ^
