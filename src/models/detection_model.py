@@ -15,6 +15,7 @@ class DetectionModel:
         self.logger = logging.getLogger("Dota2AutoAccept.DetectionModel")
         self.reference_images = self._load_reference_images()
         self.screenshot_model = screenshot_model  # Optional, for monitor-aware screenshots
+        self.ocr_cache = {}  # Cache OCR results per monitor
     
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""
@@ -116,7 +117,6 @@ class DetectionModel:
         scores["ad_stop"] = ad_stop
         return match_found, scores
     
-    def focus_dota2_window(self) -> bool:
         """Focus the Dota 2 window if it exists"""
         try:
             dota_windows = gw.getWindowsWithTitle("Dota 2")
@@ -246,6 +246,105 @@ class DetectionModel:
         except Exception as e:
             self.logger.error(f"Error moving mouse and clicking: {e}")
 
+    def cache_ocr_for_monitor(self, monitor_index: int):
+        """Perform OCR for the given monitor and cache the result."""
+        import easyocr
+        if self.screenshot_model is None:
+            try:
+                from models.screenshot_model import ScreenshotModel
+                self.screenshot_model = ScreenshotModel()
+            except Exception as e:
+                self.logger.error(f"Could not initialize ScreenshotModel: {e}")
+                return None
+        img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
+        if img is None:
+            self.logger.warning(f"Could not capture screenshot from monitor {monitor_index}")
+            return None
+        screenshot = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+        img_rgb = cv2.cvtColor(screenshot, cv2.COLOR_BGR2RGB)
+        reader = easyocr.Reader(['en'], gpu=True)
+        results = reader.readtext(img_rgb)
+        self.ocr_cache[monitor_index] = results
+        return results
+
+    def get_cached_ocr(self, monitor_index: int):
+        """Get cached OCR results for a monitor, or perform OCR if not cached."""
+        if monitor_index in self.ocr_cache:
+            return self.ocr_cache[monitor_index]
+        return self.cache_ocr_for_monitor(monitor_index)
+
+    def find_strings_positions(self, search_strings, monitor_index: Optional[int] = None):
+        """For each string, get all positions found in the OCR cache for the monitor."""
+        import json
+        if self.screenshot_model is None:
+            try:
+                from models.screenshot_model import ScreenshotModel
+                self.screenshot_model = ScreenshotModel()
+            except Exception as e:
+                self.logger.error(f"Could not initialize ScreenshotModel: {e}")
+                return {}
+        if monitor_index is None:
+            try:
+                config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                monitor_index = config.get('selected_monitor_capture_setting', 1)
+            except Exception as e:
+                self.logger.error(f"Could not read monitor index from config.json: {e}")
+                monitor_index = 1
+        results = self.get_cached_ocr(monitor_index)
+        # Get monitor offset for absolute coordinates
+        x_offset, y_offset = 0, 0
+        try:
+            with self.screenshot_model._get_mss() as sct:
+                monitors = sct.monitors
+                if 0 < monitor_index < len(monitors):
+                    mon = monitors[monitor_index]
+                    x_offset, y_offset = mon['left'], mon['top']
+        except Exception:
+            pass
+        found_positions = {s: [] for s in search_strings}
+        for (bbox, text, conf) in results:
+            for search in search_strings:
+                if search.lower() in text.lower():
+                    x = int((bbox[0][0] + bbox[2][0]) / 2) + x_offset
+                    y = int((bbox[0][1] + bbox[2][1]) / 2) + y_offset
+                    found_positions[search].append((x, y, text, conf))
+        return found_positions
+
+    def save_found_positions_to_config(self, found_positions, config_path=None):
+        """Save found string positions to config.json under 'ocr_found_positions'."""
+        import json
+        if config_path is None:
+            config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+        # Read existing config
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        except Exception:
+            config = {}
+        config['ocr_found_positions'] = found_positions
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2)
+        self.logger.info(f"Saved OCR found positions to {config_path}")
+
+    def save_string_position_to_config(self, string, position, config_path=None):
+        """Save or update the position of a found string in config.json under 'ocr_found_positions'."""
+        import json
+        if config_path is None:
+            config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+        # Read existing config
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        except Exception:
+            config = {}
+        if 'ocr_found_positions' not in config:
+            config['ocr_found_positions'] = {}
+        config['ocr_found_positions'][string] = position
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2)
+        self.logger.info(f"Saved position for string '{string}' to {config_path}")
 # Patch ScreenshotModel to add _get_mss if not present
 try:
     from models.screenshot_model import ScreenshotModel
