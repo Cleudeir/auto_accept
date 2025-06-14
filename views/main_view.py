@@ -44,7 +44,7 @@ class MainView:
         
         # Window configuration
         window_width = 420
-        window_height = 720
+        window_height = 800
         
         # Center window on screen
         screen_width = self.window.winfo_screenwidth()
@@ -62,7 +62,7 @@ class MainView:
         self._create_screenshot_section()
         self._create_settings_sections()
         self._create_control_section()
-        self._create_log_section()
+       # self._create_log_section()
      
         # Setup keyboard shortcuts
         self._setup_keyboard_shortcuts()
@@ -84,8 +84,7 @@ class MainView:
     def _create_status_section(self):
         """Create status display section"""
         self.status_label = tk.Label(
-            self.window, 
-            text="Status: Stopped", 
+            self.window,            text="Status: Stopped", 
             font=("Arial", 12, "bold"), 
             fg="red"
         )
@@ -96,8 +95,13 @@ class MainView:
         screenshot_frame = tk.LabelFrame(self.window, text="Screenshot Preview", padx=10, pady=10)
         screenshot_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
+        # Fixed height frame to maintain consistent size
+        fixed_height_frame = tk.Frame(screenshot_frame, height=240)
+        fixed_height_frame.pack(fill=tk.X)
+        fixed_height_frame.pack_propagate(False)  # Prevent the frame from resizing based on content
+        
         # Screenshot label
-        self.screenshot_label = tk.Label(screenshot_frame)
+        self.screenshot_label = tk.Label(fixed_height_frame)
         self.screenshot_label.pack(fill=tk.BOTH, expand=True)
         
         # Timestamp label
@@ -290,8 +294,7 @@ class MainView:
     # Public methods for updating UI
     def set_status(self, text: str, color: str = "black"):
         """Update status label"""
-        if self.status_label:
-            self.status_label.config(text=text, fg=color)
+        if self.status_label:            self.status_label.config(text=text, fg=color)
     
     def set_detection_state(self, is_running: bool, match_found: bool = False):
         """Update detection state and UI"""
@@ -331,7 +334,7 @@ class MainView:
                 img_copy = img_copy.resize((new_width, new_height), Image.LANCZOS)
                 photo = ImageTk.PhotoImage(img_copy)
                 
-                self.screenshot_label.config(image=photo)
+                self.screenshot_label.config(image=photo, text="")
                 self.screenshot_label.image = photo  # Keep reference
                 
                 # Update timestamp
@@ -345,7 +348,11 @@ class MainView:
                 self.screenshot_label.config(image=None, text=f"Error: {str(e)}")
                 self.timestamp_label.config(text="")
         else:
-            self.screenshot_label.config(image=None, text="No screenshot available")
+            # Create an empty image with fixed dimensions to maintain layout
+            empty_img = Image.new('RGB', (360, 240), color=(240, 240, 240))
+            photo = ImageTk.PhotoImage(empty_img)
+            self.screenshot_label.config(image=photo, text="No screenshot available")
+            self.screenshot_label.image = photo  # Keep reference
             self.timestamp_label.config(text="")
     
     def update_logs(self, log_content: str):

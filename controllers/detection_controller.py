@@ -20,6 +20,7 @@ class DetectionController:
         # Callbacks
         self.on_match_found = None
         self.on_detection_update = None
+        self.on_start_failed = None
     
     def start_detection(self):
         """Start the detection process"""
@@ -30,6 +31,10 @@ class DetectionController:
             self.detection_thread.start()
             self.logger.info("Detection started!")
             return True
+        else:
+            self.logger.warning("Detection already running. Start request ignored.")
+            if hasattr(self, 'on_start_failed') and callable(self.on_start_failed):
+                self.on_start_failed("Detection is already running.")
         return False
     
     def stop_detection(self):

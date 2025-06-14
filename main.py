@@ -17,7 +17,9 @@ def main():
     try:
         # Create and run the main controller
         controller = MainController()
+        # The detection will start automatically in the controller
         controller.run()
+        print("Dota 2 Auto Accept is running. Press Ctrl+C to exit.")
     except KeyboardInterrupt:
         print("Application interrupted by user")
     except Exception as e:

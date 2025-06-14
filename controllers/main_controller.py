@@ -98,6 +98,9 @@ class MainController:
         
         self.view.set_device_options(device_names, selected_device_index)
         
+        # Start detection automatically when app starts
+        self.detection_controller.start_detection()
+        
         # Setup monitors
         monitors = self.screenshot_model.get_available_monitors()
         monitor_names = [m[0] for m in monitors]
@@ -128,7 +131,7 @@ class MainController:
                     
                     # Calculate center position on second monitor
                     window_width = 420
-                    window_height = 720
+                    window_height = 700
                     x = second_monitor['left'] + (second_monitor['width'] // 2) - (window_width // 2)
                     y = second_monitor['top'] + (second_monitor['height'] // 2) - (window_height // 2)
                     
@@ -275,5 +278,5 @@ class MainController:
     
     def run(self):
         """Run the application"""
-        self.view.mainloop()
+        self.view.mainloop()        
         self.logger.info("Application exited")
