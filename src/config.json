@@ -2,5 +2,14 @@
   "alert_volume": 1.0,
   "selected_device_id": null,
   "selected_monitor_capture_setting": 3,
-  "always_on_top": false
+  "always_on_top": false,
+  "ocr_found_positions": {
+    "READY": {
+      "position": [
+        2723,
+        628
+      ],
+      "monitor_index": 3
+    }
+  }
 }

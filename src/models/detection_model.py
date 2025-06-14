@@ -228,6 +228,11 @@ class DetectionModel:
                         self.move_mouse_and_click(x, y)
                         self.logger.info(f"Clicked on button-like text '{text}' at ({x}, {y})")
                         print(f"Button found: {text}")
+                        # Save position in config
+                        try:
+                            self.save_string_position_to_config(text.strip(), [x, y])
+                        except Exception as e:
+                            self.logger.error(f"Failed to save string position to config: {e}")
                         return (text, (x, y), True)
         print(f"OCR found strings: {found_strings}")
         self.logger.info(f"None of the button-like strings {search_strings} found in image (EasyOCR).")
@@ -267,51 +272,6 @@ class DetectionModel:
         self.ocr_cache[monitor_index] = results
         return results
 
-    def get_cached_ocr(self, monitor_index: int):
-        """Get cached OCR results for a monitor, or perform OCR if not cached."""
-        if monitor_index in self.ocr_cache:
-            return self.ocr_cache[monitor_index]
-        return self.cache_ocr_for_monitor(monitor_index)
-
-    def find_strings_positions(self, search_strings, monitor_index: Optional[int] = None):
-        """For each string, get all positions found in the OCR cache for the monitor."""
-        import json
-        if self.screenshot_model is None:
-            try:
-                from models.screenshot_model import ScreenshotModel
-                self.screenshot_model = ScreenshotModel()
-            except Exception as e:
-                self.logger.error(f"Could not initialize ScreenshotModel: {e}")
-                return {}
-        if monitor_index is None:
-            try:
-                config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
-                with open(config_path, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                monitor_index = config.get('selected_monitor_capture_setting', 1)
-            except Exception as e:
-                self.logger.error(f"Could not read monitor index from config.json: {e}")
-                monitor_index = 1
-        results = self.get_cached_ocr(monitor_index)
-        # Get monitor offset for absolute coordinates
-        x_offset, y_offset = 0, 0
-        try:
-            with self.screenshot_model._get_mss() as sct:
-                monitors = sct.monitors
-                if 0 < monitor_index < len(monitors):
-                    mon = monitors[monitor_index]
-                    x_offset, y_offset = mon['left'], mon['top']
-        except Exception:
-            pass
-        found_positions = {s: [] for s in search_strings}
-        for (bbox, text, conf) in results:
-            for search in search_strings:
-                if search.lower() in text.lower():
-                    x = int((bbox[0][0] + bbox[2][0]) / 2) + x_offset
-                    y = int((bbox[0][1] + bbox[2][1]) / 2) + y_offset
-                    found_positions[search].append((x, y, text, conf))
-        return found_positions
-
     def save_found_positions_to_config(self, found_positions, config_path=None):
         """Save found string positions to config.json under 'ocr_found_positions'."""
         import json
@@ -328,8 +288,9 @@ class DetectionModel:
             json.dump(config, f, indent=2)
         self.logger.info(f"Saved OCR found positions to {config_path}")
 
-    def save_string_position_to_config(self, string, position, config_path=None):
-        """Save or update the position of a found string in config.json under 'ocr_found_positions'."""
+    def save_string_position_to_config(self, string, position, monitor_index=None, config_path=None):
+        """Save or update the position and monitor of a found string in config.json under 'ocr_found_positions'.
+        If monitor_index is None, use the current selected_monitor_capture_setting from config."""
         import json
         if config_path is None:
             config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
@@ -341,10 +302,37 @@ class DetectionModel:
             config = {}
         if 'ocr_found_positions' not in config:
             config['ocr_found_positions'] = {}
-        config['ocr_found_positions'][string] = position
+        # If monitor_index is None, use selected_monitor_capture_setting
+        if monitor_index is None:
+            monitor_index = config.get('selected_monitor_capture_setting', 1)
+        config['ocr_found_positions'][string] = {
+            'position': position,
+            'monitor_index': monitor_index
+        }
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2)
-        self.logger.info(f"Saved position for string '{string}' to {config_path}")
+        self.logger.info(f"Saved position and monitor for string '{string}' to {config_path}")
+
+    def get_cached_ocr(self, monitor_index: int):
+        """Get cached OCR results for a monitor, or perform OCR if not cached."""
+        if monitor_index in self.ocr_cache:
+            return self.ocr_cache[monitor_index]
+        return self.cache_ocr_for_monitor(monitor_index)
+
+    def get_position_from_config(self, string, config_path=None):
+        """Retrieve the position and monitor index for a string from config.json."""
+        import json
+        if config_path is None:
+            config_path = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+            entry = config.get('ocr_found_positions', {}).get(string)
+            if entry:
+                return entry['position'], entry.get('monitor_index')
+        except Exception:
+            pass
+        return None, None
 # Patch ScreenshotModel to add _get_mss if not present
 try:
     from models.screenshot_model import ScreenshotModel
