@@ -1,127 +1,141 @@
 # Dota 2 Auto Accept
 
-A utility that automatically detects and accepts Dota 2 match pop-ups.
+A utility that automatically detects and accepts Dota 2 match pop-ups, saving you from missing queue accepts while you're AFK.
 
-## Architecture
+![Dota 2 Auto Accept](src/bin/icon.ico)
 
-The application has been refactored to follow the MVC (Model-View-Controller) pattern for better code organization and maintainability.
+## Features
 
-### Project Structure
+- **Automatic Match Acceptance**: Detects when a Dota 2 match is found and automatically accepts it
+- **Sound Alerts**: Plays audio notification when a match is found
+- **Multiple Monitor Support**: Works with any monitor setup
+- **Customizable Settings**: Configure volume, monitor selection, and more
+- **Debug Screenshots**: Automatically saves screenshots for troubleshooting
+- **Minimized Operation**: Runs in the system tray for non-intrusive operation
+
+## Installation
+
+### Option 1: Download and Run the Executable
+
+1. Download the latest release from [Releases](https://github.com/yourusername/dota2-auto-accept/releases) (if published)
+2. Extract the ZIP file to any location on your computer
+3. Run `auto_accept.bat` to start the application
+
+### Option 2: Install from Source
+
+1. Clone the repository or download the source code
+2. Right-click on `install.bat` and select "Run as administrator"
+   - This script will:
+     - Check if Python is installed (and install Python 3.11.7 if not)
+     - Install all required Python packages
+     - Create an `auto_accept.bat` file
+     - Create a desktop shortcut
+3. After installation completes, you can start the application by:
+   - Double-clicking the desktop shortcut "Dota 2 Auto Accept"
+   - Or running `auto_accept.bat` from the installation folder
+
+> **Note**: If the installation encounters issues, you may need to manually install Python 3.9+ from [python.org](https://www.python.org/downloads/) and run `pip install -r src/requirements.txt` in a command prompt.
+
+## Usage
+
+1. Launch the application by running the desktop shortcut or `auto_accept.bat`
+2. The application runs minimized in the system tray by default
+   - You can access the main window by clicking on the tray icon
+3. Configure settings as needed:
+   - Select your monitor (if you have multiple monitors)
+   - Adjust alert volume using the slider
+   - Toggle "Always on Top" setting to keep the window visible
+4. The application will automatically:
+   - Monitor for Dota 2 match pop-ups
+   - Play a sound when a match is found
+   - Click the accept button automatically
+5. Keep the application running while you're queuing for matches
+6. To close the application, right-click on the tray icon and select "Exit"
+
+## Configuration
+
+The application uses a configuration file (`config.json`) to store your preferences:
+
+- `alert_volume`: Volume level for match alerts (0.0 to 1.0)
+- `selected_device_id`: ID of the monitor device to use for capturing
+- `selected_monitor_capture_setting`: Monitor capture method
+- `always_on_top`: Whether the application window stays on top of other windows
+
+### Debug Screenshots
+
+The application automatically saves screenshots when it's trying to detect match accept buttons:
+
+- Screenshots are saved in the `debug_screenshots/` folder
+- Each screenshot is named with a timestamp: `dota2_monitor_capture_YYYYMMDD-HHMMSS.png`
+- These screenshots are useful for troubleshooting if the application isn't correctly detecting match popups
+- The most recent screenshots can help identify why detection might be failing
+
+## Project Structure
+
+The application follows the MVC (Model-View-Controller) architecture:
 
 ```
 src/
 ├── main.py                    # Main entry point
 ├── models/                    # Data models and business logic
-│   ├── __init__.py
 │   ├── config_model.py        # Configuration management
 │   ├── audio_model.py         # Audio system handling
 │   ├── screenshot_model.py    # Screenshot capture functionality
 │   └── detection_model.py     # Image detection and comparison
 ├── views/                     # User interface components
-│   ├── __init__.py
-│   └── main_view.py          # Main GUI window
+│   └── main_view.py           # Main GUI window
 ├── controllers/               # Application logic coordinators
-│   ├── __init__.py
 │   ├── main_controller.py     # Main application controller
 │   └── detection_controller.py # Detection logic controller
-├── bin/                       # Binary resources
+├── bin/                       # Binary resources (images, sounds, icons)
+│   ├── dota.png               # Reference image for match detection
+│   ├── dota2.mp3              # Alert sound when match is found
+│   ├── icon.ico               # Application icon
+│   └── print.png              # Reference image for match detection
 ├── logs/                      # Application logs
+│   └── dota2_auto_accept.log  # Main log file
 └── debug_screenshots/         # Debug screenshots
+    └── dota2_monitor_capture_*.png  # Timestamped screenshots
 ```
 
-### Components
+## Troubleshooting
 
-#### Models
-- **ConfigModel**: Handles loading, saving, and managing application configuration
-- **AudioModel**: Manages audio system initialization and sound playback
-- **ScreenshotModel**: Handles monitor detection and screenshot capture
-- **DetectionModel**: Performs image comparison and match detection logic
+If the application isn't detecting matches correctly:
 
-#### Views
-- **MainView**: Creates and manages the main GUI window and user interactions
+1. Make sure Dota 2 is running in the selected monitor
+2. Check the logs:
+   - Main logs: `logs/dota2_auto_accept.log`
+   - Look for errors or "Match found" messages
+3. Check debug screenshots:
+   - Screenshots are saved in `debug_screenshots/` folder
+   - Files are named with timestamp: `dota2_monitor_capture_YYYYMMDD-HHMMSS.png`
+   - Compare these with the expected Dota 2 accept button appearance
+4. Verify that your Dota 2 UI hasn't been modified by mods or updates
+5. Try selecting a different monitor if you have multiple screens
+6. Restart the application and Dota 2
+7. If problems persist, try reinstalling or checking for updated versions
 
-#### Controllers
-- **MainController**: Coordinates between all models and views, handles application lifecycle
-- **DetectionController**: Manages the detection loop and threading
+## System Requirements
 
-## Usage
+- **Operating System**: Windows 10/11
+- **Python**: Version 3.9 or higher (automatically installed by the installer)
+- **Required Libraries**: (automatically installed by the installer)
+  - OpenCV
+  - PyAutoGUI
+  - NumPy
+  - PyGame
+  - MSS
+  - Pillow
+  - scikit-image
+  - PyGetWindow
+- **Screen Resolution**: 1080p or higher recommended
+- **Storage**: ~50MB of disk space
 
-### Running the Application
+## License
 
-```bash
-cd src
-python main.py
-```
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### Legacy Entry Point
+## Acknowledgments
 
-The original `accept.py` file is still available for backward compatibility, but it's recommended to use the new MVC structure via `main.py`.
-
-## Build Instructions
-
-This repository includes two build scripts to create an executable:
-
-### Simple Build
-
-1. Double-click `build_exe.bat` to create a single executable file.
-2. The output will be in the `dist` folder.
-
-### Advanced Build
-
-`build_advanced.bat` provides more options for building the application:
-
-1. Open Command Prompt in the project directory.
-2. Run the build script with desired options:
-
-```
-build_advanced.bat [--onedir] [--debug] [--clean]
-```
-
-Options:
-- `--onedir`: Create a directory containing the executable and dependent files (default is single-file)
-- `--debug`: Build with debug information
-- `--clean`: Clean previous build files before building
-
-Examples:
-```
-build_advanced.bat                    # Build single-file executable (release mode)
-build_advanced.bat --onedir           # Build directory-based executable
-build_advanced.bat --debug --clean    # Build single-file executable with debug info, cleaning first
-```
-
-## Application Files
-
-The build scripts will package the following files into the executable:
-
-- `accept.py`: Main application script
-- `dota.png`: Reference image for match detection
-- `print.png`: Reference image for match detection
-- `dota2.mp3`: Alert sound when match is found
-- `icon.ico`: Application icon
-- `config.json`: Configuration file
-
-## Requirements
-
-The following Python packages are required (installed automatically by the build scripts):
-- python-dotenv
-- pywin32
-- screeninfo
-- pyautogui
-- opencv-python
-- numpy
-- pyinstaller
-- pygame
-- sounddevice
-
-## Usage
-
-After building, you can run the application by:
-1. Opening the executable in the `dist` folder
-2. Configure your audio settings and monitor selection
-3. Click "Start Detection"
-4. When a Dota 2 match is found, the application will play a sound alert
-
-Keyboard shortcuts:
-- F1: Start detection
-- F2: Stop detection
-- F3: Test sound
+- The Dota 2 Auto Accept project was inspired by the need to avoid missing queue accepts
+- Thanks to the Python community for the amazing libraries that made this possible
