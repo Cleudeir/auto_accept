@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 debug_screenshots/*
+src/logs/*
 # Distribution / packaging
 .Python
 build/
