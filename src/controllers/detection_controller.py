@@ -62,6 +62,11 @@ class DetectionController:
                     # Log similarity scores
                     score_str = ", ".join([f"{k}={v:.2f}" for k, v in scores.items()])
                     self.logger.info(f"Similarity scores: {score_str}")
+                    
+                    if scores.get("ad_stop", False):
+                        self.logger.info("AD.png detected with similarity >= 0.6. Stopping detection loop.")
+                        self.is_running = False
+                        break
                       # Process detection results
                     if match_found:
                         action = self.detection_model.process_detection_result(scores)
@@ -77,15 +82,13 @@ class DetectionController:
                                 self.config_model.selected_device_id,
                                 self.config_model.alert_volume
                             )
-                            # Set match found flag and stop detection
+                            # Set match found flag (do not stop detection)
                             self.match_found = True
-                            self.is_running = False
-                            
+                            # self.is_running = False  # Removed stopping on accept
                             # Notify callback
                             if self.on_match_found:
                                 self.on_match_found()
-                            break
-                    
+                        
                     # Notify update callback
                     if self.on_detection_update:
                         self.on_detection_update(img, scores)

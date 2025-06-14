@@ -1,6 +1,6 @@
 {
-  "alert_volume": 0.37,
-  "selected_device_id": 5,
-  "selected_monitor_capture_setting": 1,
+  "alert_volume": 0.24,
+  "selected_device_id": 6,
+  "selected_monitor_capture_setting": 3,
   "always_on_top": true
 }

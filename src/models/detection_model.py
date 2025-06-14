@@ -21,7 +21,8 @@ class DetectionModel:
             "dota": os.path.join("bin", "dota.png"),
             "print": os.path.join("bin", "print.png"),
             "read_check": os.path.join("bin", "read-check.jpg"),
-            "long_time": os.path.join("bin", "long-time.png")
+            "long_time": os.path.join("bin", "long-time.png"),
+            "ad": os.path.join("bin", "AD.png")  # Added AD.png
         }
         
         # Verify all reference images exist
@@ -101,24 +102,31 @@ class DetectionModel:
         """
         scores = {}
         match_found = False
-        
+        ad_stop = False
         # Compare with each reference image
         for name, ref_path in self.reference_images.items():
             if os.path.exists(ref_path):
                 score = self.compare_image_with_reference(img, ref_path)
                 scores[name] = score
-                  # Check for matches based on thresholds
+                # Check for matches based on thresholds
+                if name == "ad" and score >= 0.6:
+                    print(f"AD.png detected with similarity (score={score:.2f})")
+                    ad_stop = True
                 if name in ["dota", "print"] and score > 0.8:
+                    print(f"{name.capitalize()} pattern detected with score {score:.2f}")   
                     match_found = True
                 elif name == "read_check" and score > 0.8:
+                    print(f"Read-check pattern detected with score {score:.2f}")
                     # Special case for read-check (different action)
                     match_found = True
                 elif name == "long_time" and score > 0.8:
+                    print(f"Long matchmaking wait dialog detected with score {score:.2f}")
                     # Special case for long matchmaking wait dialog
                     match_found = True
             else:
                 scores[name] = 0.0
-        
+        # Return ad_stop flag in scores for controller to act on
+        scores["ad_stop"] = ad_stop
         return match_found, scores
     
     def focus_dota2_window(self) -> bool:
@@ -177,11 +185,9 @@ class DetectionModel:
             if pos:
                 pyautogui.click(pos[0], pos[1])
                 self.logger.info(f"Clicked OK button at {pos}")
-            else:
-                pyautogui.press("enter")
-                time.sleep(0.5)
-                pyautogui.press("enter")
-                self.logger.info("OK button confirmed by pressing Enter (fallback)")
+      
+            pyautogui.press("enter")             
+            self.logger.info("OK button confirmed by pressing Enter (fallback)")
         except Exception as e:
             self.logger.error(f"Error confirming OK button: {e}")
 
