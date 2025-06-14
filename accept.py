@@ -1,20 +1,23 @@
-import pyautogui
+import os
+import sys
+import time
+import logging
+from logging.handlers import RotatingFileHandler  # Add proper import for RotatingFileHandler
+import threading
+import json
 import cv2
 import numpy as np
-import time
+import pyautogui
 import pygetwindow as gw
-from PIL import ImageGrab, Image, ImageTk
-import mss
-import os
-from skimage.metrics import structural_similarity as ssim
 import sounddevice as sd
+import pygame  # Import pygame at the top level
+from PIL import ImageGrab, Image, ImageTk
 import tkinter as tk
 from tkinter import ttk, messagebox
-import json
-import threading
-import logging
-from logging.handlers import RotatingFileHandler
+from skimage.metrics import structural_similarity as ssim
+import mss
 import datetime
+import winsound  # Import winsound for fallback beep
 
 # Create logs directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
@@ -40,6 +43,10 @@ detection_thread = None
 match_found = False
 latest_screenshot_img = None  # Global variable to hold the latest screenshot image
 latest_screenshot_time = None  # Global variable to hold the time of the latest screenshot
+
+# Initialize sound variables
+sound = None
+sound_loaded = False
 
 
 def save_fullscreen_screenshot(filename):
@@ -157,23 +164,46 @@ def keep_last_n_files(folder, n):
 
 
 def play_alert_sound():
+    """Play the alert sound using the configured settings"""
+    global sound, sound_loaded
+    
     try:
-        import pygame
-        import time as _time
-
-        mp3_path = os.path.join("bin", "dota2.mp3")
-        if os.path.exists(mp3_path):
-            pygame.mixer.init()
-            sound = pygame.mixer.Sound(mp3_path)
-            arr = pygame.sndarray.array(sound)
-            # Apply volume to the audio array
-            arr = (arr * alert_volume).astype(arr.dtype)
-            sample_rate = pygame.mixer.get_init()[0]
-            sd.play(arr, samplerate=sample_rate, device=selected_device_id)
-            sd.wait()
-            pygame.mixer.quit()
+        if sound_loaded and sound is not None:
+            # If using a specific device and sounddevice (sd)
+            if selected_device_id is not None:
+                try:
+                    # Get raw audio data from pygame Sound
+                    arr = pygame.sndarray.array(sound)
+                    # Apply volume to the audio array
+                    arr = (arr * alert_volume).astype(arr.dtype)
+                    # Get the sample rate from pygame
+                    sample_rate = pygame.mixer.get_init()[0]
+                    # Play using sounddevice with selected output device
+                    sd.play(arr, samplerate=sample_rate, device=selected_device_id)
+                    sd.wait()  # Wait for sound to finish
+                    logger.info(f"Played alert sound on device {selected_device_id}")
+                except Exception as e:
+                    logger.error(f"Error playing sound with sounddevice: {e}")
+                    # Fallback to pygame's playback
+                    sound.set_volume(alert_volume)
+                    sound.play()
+                    logger.info("Played alert sound with pygame fallback")
+            else:
+                # Use pygame's built-in playback
+                sound.set_volume(alert_volume)
+                sound.play()
+                logger.info("Played alert sound with pygame")
         else:
-            # fallback beep
+            # Use Windows beep as fallback
+            logger.warning("Sound not loaded, using fallback beep")
+            winsound.Beep(1000, 500)
+    except Exception as e:
+        logger.error(f"Error playing alert sound: {e}")
+        try:
+            # Ultimate fallback
+            winsound.Beep(1000, 500)
+        except:
+            pass  # If even this fails, just continue silently
             logger.warning("MP3 file not found. Using fallback beep.")
             import winsound
 
@@ -211,28 +241,13 @@ def get_available_monitors():
 
 
 def test_alert_sound():
+    """Test the alert sound and show error messages if any"""
     try:
-        import pygame
-        import time as _time
-
-        mp3_path = os.path.join("bin", "dota2.mp3")
-        if os.path.exists(mp3_path):
-            pygame.mixer.init()
-            sound = pygame.mixer.Sound(mp3_path)
-            arr = pygame.sndarray.array(sound)
-            # Apply volume to the audio array
-            arr = (arr * alert_volume).astype(arr.dtype)
-            sample_rate = pygame.mixer.get_init()[0]
-            sd.play(arr, samplerate=sample_rate, device=selected_device_id)
-            sd.wait()
-            pygame.mixer.quit()
-        else:
-            import winsound
-
-            winsound.Beep(1000, 500)
+        # Just use the play_alert_sound function for consistency
+        play_alert_sound()
     except Exception as e:
-        logger.error(f"Error playing alert sound: {e}")
-        messagebox.showerror("Test Error", str(e))
+        logger.error(f"Error testing alert sound: {e}")
+        messagebox.showerror("Sound Test Error", str(e))
 
 
 def load_audio_settings():
@@ -295,17 +310,21 @@ def show_audio_settings():
     global selected_device_id, alert_volume, is_running, detection_thread, selected_monitor_capture_setting, always_on_top, latest_screenshot_img, latest_screenshot_time
 
     win = tk.Tk()
-    win.title("Dota 2 Auto Accept - Control Panel")
-
-    # Center window on screen
+    win.title("Dota 2 Auto Accept - Control Panel")    # Center window on screen or place on second monitor
     window_width = 420  # Increased width
     window_height = 900  # Increased height
+    
+    # First center on primary monitor (default position)
     screen_width = win.winfo_screenwidth()
     screen_height = win.winfo_screenheight()
     x = (screen_width // 2) - (window_width // 2)
     y = (screen_height // 2) - (window_height // 2)
     win.geometry(f"{window_width}x{window_height}+{x}+{y}")
     win.resizable(False, False)
+    
+    # Try to position on second monitor after window is created
+    win.update_idletasks()  # Ensure window metrics are calculated
+    position_window_on_second_monitor(win)
 
     # Set window to always stay on top
     win.attributes("-topmost", always_on_top)
@@ -692,6 +711,84 @@ def show_audio_settings():
     win.mainloop()
 
 
+def position_window_on_second_monitor(window):
+    """Position the window on the second monitor if available"""
+    try:
+        # Get screen information
+        with mss.mss() as sct:
+            monitors = sct.monitors
+            # monitors[0] is the "all-in-one" virtual screen
+            # monitors[1] is the first physical monitor
+            # monitors[2] would be the second physical monitor, if it exists
+            
+            if len(monitors) > 2:  # At least two physical monitors (plus the all-in-one)
+                # Second monitor is monitors[2]
+                second_monitor = monitors[2]
+                
+                # Calculate window position to center it on second monitor
+                window_width = window.winfo_width()
+                window_height = window.winfo_height()
+                
+                # If window size is not yet known, use default size
+                if window_width < 100:
+                    window_width = 600
+                if window_height < 100:
+                    window_height = 700
+                
+                # Calculate center position on second monitor
+                x = second_monitor['left'] + (second_monitor['width'] // 2) - (window_width // 2)
+                y = second_monitor['top'] + (second_monitor['height'] // 2) - (window_height // 2)
+                
+                # Position the window
+                window.geometry(f"{window_width}x{window_height}+{x}+{y}")
+                logger.info(f"Window positioned on second monitor at {x},{y}")
+                return True
+    except Exception as e:
+        logger.error(f"Error positioning window on second monitor: {e}")
+    
+    return False
+
+
+def check_monitor_changes(window):
+    """Check for monitor changes and adjust window position if needed"""
+    try:
+        # This function could be called periodically to check for monitor configuration changes
+        with mss.mss() as sct:
+            monitors = sct.monitors
+            num_monitors = len(monitors) - 1  # Subtract 1 for the all-in-one virtual screen
+            
+            # Store current monitor count in window attribute if not already present
+            if not hasattr(window, '_monitor_count'):
+                window._monitor_count = num_monitors
+            
+            # If monitor count has changed, reposition window as needed
+            if window._monitor_count != num_monitors:
+                logger.info(f"Monitor configuration changed: {window._monitor_count} -> {num_monitors}")
+                
+                # If second monitor was added, move window there
+                if num_monitors > 1 and window._monitor_count <= 1:
+                    position_window_on_second_monitor(window)
+                # If on second monitor but it was removed, move back to primary
+                elif num_monitors <= 1 and window._monitor_count > 1:
+                    # Center on primary monitor
+                    screen_width = window.winfo_screenwidth()
+                    screen_height = window.winfo_screenheight()
+                    window_width = window.winfo_width()
+                    window_height = window.winfo_height()
+                    x = (screen_width // 2) - (window_width // 2)
+                    y = (screen_height // 2) - (window_height // 2)
+                    window.geometry(f"+{x}+{y}")
+                    logger.info(f"Window repositioned on primary monitor at {x},{y}")
+                
+                # Update stored monitor count
+                window._monitor_count = num_monitors
+    except Exception as e:
+        logger.error(f"Error checking monitor changes: {e}")
+
+    # Schedule next check in 5 seconds
+    window.after(5000, lambda: check_monitor_changes(window))
+
+
 def keep_log_file_size(log_file_path, max_lines=1000):
     """
     Keeps the log file from growing too large by limiting the number of lines.
@@ -796,12 +893,22 @@ def main_loop():
     logger.info("Detection loop ended")
 
 
-def main():
-    filename = f"dota2_monitor_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png"
-    if not save_dota2_monitor_screenshot(filename, selected_monitor_capture_setting):
-        # fallback to fullscreen screenshot
-        filename = f"fullscreen_screenshot_{time.strftime('%Y%m%d-%H%M%S')}.png"
-        save_fullscreen_screenshot(filename)
+def initialize_sound_system():
+    """Initialize the sound system at application startup"""
+    global sound, sound_loaded
+    sound = None
+    sound_loaded = False
+    try:
+        pygame.mixer.init()
+        mp3_path = os.path.join("bin", "dota2.mp3")
+        if os.path.exists(mp3_path):
+            sound = pygame.mixer.Sound(mp3_path)
+            sound_loaded = True
+            logger.info("Sound system initialized successfully")
+        else:
+            logger.warning(f"Alert sound file not found at {mp3_path}")
+    except Exception as e:
+        logger.error(f"Error initializing sound system: {e}")
 
 
 if __name__ == "__main__":
@@ -809,6 +916,8 @@ if __name__ == "__main__":
     # Trim log file to prevent it from growing too large
     keep_log_file_size(log_file, 1000)
     load_audio_settings()
+    # Initialize sound system
+    initialize_sound_system()
     is_running = True
     match_found = False
     detection_thread = threading.Thread(target=main_loop, daemon=True)
@@ -817,24 +926,18 @@ if __name__ == "__main__":
     logger.info("Application exiting")
 
 
-def keep_log_file_size(log_file_path, max_lines=1000):
-    """
-    Keeps the log file from growing too large by limiting the number of lines.
-    Only keeps the most recent lines up to max_lines.
-    """
-    if not os.path.exists(log_file_path):
-        return
-
+def initialize_sound_system():
+    global sound, sound_loaded
+    sound = None
+    sound_loaded = False
     try:
-        # Read all lines from the log file
-        with open(log_file_path, "r", encoding="utf-8") as file:
-            lines = file.readlines()
-
-        # If the number of lines exceeds the maximum, keep only the most recent ones
-        if len(lines) > max_lines:
-            with open(log_file_path, "w", encoding="utf-8") as file:
-                file.writelines(lines[-max_lines:])
-            logger.info(f"Log file trimmed to {max_lines} lines")
+        pygame.mixer.init()
+        mp3_path = os.path.join("bin", "dota2.mp3")
+        if os.path.exists(mp3_path):
+            sound = pygame.mixer.Sound(mp3_path)
+            sound_loaded = True
+            logger.info("Sound system initialized successfully")
+        else:
+            logger.warning(f"Alert sound file not found at {mp3_path}")
     except Exception as e:
-        # Don't log this to avoid potential infinite recursion
-        print(f"Error trimming log file: {e}")
+        logger.error(f"Error initializing sound system: {e}")
