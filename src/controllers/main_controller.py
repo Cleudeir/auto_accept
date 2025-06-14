@@ -46,9 +46,6 @@ class MainController:
     
     def _setup_logging(self):
         """Setup logging configuration"""
-        # Create logs directory if it doesn't exist
-        os.makedirs("logs", exist_ok=True)
-        
         log_file = os.path.join("logs", "dota2_auto_accept.log")
         logger = logging.getLogger("Dota2AutoAccept")
         logger.setLevel(logging.INFO)
