@@ -652,26 +652,9 @@ def show_audio_settings():
                 log_text.insert(tk.END, f"Error reading log file: {str(e)}")
                 log_text.config(state=tk.DISABLED)
 
-        # Schedule the next refresh
-        win.after(1000, refresh_logs)  # Refresh every 1 second
-
-    # Log controls for log viewer
+        # Schedule the next refresh        win.after(1000, refresh_logs)  # Refresh every 1 second    # Log controls for log viewer
     log_controls_frame = tk.Frame(log_frame)
     log_controls_frame.pack(fill="x", pady=(5, 0))
-
-    refresh_btn = tk.Button(
-        log_controls_frame, text="🔄 Refresh", command=lambda: refresh_logs()
-    )
-    refresh_btn.pack(side=tk.LEFT, padx=2)
-
-    clear_btn = tk.Button(
-        log_controls_frame,
-        text="🗑️ Clear",
-        command=lambda: log_text.config(state=tk.NORMAL)
-        or log_text.delete(1.0, tk.END)
-        or log_text.config(state=tk.DISABLED),
-    )
-    clear_btn.pack(side=tk.LEFT, padx=2)
 
     # Info frame with instructions
     info_frame = tk.Frame(win)
