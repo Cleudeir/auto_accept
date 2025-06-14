@@ -19,15 +19,13 @@ class AudioModel:
         """Initialize the sound system at application startup"""
         try:
             pygame.mixer.init()
-            if hasattr(sys, '_MEIPASS'):
-                base_path = sys._MEIPASS
-            else:
-                base_path = os.path.dirname(os.path.abspath(__file__))
+            # Use the src directory as base path for bin/dota2.mp3
+            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             mp3_path = os.path.join(base_path, "bin", "dota2.mp3")
             if os.path.exists(mp3_path):
                 self.sound = pygame.mixer.Sound(mp3_path)
                 self.sound_loaded = True
-                self.logger.info("Sound system initialized successfully")
+                self.logger.info(f"Sound system initialized successfully: {mp3_path}")
             else:
                 self.logger.warning(f"Alert sound file not found at {mp3_path}")
         except Exception as e:
