@@ -1,12 +1,3 @@
-2025-06-14 09:08:03,149 - INFO - Log file trimmed to 1000 lines
-2025-06-14 09:08:04,188 - INFO - Log file trimmed to 1000 lines
-2025-06-14 09:08:04,440 - INFO - Similarity scores: dota=0.27, print=0.41, read_check=0.29
-2025-06-14 09:08:05,219 - INFO - Log file trimmed to 1000 lines
-2025-06-14 09:08:06,071 - INFO - Detection stopped!
-2025-06-14 09:08:06,072 - INFO - Application closing
-2025-06-14 09:08:06,142 - INFO - Application exited
-2025-06-14 09:08:19,140 - INFO - Application starting
-2025-06-14 09:08:19,141 - INFO - Configuration loaded successfully
 2025-06-14 09:08:19,159 - INFO - Sound system initialized successfully
 2025-06-14 09:08:19,538 - INFO - Detection loop started
 2025-06-14 09:08:19,539 - INFO - Detection started!
@@ -999,3 +990,12 @@
 2025-06-14 09:19:49,241 - INFO - Log file trimmed to 1000 lines
 2025-06-14 09:19:50,260 - INFO - Log file trimmed to 1000 lines
 2025-06-14 09:19:51,277 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:52,305 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:53,328 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:54,335 - INFO - Similarity scores: dota=0.70, print=0.37, read_check=0.79
+2025-06-14 09:19:54,367 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:55,391 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:56,418 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:57,450 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:58,469 - INFO - Log file trimmed to 1000 lines
+2025-06-14 09:19:59,503 - INFO - Log file trimmed to 1000 lines
