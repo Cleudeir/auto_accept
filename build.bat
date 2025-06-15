@@ -1,21 +1,6 @@
 @echo off
-REM =============================
-REM Dota 2 Auto Accept Build Script
-REM Updated: 2025-06-14
-REM =============================
-
 echo Building Dota 2 Auto Accept executable...
 echo.
-
-REM Check Python version (require 3.8+)
-echo Checking Python installation...
-python --version
-if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Python is not installed or not in PATH.
-    echo Please install Python 3.8 or higher and add it to PATH.
-    pause
-    exit /b 1
-)
 
 REM Get the directory where this script is located
 set SCRIPT_DIR=%~dp0
@@ -24,17 +9,6 @@ set SRC_DIR=%SCRIPT_DIR%src
 echo Script directory: %SCRIPT_DIR%
 echo Source directory: %SRC_DIR%
 
-REM Clean up old build and dist folders
-echo Cleaning up old build artifacts...
-if exist "%SCRIPT_DIR%dist" (
-    echo Removing old dist folder...
-    rmdir /s /q "%SCRIPT_DIR%dist"
-)
-if exist "%SCRIPT_DIR%build" (
-    echo Removing old build folder...
-    rmdir /s /q "%SCRIPT_DIR%build"
-)
-
 REM Change to src directory
 cd /d "%SRC_DIR%"
 
@@ -42,38 +16,15 @@ REM Check if virtual environment exists, if not create it
 if not exist "venv\" (
     echo Creating virtual environment...
     python -m venv venv
-    if %ERRORLEVEL% NEQ 0 (
-        echo ERROR: Failed to create virtual environment.
-        pause
-        exit /b 1
-    )
 )
 
 REM Activate virtual environment
 echo Activating virtual environment...
 call venv\Scripts\activate.bat
-if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Failed to activate virtual environment.
-    pause
-    exit /b 1
-)
 
-REM Upgrade pip first
-echo Upgrading pip...
-python -m pip install --upgrade pip
-
-REM Install PyInstaller first
-echo Installing PyInstaller...
-pip install pyinstaller
-
-REM Install minimal requirements for smaller build
-echo Installing minimal requirements...
-pip install -r requirements_minimal.txt
-if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: Failed to install requirements.
-    pause
-    exit /b 1
-)
+REM Install requirements
+echo Installing requirements...
+pip install -r requirements.txt
 
 REM Create dist and build directories if they don't exist
 if not exist "%SCRIPT_DIR%dist\" mkdir "%SCRIPT_DIR%dist"
@@ -84,8 +35,7 @@ echo Building executable with PyInstaller...
 echo Current directory: %CD%
 echo.
 
-REM Build with PyInstaller (optimized for smaller size)
-echo Running PyInstaller with size optimizations...
+REM Build with PyInstaller (using absolute paths)
 pyinstaller ^
     --onefile ^
     --windowed ^
@@ -99,88 +49,31 @@ pyinstaller ^
     --distpath "%SCRIPT_DIR%dist" ^
     --workpath "%SCRIPT_DIR%build" ^
     --specpath "%SCRIPT_DIR%build" ^
-    --optimize=2 ^
-    --strip ^
-    --noupx ^
-    --exclude-module matplotlib ^
-    --exclude-module scipy ^
-    --exclude-module pandas ^
-    --exclude-module flask ^
-    --exclude-module torch ^
-    --exclude-module torchvision ^
-    --exclude-module plotly ^
-    --exclude-module easyocr ^
-    --exclude-module tensorflow ^
-    --exclude-module jupyter ^
-    --exclude-module notebook ^
-    --exclude-module IPython ^
-    --exclude-module seaborn ^
-    --exclude-module docx ^
-    --exclude-module openpyxl ^
-    --exclude-module xlrd ^
-    --exclude-module pdf ^
-    --exclude-module cryptography ^
-    --exclude-module bcrypt ^
-    --exclude-module camelot ^
-    --exclude-module lxml ^
-    --exclude-module xmltodict ^
-    --exclude-module requests ^
-    --exclude-module urllib3 ^
-    --exclude-module certifi ^
-    --exclude-module charset_normalizer ^
-    --exclude-module idna ^
-    --exclude-module click ^
-    --exclude-module jinja2 ^
-    --exclude-module werkzeug ^
-    --exclude-module blinker ^
-    --exclude-module itsdangerous ^
-    --exclude-module markupsafe ^
     --hidden-import "PIL._tkinter_finder" ^
-    --hidden-import "PIL.ImageTk" ^
-    --hidden-import "tkinter" ^
-    --hidden-import "tkinter.ttk" ^
     --hidden-import "pygame" ^
-    --hidden-import "pygame.mixer" ^
+    --hidden-import "sounddevice" ^
     --hidden-import "cv2" ^
     --hidden-import "numpy" ^
+    --hidden-import "screeninfo" ^
     --hidden-import "pyautogui" ^
     --hidden-import "mss" ^
     --hidden-import "pygetwindow" ^
-    --hidden-import "skimage.metrics" ^
-    --collect-submodules "PIL" ^
-    --collect-submodules "tkinter" ^
-    --noconfirm ^
+    --hidden-import "skimage" ^
+    --collect-all "cv2" ^
+    --collect-all "pygame" ^
     main.py
 
 if %ERRORLEVEL% EQU 0 (
     echo.
-    echo =============================
-    echo BUILD COMPLETED SUCCESSFULLY!
-    echo =============================
-    echo Executable created at: %SCRIPT_DIR%dist\Dota2AutoAccept.exe
-    echo File size: 
-    dir "%SCRIPT_DIR%dist\Dota2AutoAccept.exe"
+    echo Build completed successfully!
+    echo Executable created at: %SCRIPT_DIR%dist\\Dota2AutoAccept.exe
     echo.
-    echo You can now run the executable from the dist folder.
+    echo Opening Dota2AutoAccept.exe...
+    start "" "%SCRIPT_DIR%dist\\Dota2AutoAccept.exe"
     pause
 ) else (
     echo.
-    echo =============================
-    echo BUILD FAILED!
-    echo =============================
     echo Build failed with error code %ERRORLEVEL%
-    echo Check the output above for error details.
     echo.
-    echo Common solutions:
-    echo 1. Make sure all dependencies are installed
-    echo 2. Check if antivirus is blocking PyInstaller
-    echo 3. Try running as administrator
-    echo 4. Check if Python and pip are properly installed
     pause
-    exit /b %ERRORLEVEL%
 )
-
-REM Deactivate virtual environment
-deactivate
-
-
