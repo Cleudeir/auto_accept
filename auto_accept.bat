@@ -10,7 +10,7 @@ REM ==========================================================================
 echo(
 echo [1/2] Checking for Python...
 set "PYTHON_EXE="
-where python >nul 2>&1
+where python > nul 2>&1
 if !ERRORLEVEL! equ 0 (
     echo   Python is installed.
     set "PYTHON_EXE=python"
