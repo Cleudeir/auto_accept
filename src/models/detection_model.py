@@ -209,7 +209,7 @@ class DetectionModel:
             return None
         screenshot = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img_rgb = cv2.cvtColor(screenshot, cv2.COLOR_BGR2RGB)
-        reader = easyocr.Reader(['en'], gpu=True)
+        reader = easyocr.Reader(['en'], gpu=False)
         results = reader.readtext(img_rgb)
         # Get monitor offset for absolute coordinates
         x_offset, y_offset = 0, 0
