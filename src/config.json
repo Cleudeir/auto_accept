@@ -1,13 +1,20 @@
 {
-  "alert_volume": 1.0,
+  "alert_volume": 0.04,
   "selected_device_id": null,
   "selected_monitor_capture_setting": 3,
-  "always_on_top": false,
+  "always_on_top": true,
   "ocr_found_positions": {
-    "READY": {
+    "AcCEPT": {
       "position": [
-        2723,
-        628
+        2879,
+        513
+      ],
+      "monitor_index": 3
+    },
+    "OK": {
+      "position": [
+        2881,
+        639
       ],
       "monitor_index": 3
     }

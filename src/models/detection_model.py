@@ -111,12 +111,12 @@ class DetectionModel:
                     print(f"Long matchmaking wait dialog detected with score {score:.2f}")
                     # Special case for long matchmaking wait dialog
                     match_found = True
-            else:
-                scores[name] = 0.0
+            else:                scores[name] = 0.0
         # Return ad_stop flag in scores for controller to act on
         scores["ad_stop"] = ad_stop
         return match_found, scores
     
+    def focus_dota2_window(self):
         """Focus the Dota 2 window if it exists"""
         try:
             dota_windows = gw.getWindowsWithTitle("Dota 2")
@@ -149,10 +149,15 @@ class DetectionModel:
         # Check for long matchmaking wait dialog first
         if scores.get("long_time", 0) > 0.9:
             print(f"Long matchmaking wait dialog detected with score {scores['long_time']:.2f}")
+            print(f"Pressing ESC key")
+            pyautogui.press("esc")
+           
             self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "long_time_dialog_detected"
         # Check for read-check pattern (different action)
         elif scores.get("read_check", 0) > 0.9:
+            print(f"Preessing Enter key")
+            pyautogui.press("enter")
             print(f"Read-check pattern detected with score {scores['read_check']:.2f}")
             self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "read_check_detected"
@@ -160,15 +165,17 @@ class DetectionModel:
         elif scores.get("dota", 0) > 0.9 or scores.get("print", 0) > 0.9:
             print(f"Match detected with scores: Dota={scores.get('dota', 0):.2f}, Print={scores.get('print', 0):.2f}")
             self.focus_dota2_window()
+            print(f"Preessing Enter key")
+            pyautogui.press("enter")
             self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "match_detected"
         return action
 
     def send_enter_key_if_text_found(self, search_strings):
         
+       
         print(f"Searching for text: {search_strings}")
         result = self.find_string_in_image(search_strings)
-        pyautogui.press("enter")
         if result:
             self.logger.info(f"Text '{result[0]}' found, pressed Enter.")
         else:
