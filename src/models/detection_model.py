@@ -147,7 +147,7 @@ class DetectionModel:
         """Process detection results and return action taken using only OCR and Enter key"""
         action = "none"
         # Check for long matchmaking wait dialog first
-        if scores.get("long_time", 0) > 0.9:
+        if scores.get("long_time", 0) > 0.8:
             print(f"Long matchmaking wait dialog detected with score {scores['long_time']:.2f}")
             print(f"Pressing ESC key")
             pyautogui.press("esc")

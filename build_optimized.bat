@@ -1,10 +1,11 @@
 @echo off
 REM =============================
-REM Dota 2 Auto Accept Build Script
+REM Dota 2 Auto Accept - OPTIMIZED Build Script for Minimal Size
 REM Updated: 2025-06-14
+REM Size Optimization: Aggressive exclusions and minimal dependencies
 REM =============================
 
-echo Building Dota 2 Auto Accept executable...
+echo Building Dota 2 Auto Accept executable with size optimizations...
 echo.
 
 REM Check Python version (require 3.8+)
@@ -62,12 +63,8 @@ REM Upgrade pip first
 echo Upgrading pip...
 python -m pip install --upgrade pip
 
-REM Install PyInstaller first
-echo Installing PyInstaller...
-pip install pyinstaller
-
-REM Install minimal requirements for smaller build
-echo Installing minimal requirements...
+REM Install minimal requirements ONLY for smaller build
+echo Installing MINIMAL requirements for size optimization...
 pip install -r requirements_minimal.txt
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Failed to install requirements.
@@ -80,12 +77,12 @@ if not exist "%SCRIPT_DIR%dist\" mkdir "%SCRIPT_DIR%dist"
 if not exist "%SCRIPT_DIR%build\" mkdir "%SCRIPT_DIR%build"
 
 echo.
-echo Building executable with PyInstaller...
+echo Building executable with MAXIMUM size optimizations...
 echo Current directory: %CD%
 echo.
 
-REM Build with PyInstaller (optimized for smaller size)
-echo Running PyInstaller with size optimizations...
+REM Build with PyInstaller - ULTRA OPTIMIZED for minimal size
+echo Running PyInstaller with aggressive size optimizations...
 pyinstaller ^
     --onefile ^
     --windowed ^
@@ -103,6 +100,7 @@ pyinstaller ^
     --strip ^
     --noupx ^
     --exclude-module matplotlib ^
+    --exclude-module matplotlib.pyplot ^
     --exclude-module scipy ^
     --exclude-module pandas ^
     --exclude-module flask ^
@@ -116,9 +114,14 @@ pyinstaller ^
     --exclude-module IPython ^
     --exclude-module seaborn ^
     --exclude-module docx ^
+    --exclude-module python_docx ^
     --exclude-module openpyxl ^
     --exclude-module xlrd ^
+    --exclude-module xlsxwriter ^
     --exclude-module pdf ^
+    --exclude-module pypdf ^
+    --exclude-module pymupdf ^
+    --exclude-module pdfminer ^
     --exclude-module cryptography ^
     --exclude-module bcrypt ^
     --exclude-module camelot ^
@@ -135,6 +138,37 @@ pyinstaller ^
     --exclude-module blinker ^
     --exclude-module itsdangerous ^
     --exclude-module markupsafe ^
+    --exclude-module pytest ^
+    --exclude-module setuptools ^
+    --exclude-module wheel ^
+    --exclude-module pip ^
+    --exclude-module distutils ^
+    --exclude-module email ^
+    --exclude-module http ^
+    --exclude-module xml ^
+    --exclude-module urllib ^
+    --exclude-module html ^
+    --exclude-module test ^
+    --exclude-module tests ^
+    --exclude-module unittest ^
+    --exclude-module pydoc ^
+    --exclude-module doctest ^
+    --exclude-module argparse ^
+    --exclude-module multiprocessing ^
+    --exclude-module concurrent ^
+    --exclude-module asyncio ^
+    --exclude-module sqlite3 ^
+    --exclude-module dbm ^
+    --exclude-module tkinter.dnd ^
+    --exclude-module tkinter.colorchooser ^
+    --exclude-module tkinter.commondialog ^
+    --exclude-module tkinter.filedialog ^
+    --exclude-module tkinter.font ^
+    --exclude-module tkinter.messagebox ^
+    --exclude-module tkinter.scrolledtext ^
+    --exclude-module tkinter.simpledialog ^
+    --exclude-module tkinter.tix ^
+    --exclude-module turtle ^
     --hidden-import "PIL._tkinter_finder" ^
     --hidden-import "PIL.ImageTk" ^
     --hidden-import "tkinter" ^
@@ -147,6 +181,7 @@ pyinstaller ^
     --hidden-import "mss" ^
     --hidden-import "pygetwindow" ^
     --hidden-import "skimage.metrics" ^
+    --hidden-import "sounddevice" ^
     --collect-submodules "PIL" ^
     --collect-submodules "tkinter" ^
     --noconfirm ^
@@ -155,12 +190,13 @@ pyinstaller ^
 if %ERRORLEVEL% EQU 0 (
     echo.
     echo =============================
-    echo BUILD COMPLETED SUCCESSFULLY!
+    echo OPTIMIZED BUILD COMPLETED SUCCESSFULLY!
     echo =============================
     echo Executable created at: %SCRIPT_DIR%dist\Dota2AutoAccept.exe
     echo File size: 
-    dir "%SCRIPT_DIR%dist\Dota2AutoAccept.exe"
+    dir "%SCRIPT_DIR%dist\Dota2AutoAccept.exe" | findstr "Dota2AutoAccept.exe"
     echo.
+    echo Size optimization complete!
     echo You can now run the executable from the dist folder.
     pause
 ) else (
@@ -182,5 +218,3 @@ if %ERRORLEVEL% EQU 0 (
 
 REM Deactivate virtual environment
 deactivate
-
-

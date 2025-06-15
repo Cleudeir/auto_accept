@@ -1,0 +1,20 @@
+# ULTRA MINIMAL requirements for Dota 2 Auto Accept
+# Absolutely minimal dependencies - some SSIM functionality replaced with OpenCV
+
+# Core GUI and system interaction
+pyautogui==0.9.54
+pygetwindow==0.0.9
+mss==10.0.0
+
+# Image processing - using minimal versions
+opencv-python-headless==4.11.0.86  # headless version is smaller
+pillow==11.2.1
+numpy==1.26.4
+# Removed scikit-image - using OpenCV for image comparison instead
+
+# Audio
+pygame==2.6.1
+sounddevice==0.5.2
+
+# Build tool
+pyinstaller==6.12.0
