@@ -116,56 +116,59 @@ if not defined PYTHON_EXE (
 echo   Using !PYTHON_EXE! for Python commands.
 
 REM ==========================================================================
-REM Install/Upgrade pip and install pycurl
+REM Install/Upgrade pip and install project dependencies
 REM ==========================================================================
 echo(
-echo [3/3] Installing/Upgrading pip ^& installing pycurl...
+echo [3/3] Installing/Upgrading pip ^& installing project dependencies...
 
 echo   Ensuring pip is available ^& upgrading it...
-!PYTHON_EXE! -m ensurepip --upgrade
-if !ERRORLEVEL! neq 0 (
-    echo   Failed to ensure/upgrade pip using '!PYTHON_EXE! -m ensurepip --upgrade'. (Errorlevel: !ERRORLEVEL!)
-    goto :EOF_ERROR
+!PYTHON_EXE! -m ensurepip --upgrade 2>nul
+set PIP_ENSURE_RESULT=!ERRORLEVEL!
+if !PIP_ENSURE_RESULT! neq 0 (
+    echo   Failed to ensure/upgrade pip using '!PYTHON_EXE! -m ensurepip --upgrade'. (Errorlevel: !PIP_ENSURE_RESULT!)
+    echo   This might be normal if pip is already installed. Continuing...
 )
 
 !PYTHON_EXE! -m pip install --upgrade pip
-if !ERRORLEVEL! neq 0 (
-    echo   Failed to upgrade pip using '!PYTHON_EXE! -m pip install --upgrade pip'. (Errorlevel: !ERRORLEVEL!)
-    echo   Continuing with pycurl installation, but pip might be outdated.
+set PIP_UPGRADE_RESULT=!ERRORLEVEL!
+if !PIP_UPGRADE_RESULT! neq 0 (
+    echo   Failed to upgrade pip using '!PYTHON_EXE! -m pip install --upgrade pip'. (Errorlevel: !PIP_UPGRADE_RESULT!)
+    echo   Continuing with dependencies installation, but pip might be outdated.
 )
 
-echo   Attempting to install pycurl...
-!PYTHON_EXE! -m pip install pycurl
-if !ERRORLEVEL! neq 0 (
+echo   Installing project dependencies from requirements.txt...
+cd /d "%~dp0src"
+if not exist requirements.txt (
+    echo   ERROR: requirements.txt not found in src directory
+    goto :EOF_ERROR
+)
+
+!PYTHON_EXE! -m pip install -r requirements.txt
+set INSTALL_RESULT=!ERRORLEVEL!
+if !INSTALL_RESULT! neq 0 (
     echo   --------------------------------------------------------------------
-    echo   ERROR: Failed to install pycurl (Errorlevel: !ERRORLEVEL!).
-    echo   pycurl can be difficult to install on Windows due to dependencies
-    echo   on libcurl ^& C compilers.
+    echo   ERROR: Failed to install project dependencies (Errorlevel: !INSTALL_RESULT!).
+    echo   This could be due to:
+    echo   1. Missing C++ compiler for some packages
+    echo   2. Network connectivity issues
+    echo   3. Incompatible package versions
     echo(
-    echo   Possible solutions:
-    echo   1. Install Microsoft C++ Build Tools:
-    echo      Go to https://visualstudio.microsoft.com/visual-cpp-build-tools/
-    echo      Download the Build Tools, ^& during installation, select the
-    echo      "C++ build tools" workload.
-    echo(
-    echo   2. Try installing from an unofficial binary wheel if available:
-    echo      Search for "pycurl windows whl" on sites like Christoph Gohlke's
-    echo      Python Extension Packages for Windows (https://www.lfd.uci.edu/~gohlke/pythonlibs/).
-    echo      If you download a .whl file, install it with:
-    echo      !PYTHON_EXE! -m pip install path\to\yourfile.whl
-    echo(
-    echo   3. Consider using the 'requests' library as an alternative for HTTP tasks:
-    echo      !PYTHON_EXE! -m pip install requests
+    echo   You can try installing individual packages manually:
+    echo   !PYTHON_EXE! -m pip install requests opencv-python pillow pyautogui
     echo   --------------------------------------------------------------------
     goto :EOF_ERROR
 )
 
-echo   pycurl installed successfully.
+echo   Project dependencies installed successfully.
 
 echo(
 echo ==========================================================================
 echo Installation script completed successfully.
+echo All dependencies have been installed.
+echo You can now run the Dota 2 Auto Accept application using auto_accept.bat
 echo ==========================================================================
+
+
 goto :EOF_SUCCESS
 
 :EOF_ERROR
@@ -177,5 +180,6 @@ pause
 exit /b 1
 
 :EOF_SUCCESS
-pause
+
+
 exit /b 0
