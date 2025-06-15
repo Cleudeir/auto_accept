@@ -1,12 +1,23 @@
 @echo off
 setlocal enableDelayedExpansion
 
+REM ===========================================================================
+REM Check for Administrator privileges
+REM ===========================================================================
+openfiles >nul 2>&1
+if not !errorlevel!==0 echo ===========================================================================
+if not !errorlevel!==0 echo WARNING: This script is not running as Administrator.
+if not !errorlevel!==0 echo Some installation steps may fail without elevated privileges.
+if not !errorlevel!==0 echo Please right-click and 'Run as administrator' if you encounter issues.
+if not !errorlevel!==0 echo ===========================================================================
+if not !errorlevel!==0 echo(
+
 echo Starting installation process...
 
 :PYTHON_CHECK
-REM ==========================================================================
+REM ===========================================================================
 REM Check and Install Python
-REM ==========================================================================
+REM ===========================================================================
 echo(
 echo [1/2] Checking for Python...
 set "PYTHON_EXE="
@@ -34,29 +45,56 @@ if not exist "!PYTHON_INSTALLER!" (
 
 echo   Installing Python from !PYTHON_INSTALLER!...
 echo   This will install Python with default settings and add it to PATH.
-"!PYTHON_INSTALLER!" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-if !ERRORLEVEL! neq 0 (
-    echo   Failed to install Python using local installer (Errorlevel: !ERRORLEVEL!).
-    echo   Please try running the installer manually from dependencies\python-3.13.1-amd64.exe
-    goto :EOF_ERROR
+"!PYTHON_INSTALLER!" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0 Include_doc=0 Include_dev=0 Include_debug=0 InstallLauncherAllUsers=1 AssociateFiles=1
+set INSTALL_RESULT=!ERRORLEVEL!
+echo(
+if not !INSTALL_RESULT!==0 goto :INSTALL_FAIL
+
+echo ===========================================================================
+echo Python installer completed. Validating installation...
+echo ===========================================================================
+timeout /t 3 /nobreak >nul
+echo Checking if Python is accessible...
+set PYTHON_FOUND=0
+set PYTHON_LAUNCHER_FOUND=0
+python --version >nul 2>&1
+if !ERRORLEVEL! equ 0 set PYTHON_FOUND=1
+py --version >nul 2>&1
+if !ERRORLEVEL! equ 0 set PYTHON_LAUNCHER_FOUND=1
+
+if !PYTHON_FOUND! equ 1 (
+    echo [OK] Python command is working:
+    python --version
+    set "PYTHON_EXE=python"
+) else (
+    echo [FAIL] Python command not found in PATH
+)
+if !PYTHON_LAUNCHER_FOUND! equ 1 (
+    echo [OK] Python Launcher (py) is working
+    set "PYTHON_EXE=py"
+) else (
+    echo [FAIL] Python Launcher (py) not found
 )
 
-echo   Python 3.13.1 installed successfully from local installer.
-echo   You MIGHT need to open a new command prompt for Python to be available in PATH.
-REM Try to find python or py again
-where python >nul 2>&1
-if !ERRORLEVEL! equ 0 (
-    set "PYTHON_EXE=python"
-    goto :PIP_INSTALL_CHECK
-)
-where py >nul 2>&1
-if !ERRORLEVEL! equ 0 (
-    set "PYTHON_EXE=py"
-    goto :PIP_INSTALL_CHECK
-)
+if !PYTHON_FOUND! equ 1 goto :PIP_INSTALL_CHECK
+if !PYTHON_LAUNCHER_FOUND! equ 1 goto :PIP_INSTALL_CHECK
 
 echo   Python still not found in PATH even after local installation.
 echo   Please open a new command prompt ^& re-run this script, or ensure Python was correctly installed ^& added to PATH.
+goto :EOF_ERROR
+
+:INSTALL_FAIL
+echo ===========================================================================
+echo ERROR: Python installation failed with error code: !INSTALL_RESULT!
+echo ===========================================================================
+echo Possible reasons:
+echo - Insufficient privileges (try running as Administrator)
+echo - Python is already installed
+echo - System incompatibility
+echo - Corrupted installer file
+echo(
+echo Please try running this script as Administrator or check the installer.
+echo ===========================================================================
 goto :EOF_ERROR
 
 :PIP_INSTALL_CHECK
@@ -66,9 +104,9 @@ if not defined PYTHON_EXE (
 )
 echo   Using !PYTHON_EXE! for Python commands.
 
-REM ==========================================================================
+REM ===========================================================================
 REM Install/Upgrade pip and install project dependencies
-REM ==========================================================================
+REM ===========================================================================
 echo(
 echo [2/2] Installing/Upgrading pip ^& installing project dependencies...
 
@@ -113,13 +151,12 @@ if !INSTALL_RESULT! neq 0 (
 echo   Project dependencies installed successfully.
 
 echo(
-echo ==========================================================================
+echo ===========================================================================
 echo Installation script completed successfully.
 echo All dependencies have been installed.
 echo You can now run the Dota 2 Auto Accept application using auto_accept.bat
-echo ==========================================================================
-
-
+echo ===========================================================================
+echo Done
 goto :EOF_SUCCESS
 
 :EOF_ERROR
@@ -131,6 +168,5 @@ pause
 exit /b 1
 
 :EOF_SUCCESS
-
 
 exit /b 0

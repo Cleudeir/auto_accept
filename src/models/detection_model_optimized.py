@@ -18,12 +18,13 @@ class DetectionModel:
     
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""
+        base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bin")
         references = {
-            "dota": os.path.join("bin", "dota.png"),
-            "print": os.path.join("bin", "print.png"),
-            "read_check": os.path.join("bin", "read_check.jpg"),
-            "long_time": os.path.join("bin", "long_time.png"),
-            "ad": os.path.join("bin", "AD.png")
+            "dota": os.path.join(base_path, "dota.png"),
+            "print": os.path.join(base_path, "print.png"),
+            "read_check": os.path.join(base_path, "read_check.jpg"),
+            "long_time": os.path.join(base_path, "long_time.png"),
+            "ad": os.path.join(base_path, "AD.png")
         }
         # Only log reference images, no button images
         for name, path in references.items():
