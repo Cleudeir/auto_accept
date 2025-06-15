@@ -3,55 +3,12 @@ setlocal enableDelayedExpansion
 
 echo Starting installation process...
 
-REM ==========================================================================
-REM Check and Install curl
-REM ==========================================================================
-echo(
-echo [1/3] Checking for curl...
-where curl >nul 2>&1
-if !ERRORLEVEL! equ 0 (
-    echo   curl is already installed.
-    goto :PYTHON_CHECK
-)
-
-echo   curl not found. Attempting to install using winget...
-where winget >nul 2>&1
-if !ERRORLEVEL! neq 0 (
-    echo   winget is not available.
-    echo   Please install curl manually (e.g., from https://curl.se/windows/) ^& ensure it's in your PATH.
-    goto :EOF_ERROR
-)
-
-winget search Microsoft.Curl >nul 2>&1
-if !ERRORLEVEL! neq 0 (
-    echo   Microsoft.Curl package not found via winget.
-    echo   Please install curl manually (e.g., from https://curl.se/windows/) ^& ensure it's in your PATH.
-    goto :EOF_ERROR
-)
-
-echo   Attempting to install Microsoft.Curl via winget...
-winget install -e --id Microsoft.Curl --source winget --accept-package-agreements --accept-source-agreements
-if !ERRORLEVEL! neq 0 (
-    echo   Failed to install curl using winget (Errorlevel: !ERRORLEVEL!).
-    echo   Please try installing curl manually (e.g., from https://curl.se/windows/) ^& ensure it's in your PATH.
-    goto :EOF_ERROR
-)
-
-echo   curl installed successfully via winget.
-echo   You might need to open a new command prompt for changes to take effect.
-REM Re-check if curl is now available in the current session
-where curl >nul 2>&1
-if !ERRORLEVEL! neq 0 (
-    echo   curl still not found in PATH after winget install. Please open a new command prompt ^& re-run this script.
-    goto :EOF_ERROR
-)
-
 :PYTHON_CHECK
 REM ==========================================================================
 REM Check and Install Python
 REM ==========================================================================
 echo(
-echo [2/3] Checking for Python...
+echo [1/2] Checking for Python...
 set "PYTHON_EXE="
 where python >nul 2>&1
 if !ERRORLEVEL! equ 0 (
@@ -67,30 +24,24 @@ if !ERRORLEVEL! equ 0 (
     goto :PIP_INSTALL_CHECK
 )
 
-echo   Python not found. Attempting to install Python 3 using winget...
-where winget >nul 2>&1
-if !ERRORLEVEL! neq 0 (
-    echo   winget is not available.
-    echo   Please install Python 3 manually (from https://www.python.org/downloads/) ^& ensure it's added to your PATH.
+echo   Python not found. Installing Python from local installer...
+set "PYTHON_INSTALLER=%~dp0dependencies\python-3.13.1-amd64.exe"
+if not exist "!PYTHON_INSTALLER!" (
+    echo   ERROR: Python installer not found at !PYTHON_INSTALLER!
+    echo   Please ensure the Python installer is in the dependencies folder.
     goto :EOF_ERROR
 )
 
-winget search Python.Python.3 >nul 2>&1
+echo   Installing Python from !PYTHON_INSTALLER!...
+echo   This will install Python with default settings and add it to PATH.
+"!PYTHON_INSTALLER!" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 if !ERRORLEVEL! neq 0 (
-    echo   Python.Python.3 package not found via winget.
-    echo   Please install Python 3 manually (from https://www.python.org/downloads/) ^& ensure it's added to your PATH.
+    echo   Failed to install Python using local installer (Errorlevel: !ERRORLEVEL!).
+    echo   Please try running the installer manually from dependencies\python-3.13.1-amd64.exe
     goto :EOF_ERROR
 )
 
-echo   Attempting to install Python.Python.3 via winget...
-winget install -e --id Python.Python.3 --source winget --accept-package-agreements --accept-source-agreements
-if !ERRORLEVEL! neq 0 (
-    echo   Failed to install Python using winget (Errorlevel: !ERRORLEVEL!).
-    echo   Please install Python 3 manually (from https://www.python.org/downloads/) ^& ensure it's added to your PATH.
-    goto :EOF_ERROR
-)
-
-echo   Python 3 installed successfully via winget.
+echo   Python 3.13.1 installed successfully from local installer.
 echo   You MIGHT need to open a new command prompt for Python to be available in PATH.
 REM Try to find python or py again
 where python >nul 2>&1
@@ -104,8 +55,8 @@ if !ERRORLEVEL! equ 0 (
     goto :PIP_INSTALL_CHECK
 )
 
-echo   Python still not found in PATH even after winget install.
-echo   Please open a new command prompt ^& re-run this script, or ensure Python is correctly installed ^& in PATH.
+echo   Python still not found in PATH even after local installation.
+echo   Please open a new command prompt ^& re-run this script, or ensure Python was correctly installed ^& added to PATH.
 goto :EOF_ERROR
 
 :PIP_INSTALL_CHECK
@@ -119,7 +70,7 @@ REM ==========================================================================
 REM Install/Upgrade pip and install project dependencies
 REM ==========================================================================
 echo(
-echo [3/3] Installing/Upgrading pip ^& installing project dependencies...
+echo [2/2] Installing/Upgrading pip ^& installing project dependencies...
 
 echo   Ensuring pip is available ^& upgrading it...
 !PYTHON_EXE! -m ensurepip --upgrade 2>nul
