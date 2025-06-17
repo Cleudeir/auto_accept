@@ -25,7 +25,7 @@ class DetectionModel:
         )
         references = {
             "dota": os.path.join(base_path, "dota.png"),
-            "dota2_plus": os.path.join(base_path, "dota2_plus.png"),
+            "dota2_plus": os.path.join(base_path, "dota2_plus.jpeg"),
             "read_check": os.path.join(base_path, "read_check.jpg"),
             "long_time": os.path.join(base_path, "long_time.png"),
             "ad": os.path.join(base_path, "AD.png"),
@@ -155,14 +155,14 @@ class DetectionModel:
             print(f"Long matchmaking wait dialog detected")
             print(f"Pressing ESC key")
             pyautogui.press("esc")
-            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
+            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT", "ACEITAR"])
             action = "long_time_dialog_detected"
 
         elif highest_match == "read_check":
             print(f"Pressing Enter key")
             pyautogui.press("enter")
             print(f"Read-check pattern detected")
-            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
+            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT", "ACEITAR"])
             action = "read_check_detected"
 
         elif highest_match in ["dota", "dota2_plus"]:
@@ -170,7 +170,7 @@ class DetectionModel:
             self.focus_dota2_window()
             print(f"Pressing Enter key")
             pyautogui.press("enter")
-            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
+            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT", "ACEITAR"])
             action = "match_detected"
 
         elif highest_match == "ad":
