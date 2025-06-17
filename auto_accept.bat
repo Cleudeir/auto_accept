@@ -2,6 +2,14 @@
 setlocal enableDelayedExpansion
 
 REM ===========================================================================
+REM Dota 2 Auto Accept - Installation and Launch Script
+REM ===========================================================================
+echo ===========================================================================
+echo Welcome to Dota 2 Auto Accept
+echo ===========================================================================
+echo Starting installation and setup process...
+
+REM ===========================================================================
 REM Check for Administrator privileges
 REM ===========================================================================
 openfiles >nul 2>&1
@@ -80,7 +88,7 @@ if !PYTHON_FOUND! equ 1 goto :PIP_INSTALL_CHECK
 if !PYTHON_LAUNCHER_FOUND! equ 1 goto :PIP_INSTALL_CHECK
 
 echo   Python still not found in PATH even after local installation.
-echo   Please open a new command prompt ^& re-run this script, or ensure Python was correctly installed ^& added to PATH.
+echo   Please open a new command prompt and re-run this script, or ensure Python was correctly installed and added to PATH.
 goto :EOF_ERROR
 
 :INSTALL_FAIL
@@ -99,7 +107,7 @@ goto :EOF_ERROR
 
 :PIP_INSTALL_CHECK
 if not defined PYTHON_EXE (
-    echo   Could not determine Python executable. Please ensure Python is installed ^& in PATH.
+    echo   Could not determine Python executable. Please ensure Python is installed and in PATH.
     goto :EOF_ERROR
 )
 echo   Using !PYTHON_EXE! for Python commands.
@@ -108,9 +116,9 @@ REM ===========================================================================
 REM Install/Upgrade pip and install project dependencies
 REM ===========================================================================
 echo(
-echo [2/2] Installing/Upgrading pip ^& installing project dependencies...
+echo [2/2] Installing/Upgrading pip and installing project dependencies...
 
-echo   Ensuring pip is available ^& upgrading it...
+echo   Ensuring pip is available and upgrading it...
 !PYTHON_EXE! -m ensurepip --upgrade 2>nul
 set PIP_ENSURE_RESULT=!ERRORLEVEL!
 if !PIP_ENSURE_RESULT! neq 0 (
@@ -118,10 +126,9 @@ if !PIP_ENSURE_RESULT! neq 0 (
     echo   This might be normal if pip is already installed. Continuing...
 )
 
-!PYTHON_EXE! -m pip install --upgrade pip
-set PIP_UPGRADE_RESULT=!ERRORLEVEL!
-if !PIP_UPGRADE_RESULT! neq 0 (
-    echo   Failed to upgrade pip using '!PYTHON_EXE! -m pip install --upgrade pip'. (Errorlevel: !PIP_UPGRADE_RESULT!)
+!PYTHON_EXE! -m pip install --upgrade pip >nul 2>&1
+if errorlevel 1 (
+    echo   Failed to upgrade pip.
     echo   Continuing with dependencies installation, but pip might be outdated.
 )
 
@@ -132,11 +139,11 @@ if not exist requirements.txt (
     goto :EOF_ERROR
 )
 
-!PYTHON_EXE! -m pip install -r requirements.txt
-set INSTALL_RESULT=!ERRORLEVEL!
-if !INSTALL_RESULT! neq 0 (
+echo   Please wait while dependencies are being installed...
+!PYTHON_EXE! -m pip install -r requirements.txt >nul 2>&1
+if errorlevel 1 (
     echo   --------------------------------------------------------------------
-    echo   ERROR: Failed to install project dependencies (Errorlevel: !INSTALL_RESULT!).
+    echo   ERROR: Failed to install project dependencies.
     echo   This could be due to:
     echo   1. Missing C++ compiler for some packages
     echo   2. Network connectivity issues
@@ -154,9 +161,32 @@ echo(
 echo ===========================================================================
 echo Installation script completed successfully.
 echo All dependencies have been installed.
-echo You can now run the Dota 2 Auto Accept application using auto_accept.bat
 echo ===========================================================================
-echo Done
+echo(
+echo Automatically starting Dota 2 Auto Accept Application...
+goto :RUN_PROGRAM
+
+:RUN_PROGRAM
+echo(
+echo ===========================================================================
+echo Starting Dota 2 Auto Accept Application...
+echo ===========================================================================
+echo   Launching the application. Press Ctrl+C to stop when running.
+echo(
+cd /d "%~dp0src"
+!PYTHON_EXE! main.py
+set RUN_RESULT=!ERRORLEVEL!
+if !RUN_RESULT! neq 0 (
+    echo(
+    echo   Application exited with error code: !RUN_RESULT!
+    echo   Check the logs directory for more information.
+) else (
+    echo(
+    echo   Application finished successfully.
+)
+echo(
+echo Press any key to exit...
+pause >nul
 goto :EOF_SUCCESS
 
 :EOF_ERROR
