@@ -55,23 +55,25 @@ class DetectionController:
             while self.is_running:
                 monitor_index = self.config_model.selected_monitor_capture_setting
                 img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
-
                 if img is not None:
-                    match_found, scores = self.detection_model.detect_match_in_image(
-                        img
-                    )
+                    highest_match = self.detection_model.detect_match_in_image(img)
 
-                    score_str = ", ".join([f"{k}={v:.2f}" for k, v in scores.items()])
-                    self.logger.info(f"Similarity scores: {score_str}")
+                    self.logger.info(f"Highest match: {highest_match}")
 
-                    if scores.get("ad_stop", False):
-                        self.logger.info(
-                            "AD.png detected with similarity >= 0.6. Stopping detection loop."
-                        )
+                    if highest_match == "ad":
+                        self.logger.info("AD.png detected. Stopping detection loop.")
                         self.is_running = False
                         break
-                    if match_found:
-                        action = self.detection_model.process_detection_result(scores)
+
+                    if highest_match in [
+                        "dota",
+                        "dota2_plus",
+                        "read_check",
+                        "long_time",
+                    ]:
+                        action = self.detection_model.process_detection_result(
+                            highest_match
+                        )
 
                         if action == "read_check_detected":
                             self.logger.info(
@@ -94,7 +96,7 @@ class DetectionController:
                                 self.on_match_found()
 
                     if self.on_detection_update:
-                        self.on_detection_update(img, scores)
+                        self.on_detection_update(img, highest_match)
                 else:
                     self.logger.warning(
                         "Monitor capture failed for this iteration. Will retry."

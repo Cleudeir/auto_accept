@@ -99,30 +99,27 @@ class DetectionModel:
             self.logger.error(f"Error comparing image with reference: {e}")
             return 0.0
 
-    def detect_match_in_image(self, img: Image.Image) -> Tuple[bool, dict]:
+    def detect_match_in_image(self, img: Image.Image) -> str:
         """
-        Detect if any reference patterns match in the given image
-        Returns (match_found, similarity_scores)
+        Detect reference patterns in the given image
+        Returns the name of the reference image with the highest score
         """
         scores = {}
-        match_found = False
-        ad_stop = False
         for name, ref_path in self.reference_images.items():
             if os.path.exists(ref_path):
                 score = self.compare_image_with_reference(img, ref_path)
                 scores[name] = score
-                if name == "ad" and score >= 0.6:
-                    ad_stop = True
-                if name in ["dota", "dota2_plus"] and score > 0.85:
-                    match_found = True
-                if name == "read_check" and score > 0.85:
-                    match_found = True
-                if name == "long_time" and score > 0.85:
-                    match_found = True
             else:
-                scores[name] = 0.0
-        scores["ad_stop"] = ad_stop
-        return match_found, scores
+                scores[name] = (
+                    0.0  # Return the name with the highest score only if it's >= 0.8
+                )
+        if scores:
+            print(f"Scores: {scores}")
+            highest_score_name = max(scores, key=scores.get)
+            highest_score = scores[highest_score_name]
+            if highest_score >= 0.8:
+                return highest_score_name
+        return "none"
 
     def focus_dota2_window(self):
         """Focus the Dota 2 window if it exists"""
@@ -150,33 +147,36 @@ class DetectionModel:
         except Exception as e:
             self.logger.error(f"Error pressing Enter key: {e}")
 
-    def process_detection_result(self, scores: dict) -> str:
+    def process_detection_result(self, highest_match: str) -> str:
         """Process detection results and return action taken using only OCR and Enter key"""
         action = "none"
-        if scores.get("long_time", 0) > 0.85:
-            print(
-                f"Long matchmaking wait dialog detected with score {scores['long_time']:.2f}"
-            )
+
+        if highest_match == "long_time":
+            print(f"Long matchmaking wait dialog detected")
             print(f"Pressing ESC key")
             pyautogui.press("esc")
-
             self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "long_time_dialog_detected"
-        if scores.get("read_check", 0) > 0.85:
-            print(f"Preessing Enter key")
+
+        elif highest_match == "read_check":
+            print(f"Pressing Enter key")
             pyautogui.press("enter")
-            print(f"Read-check pattern detected with score {scores['read_check']:.2f}")
+            print(f"Read-check pattern detected")
             self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "read_check_detected"
-        if scores.get("dota", 0) > 0.85 or scores.get("dota2_plus", 0) > 0.85:
-            print(
-                f"Match detected with scores: Dota={scores.get('dota', 0):.2f}, Print={scores.get('dota2_plus', 0):.2f}"
-            )
+
+        elif highest_match in ["dota", "dota2_plus"]:
+            print(f"Match detected with highest match: {highest_match}")
             self.focus_dota2_window()
-            print(f"Preessing Enter key")
+            print(f"Pressing Enter key")
             pyautogui.press("enter")
             self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT"])
             action = "match_detected"
+
+        elif highest_match == "ad":
+            print(f"Advertisement detected")
+            action = "ad_detected"
+
         return action
 
     def send_enter_key_if_text_found(self, search_strings):
