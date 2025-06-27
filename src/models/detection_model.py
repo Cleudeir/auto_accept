@@ -155,14 +155,16 @@ class DetectionModel:
             print(f"Long matchmaking wait dialog detected")
             print(f"Pressing ESC key")
             pyautogui.press("esc")
-            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT", "ACEITAR"])
+            time.sleep(5)
+            pyautogui.press("esc")
             action = "long_time_dialog_detected"
 
         elif highest_match == "read_check":
             print(f"Pressing Enter key")
             pyautogui.press("enter")
+            time.sleep(5)
+            pyautogui.press("enter")
             print(f"Read-check pattern detected")
-            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT", "ACEITAR"])
             action = "read_check_detected"
 
         elif highest_match in ["dota", "dota2_plus"]:
@@ -170,7 +172,8 @@ class DetectionModel:
             self.focus_dota2_window()
             print(f"Pressing Enter key")
             pyautogui.press("enter")
-            self.send_enter_key_if_text_found(["OK", "READY", "ACCEPT", "ACEITAR"])
+            time.sleep(5)
+            pyautogui.press("enter")
             action = "match_detected"
 
         elif highest_match == "ad":
@@ -178,206 +181,3 @@ class DetectionModel:
             action = "ad_detected"
 
         return action
-
-    def send_enter_key_if_text_found(self, search_strings):
-
-        print(f"Searching for text: {search_strings}")
-        self.send_enter_key()
-        result = self.find_string_in_image(search_strings)
-        if result:
-            self.logger.info(f"Text '{result[0]}' found, pressed Enter.")
-        else:
-            self.logger.info(f"No relevant text found, pressed Enter as fallback.")
-
-    def find_string_in_image(
-        self, search_strings, monitor_index: Optional[int] = None
-    ) -> Optional[Tuple[str, Tuple[int, int], bool]]:
-        """Find the given string(s) in a screenshot from the selected monitor using EasyOCR. Returns (string, (x, y) center, is_button) if found and clicks the position. Always uses ScreenshotModel for the monitor."""
-        import easyocr
-        import json
-
-        if self.screenshot_model is None:
-            try:
-                from models.screenshot_model import ScreenshotModel
-
-                self.screenshot_model = ScreenshotModel()
-            except Exception as e:
-                self.logger.error(f"Could not initialize ScreenshotModel: {e}")
-                return None
-        if monitor_index is None:
-            try:
-                config_path = os.path.join(
-                    os.path.dirname(__file__), "..", "config.json"
-                )
-                with open(config_path, "r", encoding="utf-8") as f:
-                    config = json.load(f)
-                monitor_index = config.get("selected_monitor_capture_setting", 1)
-            except Exception as e:
-                self.logger.error(f"Could not read monitor index from config.json: {e}")
-                monitor_index = 1
-        img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
-        if img is None:
-            self.logger.warning(
-                f"Could not capture screenshot from monitor {monitor_index}"
-            )
-            return None
-        screenshot = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-        img_rgb = cv2.cvtColor(screenshot, cv2.COLOR_BGR2RGB)
-        reader = easyocr.Reader(["en"], gpu=False)
-        results = reader.readtext(img_rgb)
-        x_offset, y_offset = 0, 0
-        try:
-            with self.screenshot_model._get_mss() as sct:
-                monitors = sct.monitors
-                if 0 < monitor_index < len(monitors):
-                    mon = monitors[monitor_index]
-                    x_offset, y_offset = mon["left"], mon["top"]
-        except Exception:
-            pass
-        found_strings = []
-        button_like = [s.lower() for s in search_strings]
-        for bbox, text, conf in results:
-            found_strings.append(text)
-            for search in search_strings:
-                if search.lower() in text.lower():
-                    x = int((bbox[0][0] + bbox[2][0]) / 2) + x_offset
-                    y = int((bbox[0][1] + bbox[2][1]) / 2) + y_offset
-                    is_button = text.strip().lower() in button_like
-                    self.logger.info(
-                        f"Found '{text}' at ({x}, {y}) in image with EasyOCR. Button-like: {is_button}."
-                    )
-                    if is_button:
-                        self.move_mouse_and_click(x, y)
-                        self.logger.info(
-                            f"Clicked on button-like text '{text}' at ({x}, {y})"
-                        )
-                        print(f"Button found: {text}")
-                        try:
-                            self.save_string_position_to_config(text.strip(), [x, y])
-                        except Exception as e:
-                            self.logger.error(
-                                f"Failed to save string position to config: {e}"
-                            )
-                        return (text, (x, y), True)
-        print(f"OCR found strings: {found_strings}")
-        self.logger.info(
-            f"None of the button-like strings {search_strings} found in image (EasyOCR)."
-        )
-        return None
-
-    def move_mouse_and_click(self, x: int, y: int, duration: float = 0.5):
-        """Move the mouse to (x, y) slowly and click."""
-        try:
-            pyautogui.moveTo(x, y, duration=duration)
-            pyautogui.click(x, y)
-
-            print(f"Clicked at ({x}, {y})")
-            self.logger.info(f"Moved mouse to ({x}, {y}) over {duration}s and clicked.")
-        except Exception as e:
-            self.logger.error(f"Error moving mouse and clicking: {e}")
-
-    def cache_ocr_for_monitor(self, monitor_index: int):
-        """Perform OCR for the given monitor and cache the result."""
-        import easyocr
-
-        if self.screenshot_model is None:
-            try:
-                from models.screenshot_model import ScreenshotModel
-
-                self.screenshot_model = ScreenshotModel()
-            except Exception as e:
-                self.logger.error(f"Could not initialize ScreenshotModel: {e}")
-                return None
-        img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
-        if img is None:
-            self.logger.warning(
-                f"Could not capture screenshot from monitor {monitor_index}"
-            )
-            return None
-        screenshot = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-        img_rgb = cv2.cvtColor(screenshot, cv2.COLOR_BGR2RGB)
-        reader = easyocr.Reader(["en"], gpu=True)
-        results = reader.readtext(img_rgb)
-        self.ocr_cache[monitor_index] = results
-        return results
-
-    def save_found_positions_to_config(self, found_positions, config_path=None):
-        """Save found string positions to config.json under 'ocr_found_positions'."""
-        import json
-
-        if config_path is None:
-            config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                config = json.load(f)
-        except Exception:
-            config = {}
-        config["ocr_found_positions"] = found_positions
-        with open(config_path, "w", encoding="utf-8") as f:
-            json.dump(config, f, indent=2)
-        self.logger.info(f"Saved OCR found positions to {config_path}")
-
-    def save_string_position_to_config(
-        self, string, position, monitor_index=None, config_path=None
-    ):
-        """Save or update the position and monitor of a found string in config.json under 'ocr_found_positions'.
-        If monitor_index is None, use the current selected_monitor_capture_setting from config.
-        """
-        import json
-
-        if config_path is None:
-            config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                config = json.load(f)
-        except Exception:
-            config = {}
-        if "ocr_found_positions" not in config:
-            config["ocr_found_positions"] = {}
-        if monitor_index is None:
-            monitor_index = config.get("selected_monitor_capture_setting", 1)
-        config["ocr_found_positions"][string] = {
-            "position": position,
-            "monitor_index": monitor_index,
-        }
-        with open(config_path, "w", encoding="utf-8") as f:
-            json.dump(config, f, indent=2)
-        self.logger.info(
-            f"Saved position and monitor for string '{string}' to {config_path}"
-        )
-
-    def get_cached_ocr(self, monitor_index: int):
-        """Get cached OCR results for a monitor, or perform OCR if not cached."""
-        if monitor_index in self.ocr_cache:
-            return self.ocr_cache[monitor_index]
-        return self.cache_ocr_for_monitor(monitor_index)
-
-    def get_position_from_config(self, string, config_path=None):
-        """Retrieve the position and monitor index for a string from config.json."""
-        import json
-
-        if config_path is None:
-            config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                config = json.load(f)
-            entry = config.get("ocr_found_positions", {}).get(string)
-            if entry:
-                return entry["position"], entry.get("monitor_index")
-        except Exception:
-            pass
-        return None, None
-
-
-try:
-    from models.screenshot_model import ScreenshotModel
-
-    if not hasattr(ScreenshotModel, "_get_mss"):
-        import mss
-
-        def _get_mss(self):
-            return mss.mss()
-
-        ScreenshotModel._get_mss = _get_mss
-except Exception:
-    pass
