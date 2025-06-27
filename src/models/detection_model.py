@@ -110,14 +110,12 @@ class DetectionModel:
                 score = self.compare_image_with_reference(img, ref_path)
                 scores[name] = score
             else:
-                scores[name] = (
-                    0.0  # Return the name with the highest score only if it's >= 0.8
-                )
+                scores[name] = 0.0
         if scores:
             print(f"Scores: {scores}")
             highest_score_name = max(scores, key=scores.get)
             highest_score = scores[highest_score_name]
-            if highest_score >= 0.8:
+            if highest_score >= 0.7:
                 return highest_score_name
         return "none"
 
