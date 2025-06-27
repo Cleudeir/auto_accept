@@ -182,6 +182,7 @@ class DetectionModel:
     def send_enter_key_if_text_found(self, search_strings):
 
         print(f"Searching for text: {search_strings}")
+        self.send_enter_key()
         result = self.find_string_in_image(search_strings)
         if result:
             self.logger.info(f"Text '{result[0]}' found, pressed Enter.")
