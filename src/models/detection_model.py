@@ -155,14 +155,14 @@ class DetectionModel:
             print(f"Long matchmaking wait dialog detected")
             print(f"Pressing ESC key")
             pyautogui.press("esc")
-            time.sleep(5)
+            time.sleep(1)
             pyautogui.press("esc")
             action = "long_time_dialog_detected"
 
         elif highest_match == "read_check":
             print(f"Pressing Enter key")
             pyautogui.press("enter")
-            time.sleep(5)
+            time.sleep(1)
             pyautogui.press("enter")
             print(f"Read-check pattern detected")
             action = "read_check_detected"
@@ -172,7 +172,7 @@ class DetectionModel:
             self.focus_dota2_window()
             print(f"Pressing Enter key")
             pyautogui.press("enter")
-            time.sleep(5)
+            time.sleep(1)
             pyautogui.press("enter")
             action = "match_detected"
 

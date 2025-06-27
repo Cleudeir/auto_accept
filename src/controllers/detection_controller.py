@@ -102,7 +102,7 @@ class DetectionController:
                         "Monitor capture failed for this iteration. Will retry."
                     )
 
-                time.sleep(5)
+                time.sleep(1)
 
         except Exception as e:
             self.logger.error(f"Error in detection loop: {e}")
