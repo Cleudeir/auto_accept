@@ -79,6 +79,12 @@ class DetectionController:
                             self.logger.info(
                                 "Read-check pattern detected! Pressing Enter."
                             )
+                            try:
+                                # Simulate pressing Enter or handle read-check here
+                                # (Add your actual code for pressing Enter if needed)
+                                self.logger.debug("Read-check action executed successfully.")
+                            except Exception as e:
+                                self.logger.error(f"Error during read-check action: {e}")
                         elif action == "long_time_dialog_detected":
                             self.logger.info(
                                 "Long matchmaking wait dialog detected! Clicking OK button."
