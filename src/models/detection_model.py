@@ -116,7 +116,7 @@ class DetectionModel:
             print(f"Scores: {scores}")
             highest_score_name = max(scores, key=scores.get)
             highest_score = scores[highest_score_name]
-            if highest_score >= 0.7:
+            if highest_score >= 0.65:
                 return highest_score_name
         return "none"
 
