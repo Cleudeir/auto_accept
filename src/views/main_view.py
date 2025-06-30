@@ -49,7 +49,7 @@ class MainView:
         
         # Window configuration
         window_width = 520  # Increased width
-        window_height = 1000  # Increased height
+        window_height = 850  # Increased height
         
         # Center window on screen
         screen_width = self.window.winfo_screenwidth()
