@@ -292,9 +292,11 @@ class MainView:
         """Create start and stop buttons below the settings sections, centered, with improved style"""
         control_frame = tk.Frame(self.window, bg="#ffffff")
         control_frame.pack(fill="x", padx=10, pady=10)
-        # Center the buttons
+        # Center the buttons vertically and horizontally
+        control_frame.pack_propagate(False)
+        control_frame.configure(height=80)  # Give enough height for vertical centering
         button_inner = tk.Frame(control_frame, bg="#ffffff")
-        button_inner.pack(anchor="center")
+        button_inner.place(relx=0.5, rely=0.5, anchor="center")
         self.start_btn = tk.Button(
             button_inner,
             text="▶ Start",
