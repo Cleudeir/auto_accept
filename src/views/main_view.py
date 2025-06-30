@@ -268,11 +268,14 @@ class MainView:
         self.window.focus_set()
     
     def _create_control_buttons_section(self):
-        """Create start and pause buttons below the settings sections"""
+        """Create start and stop buttons below the settings sections, centered"""
         control_frame = tk.Frame(self.window)
         control_frame.pack(fill="x", padx=10, pady=10)
+        # Center the buttons
+        button_inner = tk.Frame(control_frame)
+        button_inner.pack(anchor="center")
         self.start_btn = tk.Button(
-            control_frame,
+            button_inner,
             text="▶ Start",
             command=self._on_start_detection_click,
             bg="green",
@@ -281,18 +284,20 @@ class MainView:
             padx=20,
             pady=5,
         )
-        self.start_btn.pack(side="left", padx=5)
-        self.pause_btn = tk.Button(
-            control_frame,
-            text="⏸ Pause",
+        self.stop_btn = tk.Button(
+            button_inner,
+            text="⏹ Stop",
             command=self._on_stop_detection_click,
-            bg="orange",
+            bg="red",
             fg="white",
             font=("Arial", 10, "bold"),
             padx=20,
             pady=5,
         )
-        self.pause_btn.pack(side="left", padx=5)
+        self.start_btn.pack(side="left", padx=5)
+        self.stop_btn.pack(side="left", padx=5)
+        # Initial state: only show start
+        self.stop_btn.pack_forget()
 
     # Event handlers
     def _on_start_detection_click(self):
@@ -341,16 +346,22 @@ class MainView:
         if self.status_label:            self.status_label.config(text=text, fg=color)
     
     def set_detection_state(self, is_running: bool, match_found: bool = False):
-        """Update detection state and UI (no control buttons)"""
+        """Update detection state and UI for control buttons (no pause)"""
         self.is_running = is_running
         self.match_found = match_found
         if is_running:
             self.set_status("Status: Running Detection", "green")
+            self.start_btn.pack_forget()
+            self.stop_btn.pack(side="left", padx=5)
         elif match_found:
             self.set_status("Status: Match Found! Detection Stopped", "blue")
+            self.stop_btn.pack_forget()
+            self.start_btn.pack(side="left", padx=5)
         else:
             self.set_status("Status: Stopped", "red")
-    
+            self.stop_btn.pack_forget()
+            self.start_btn.pack(side="left", padx=5)
+
     def update_screenshot(self, img: Optional[Image.Image], timestamp: Optional[datetime.datetime] = None):
         """Update screenshot preview"""
         if img is not None:
