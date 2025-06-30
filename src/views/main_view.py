@@ -21,6 +21,8 @@ class MainView:
         self.log_text = None
         self.start_btn = None
         self.stop_btn = None
+        self.match_percent_label = None  # Add label for match %
+        self.match_name_label = None     # Add label for match name
         
         # Callbacks
         self.on_start_detection = None
@@ -36,6 +38,8 @@ class MainView:
         # UI State
         self.is_running = False
         self.match_found = False
+        self.current_match_percent = 0.0
+        self.current_match_name = "none"
         
     def create_window(self):
         """Create and setup the main window"""
@@ -89,6 +93,36 @@ class MainView:
             fg="red"
         )
         self.status_label.pack(pady=(10, 5))
+        # Modern progress bar with percent text to the right
+        bar_frame = tk.Frame(self.window)
+        bar_frame.pack(pady=(0, 10))
+        self.match_percent_bar = ttk.Progressbar(
+            bar_frame,
+            orient="horizontal",
+            length=180,
+            mode="determinate",
+            maximum=100
+        )
+        self.match_percent_bar.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.match_percent_text = tk.Label(
+            bar_frame,
+            text="0.0%",
+            font=("Arial", 8, "bold"),
+            fg="black",
+            bg="SystemButtonFace",
+            width=7,
+            anchor="e"
+        )
+        self.match_percent_text.pack(side=tk.LEFT, padx=(5, 0))
+        # Only show the detected image name below
+        self.match_name_label = tk.Label(
+            self.window,
+            text="none",
+            font=("Arial", 11, "bold"),
+            fg="#333"
+        )
+        self.match_name_label.pack(pady=(0, 5))
+
     
     def _create_screenshot_section(self):
         """Create screenshot preview section"""
@@ -119,7 +153,7 @@ class MainView:
         )
         take_screenshot_btn.pack(side=tk.LEFT, padx=2)
     
-    def _create_settings_sections(self):
+    def _create_settings_sections(self,):
         """Create settings sections"""
         # Main frame for settings
         main_frame = tk.Frame(self.window)
@@ -407,3 +441,51 @@ class MainView:
         """Schedule a callback after delay milliseconds"""
         if self.window:
             self.window.after(delay, callback)
+    
+    def set_match_percent_and_name(self, percent: float, name: str):
+        """Update match percent bar, percent text, and detected image name only"""
+        self.current_match_percent = percent
+        self.current_match_name = name
+        if self.match_percent_bar:
+            self.match_percent_bar['value'] = percent
+            # Color bar: green >80, yellow >60, orange >40, red else
+            if percent >= 80:
+                color = '#4caf50'  # green
+            elif percent >= 60:
+                color = '#ffc107'  # yellow
+            elif percent >= 40:
+                color = '#ff9800'  # orange
+            else:
+                color = '#f44336'  # red
+            style = ttk.Style()
+            style.theme_use('default')
+            style.configure("Custom.Horizontal.TProgressbar", troughcolor='#e0e0e0', background=color)
+            self.match_percent_bar.config(style="Custom.Horizontal.TProgressbar")
+            # Update percent text to the right of the bar
+            self.match_percent_text.config(text=f"{percent:.1f}%")
+        if self.match_name_label:
+            self.match_name_label.config(text=self._get_match_display_name(name))
+
+    def _get_match_display_name(self, name: str) -> str:
+        """Return a user-friendly display name for each match type"""
+        mapping = {
+            "dota": "Match Found!",
+            "dota2_plus": "Dota Plus Offer",
+            "read_check": "Read-Check Confirmation",
+            "long_time": "Long Wait Warning",
+            "ad": "Advertisement",
+            "none": "No Match Detected"
+        }
+        return mapping.get(name, name)
+
+    def _get_match_description(self, name: str) -> str:
+        """Return a descriptive text for each match type"""
+        mapping = {
+            "dota": "A Dota 2 match has been found. Ready to accept!",
+            "dota2_plus": "Dota Plus subscription dialog detected.",
+            "read_check": "Read-check dialog detected. Please confirm to continue.",
+            "long_time": "Long matchmaking wait dialog detected.",
+            "ad": "Advertisement detected on screen.",
+            "none": "No known pattern detected."
+        }
+        return mapping.get(name, "Unknown pattern.")

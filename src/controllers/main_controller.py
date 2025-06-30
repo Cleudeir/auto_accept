@@ -205,8 +205,11 @@ class MainController:
         """Handle match found event"""
         pass
 
-    def _on_detection_update(self, img, highest_match):
+    def _on_detection_update(self, img, highest_match, match_score=None):
         """Handle detection update event"""
+        # Update match percent and name in the view if score is provided
+        if match_score is not None:
+            self.view.set_match_percent_and_name(match_score * 100, highest_match)
         # This is called frequently during detection, so we don't log it
         pass
 

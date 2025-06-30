@@ -56,9 +56,10 @@ class DetectionController:
                 monitor_index = self.config_model.selected_monitor_capture_setting
                 img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
                 if img is not None:
-                    highest_match = self.detection_model.detect_match_in_image(img)
+                    # Get both highest match and score
+                    highest_match, highest_score = self.detection_model.detect_match_in_image_with_score(img)
 
-                    self.logger.info(f"Highest match: {highest_match}")
+                    self.logger.info(f"Highest match: {highest_match} ({highest_score:.2f})")
 
                     if highest_match == "ad":
                         self.logger.info("AD.png detected. Stopping detection loop.")
@@ -102,7 +103,7 @@ class DetectionController:
                                 self.on_match_found()
 
                     if self.on_detection_update:
-                        self.on_detection_update(img, highest_match)
+                        self.on_detection_update(img, highest_match, highest_score)
                 else:
                     self.logger.warning(
                         "Monitor capture failed for this iteration. Will retry."

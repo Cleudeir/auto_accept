@@ -120,6 +120,30 @@ class DetectionModel:
                 return highest_score_name
         return "none"
 
+    def detect_match_in_image_with_score(
+        self, img: Image.Image
+    ) -> Tuple[str, float]:
+        """
+        Detect reference patterns in the given image
+        Returns (name, score) of the reference image with the highest score
+        """
+        scores = {}
+        for name, ref_path in self.reference_images.items():
+            if os.path.exists(ref_path):
+                score = self.compare_image_with_reference(img, ref_path)
+                scores[name] = score
+            else:
+                scores[name] = 0.0
+        if scores:
+            print(f"Scores: {scores}")
+            highest_score_name = max(scores, key=scores.get)
+            highest_score = scores[highest_score_name]
+            if highest_score >= 0.65:
+                return highest_score_name, highest_score
+            else:
+                return "none", highest_score
+        return "none", 0.0
+
     def focus_dota2_window(self):
         """Focus the Dota 2 window if it exists"""
         try:
