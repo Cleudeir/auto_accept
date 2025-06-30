@@ -45,6 +45,7 @@ class MainView:
         """Create and setup the main window"""
         self.window = tk.Tk()
         self.window.title(self.title)
+        self.window.configure(bg="#ffffff")  # Set app background to white
         
         # Window configuration
         window_width = 520  # Increased width
@@ -86,20 +87,22 @@ class MainView:
             self.logger.warning(f"Could not set window icon: {e}")
     
     def _create_status_section(self):
-        """Create status display section"""
+        """Create status display section with improved visuals"""
+        # Status label
         self.status_label = tk.Label(
-            self.window,            text="Status: Stopped", 
-            font=("Arial", 12, "bold"), 
-            fg="red"
+            self.window, text="Status: Stopped", font=("Segoe UI", 14, "bold"), fg="#e53935", bg="#ffffff"
         )
-        self.status_label.pack(pady=(10, 5))
-        # Modern progress bar with percent text to the right
-        bar_frame = tk.Frame(self.window)
-        bar_frame.pack(pady=(0, 10))
+        self.status_label.pack(pady=(18, 8), fill="x")
+        # Card-like frame for progress bar and sensitivity
+        card_frame = tk.Frame(self.window, bg="#ffffff", bd=2, relief="groove")
+        card_frame.pack(pady=(0, 14), padx=18, fill="x")
+        # Progress bar with percent
+        bar_frame = tk.Frame(card_frame, bg="#ffffff")
+        bar_frame.pack(pady=(12, 2), padx=10, fill="x")
         self.match_percent_bar = ttk.Progressbar(
             bar_frame,
             orient="horizontal",
-            length=180,
+            length=220,
             mode="determinate",
             maximum=100
         )
@@ -107,62 +110,88 @@ class MainView:
         self.match_percent_text = tk.Label(
             bar_frame,
             text="0.0%",
-            font=("Arial", 8, "bold"),
-            fg="black",
-            bg="SystemButtonFace",
+            font=("Segoe UI", 10, "bold"),
+            fg="#333",
+            bg="#ffffff",
             width=7,
             anchor="e"
         )
-        self.match_percent_text.pack(side=tk.LEFT, padx=(5, 0))
-        # Only show the detected image name below
+        self.match_percent_text.pack(side=tk.LEFT, padx=(8, 0))
+        # Detected image name
         self.match_name_label = tk.Label(
-            self.window,
+            card_frame,
             text="none",
-            font=("Arial", 11, "bold"),
-            fg="#333"
+            font=("Segoe UI", 12, "bold"),
+            fg="#1976d2",
+            bg="#ffffff"
         )
-        self.match_name_label.pack(pady=(0, 5))
-
+        self.match_name_label.pack(pady=(0, 8))
+        # Sensitivity slider
+        threshold_frame = tk.Frame(card_frame, bg="#ffffff")
+        threshold_frame.pack(pady=(0, 10))
+        tk.Label(threshold_frame, text="Detection Sensitivity:", font=("Segoe UI", 10), bg="#ffffff").pack(side=tk.LEFT)
+        self.score_threshold_var = tk.DoubleVar(value=65.0)
+        self.score_threshold_slider = tk.Scale(
+            threshold_frame,
+            from_=50, to=100, resolution=1, orient=tk.HORIZONTAL,
+            variable=self.score_threshold_var,
+            command=self._on_score_threshold_change_event,
+            length=120,
+            showvalue=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            troughcolor="#e3e3e3",
+            sliderrelief="flat"
+        )
+        self.score_threshold_slider.pack(side=tk.LEFT, padx=(8, 0))
+        self.score_threshold_value_label = tk.Label(threshold_frame, text="65%", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#1976d2")
+        self.score_threshold_value_label.pack(side=tk.LEFT, padx=(8, 0))
     
     def _create_screenshot_section(self):
-        """Create screenshot preview section"""
-        screenshot_frame = tk.LabelFrame(self.window, text="Screenshot Preview", padx=10, pady=10)
-        screenshot_frame.pack(fill="both", expand=True, padx=10, pady=5)
-        
+        """Create screenshot preview section with improved visuals"""
+        screenshot_frame = tk.LabelFrame(self.window, text="Screenshot Preview", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
+        screenshot_frame.pack(fill="both", expand=True, padx=18, pady=8)
         # Fixed height frame to maintain consistent size
-        fixed_height_frame = tk.Frame(screenshot_frame, height=240)
+        fixed_height_frame = tk.Frame(screenshot_frame, height=240, bg="#ffffff")
         fixed_height_frame.pack(fill=tk.X)
-        fixed_height_frame.pack_propagate(False)  # Prevent the frame from resizing based on content
-        
+        fixed_height_frame.pack_propagate(False)
         # Screenshot label
-        self.screenshot_label = tk.Label(fixed_height_frame)
-        self.screenshot_label.pack(fill=tk.BOTH, expand=True)
-        
+        self.screenshot_label = tk.Label(fixed_height_frame, bg="#e3e3e3", relief="ridge", bd=1)
+        self.screenshot_label.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
         # Timestamp label
-        self.timestamp_label = tk.Label(screenshot_frame, font=("Arial", 8), fg="gray")
+        self.timestamp_label = tk.Label(screenshot_frame, font=("Segoe UI", 9), fg="#888", bg="#ffffff")
         self.timestamp_label.pack(side=tk.BOTTOM, pady=(2, 0))
-        
         # Screenshot controls
-        screenshot_controls = tk.Frame(screenshot_frame)
+        screenshot_controls = tk.Frame(screenshot_frame, bg="#ffffff")
         screenshot_controls.pack(fill="x", pady=(5, 0))
-        
         take_screenshot_btn = tk.Button(
             screenshot_controls,
             text="📷 Take Screenshot",
-            command=self._on_take_screenshot_click
+            command=self._on_take_screenshot_click,
+            bg="#1976d2",
+            fg="#fff",
+            activebackground="#1565c0",
+            activeforeground="#fff",
+            font=("Segoe UI", 10, "bold"),
+            padx=12,
+            pady=6,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
         )
         take_screenshot_btn.pack(side=tk.LEFT, padx=2)
     
     def _create_settings_sections(self,):
         """Create settings sections"""
         # Main frame for settings
-        main_frame = tk.Frame(self.window)
+        main_frame = tk.Frame(self.window, bg="#ffffff")
         main_frame.pack(fill="both", expand=True, padx=10, pady=5)
         
-        left_frame = tk.Frame(main_frame)
+        left_frame = tk.Frame(main_frame, bg="#ffffff")
         left_frame.pack(side=tk.LEFT, fill="both", expand=True)
         
-        right_frame = tk.Frame(main_frame)
+        right_frame = tk.Frame(main_frame, bg="#ffffff")
         right_frame.pack(side=tk.RIGHT, fill="both", expand=True)
         
         # Audio settings
@@ -172,68 +201,60 @@ class MainView:
         self._create_monitor_settings(right_frame)
     
     def _create_audio_settings(self, parent):
-        """Create audio settings section"""
-        audio_frame = tk.LabelFrame(parent, text="Audio Settings", padx=10, pady=10)
-        audio_frame.pack(fill="x", padx=5, pady=5)
-        
+        """Create audio settings section with improved visuals"""
+        audio_frame = tk.LabelFrame(parent, text="Audio Settings", padx=0, pady=0, bg="#ffffff", fg="#43a047", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
+        audio_frame.pack(fill="x", padx=8, pady=8)
         # Device selection
-        tk.Label(audio_frame, text="Output Device:").pack(pady=(5, 0))
-        self.device_combo = ttk.Combobox(audio_frame, state="readonly")
-        self.device_combo.pack(pady=5)
+        tk.Label(audio_frame, text="Output Device:", font=("Segoe UI", 10), bg="#ffffff", fg="#333").pack(pady=(8, 0), anchor="w", padx=10)
+        self.device_combo = ttk.Combobox(audio_frame, state="readonly", font=("Segoe UI", 10))
+        self.device_combo.pack(pady=5, padx=10, fill="x")
         self.device_combo.bind("<<ComboboxSelected>>", self._on_device_change_event)
-        
         # Volume control
-        tk.Label(audio_frame, text="Volume:").pack(pady=(10, 0))
+        tk.Label(audio_frame, text="Volume:", font=("Segoe UI", 10), bg="#ffffff", fg="#333").pack(pady=(10, 0), anchor="w", padx=10)
         self.volume_slider = tk.Scale(
-            audio_frame, 
-            from_=0, 
-            to=100, 
-            orient=tk.HORIZONTAL, 
-            command=self._on_volume_change_event
+            audio_frame,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            command=self._on_volume_change_event,
+            length=160,
+            bg="#ffffff",
+            highlightthickness=0,
+            troughcolor="#e3e3e3",
+            sliderrelief="flat"
         )
-        self.volume_slider.pack(pady=5)
-        
+        self.volume_slider.pack(pady=5, padx=10, fill="x")
         # Test sound button
-        test_btn = tk.Button(audio_frame, text="🎵 Test Sound", command=self._on_test_sound_click)
-        test_btn.pack(pady=5)
-    
+        test_btn = tk.Button(audio_frame, text="🎵 Test Sound", command=self._on_test_sound_click,
+                             bg="#43a047", fg="#fff", activebackground="#388e3c", activeforeground="#fff",
+                             font=("Segoe UI", 10, "bold"), padx=12, pady=6, bd=0, relief="flat", cursor="hand2", highlightthickness=0)
+        test_btn.pack(pady=8, padx=10, anchor="w")
+
     def _create_monitor_settings(self, parent):
-        """Create monitor settings section"""
-        monitor_frame = tk.LabelFrame(parent, text="Monitor Settings", padx=10, pady=10)
-        monitor_frame.pack(fill="x", padx=5, pady=5)
-        
+        """Create monitor settings section with improved visuals"""
+        monitor_frame = tk.LabelFrame(parent, text="Monitor Settings", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
+        monitor_frame.pack(fill="x", padx=8, pady=8)
         # Monitor selection
-        tk.Label(monitor_frame, text="Capture Monitor:").pack(pady=(5, 0))
-        self.monitor_combo = ttk.Combobox(monitor_frame, state="readonly")
-        self.monitor_combo.pack(pady=5)
+        tk.Label(monitor_frame, text="Capture Monitor:", font=("Segoe UI", 10), bg="#ffffff", fg="#333").pack(pady=(8, 0), anchor="w", padx=10)
+        self.monitor_combo = ttk.Combobox(monitor_frame, state="readonly", font=("Segoe UI", 10))
+        self.monitor_combo.pack(pady=5, padx=10, fill="x")
         self.monitor_combo.bind("<<ComboboxSelected>>", self._on_monitor_change_event)
-        
         # Always on top option
         self.always_on_top_var = tk.BooleanVar()
         self.always_on_top_check = tk.Checkbutton(
             monitor_frame,
             text="Keep window on top",
             variable=self.always_on_top_var,
-            command=self._on_always_on_top_change_event
+            command=self._on_always_on_top_change_event,
+            font=("Segoe UI", 10),
+            bg="#ffffff",
+            fg="#333",
+            activebackground="#e3e3e3",
+            selectcolor="#e3e3e3",
+            highlightthickness=0
         )
-        self.always_on_top_check.pack(pady=5)
+        self.always_on_top_check.pack(pady=8, padx=10, anchor="w")
         
-        # Score threshold slider (percent)
-        threshold_frame = tk.Frame(monitor_frame)
-        threshold_frame.pack(fill="x", pady=(10, 0))
-        tk.Label(threshold_frame, text="Detection Sensitivity:").pack(side=tk.LEFT)
-        self.score_threshold_var = tk.DoubleVar(value=65.0)
-        self.score_threshold_slider = tk.Scale(
-            threshold_frame,
-            from_=50, to=100, resolution=1, orient=tk.HORIZONTAL,
-            variable=self.score_threshold_var,
-            command=self._on_score_threshold_change_event,
-            length=120
-        )
-        self.score_threshold_slider.pack(side=tk.LEFT, padx=(5, 0))
-        self.score_threshold_value_label = tk.Label(threshold_frame, text="65%")
-        self.score_threshold_value_label.pack(side=tk.LEFT, padx=(5, 0))
-
     def _create_log_section(self):
         """Create log viewer section"""
         log_frame = tk.LabelFrame(self.window, text="Log Viewer", padx=10, pady=10)
@@ -268,34 +289,46 @@ class MainView:
         self.window.focus_set()
     
     def _create_control_buttons_section(self):
-        """Create start and stop buttons below the settings sections, centered"""
-        control_frame = tk.Frame(self.window)
+        """Create start and stop buttons below the settings sections, centered, with improved style"""
+        control_frame = tk.Frame(self.window, bg="#ffffff")
         control_frame.pack(fill="x", padx=10, pady=10)
         # Center the buttons
-        button_inner = tk.Frame(control_frame)
+        button_inner = tk.Frame(control_frame, bg="#ffffff")
         button_inner.pack(anchor="center")
         self.start_btn = tk.Button(
             button_inner,
             text="▶ Start",
             command=self._on_start_detection_click,
-            bg="green",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            padx=20,
-            pady=5,
+            bg="#43a047",
+            fg="#fff",
+            activebackground="#388e3c",
+            activeforeground="#fff",
+            font=("Segoe UI", 11, "bold"),
+            padx=28,
+            pady=10,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
         )
         self.stop_btn = tk.Button(
             button_inner,
             text="⏹ Stop",
             command=self._on_stop_detection_click,
-            bg="red",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            padx=20,
-            pady=5,
+            bg="#e53935",
+            fg="#fff",
+            activebackground="#b71c1c",
+            activeforeground="#fff",
+            font=("Segoe UI", 11, "bold"),
+            padx=28,
+            pady=10,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
         )
-        self.start_btn.pack(side="left", padx=5)
-        self.stop_btn.pack(side="left", padx=5)
+        self.start_btn.pack(side="left", padx=12)
+        self.stop_btn.pack(side="left", padx=12)
         # Initial state: only show start
         self.stop_btn.pack_forget()
 
