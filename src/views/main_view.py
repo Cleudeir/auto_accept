@@ -65,7 +65,7 @@ class MainView:
         self._create_status_section()
         self._create_screenshot_section()
         self._create_settings_sections()
-        self._create_control_section()
+        # self._create_control_section()
        # self._create_log_section()
      
         # Setup keyboard shortcuts
@@ -217,40 +217,23 @@ class MainView:
             command=self._on_always_on_top_change_event
         )
         self.always_on_top_check.pack(pady=5)
-    
-    def _create_control_section(self):
-        """Create detection control section"""
-        control_frame = tk.LabelFrame(self.window, text="Detection Control", padx=10, pady=10)
-        control_frame.pack(fill="x", padx=10, pady=5)
         
-        button_frame = tk.Frame(control_frame)
-        button_frame.pack()
-        
-        self.start_btn = tk.Button(
-            button_frame,
-            text="▶ Start Detection",
-            command=self._on_start_detection_click,
-            bg="green",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            padx=20,
-            pady=5,
+        # Score threshold slider (percent)
+        threshold_frame = tk.Frame(monitor_frame)
+        threshold_frame.pack(fill="x", pady=(10, 0))
+        tk.Label(threshold_frame, text="Detection Sensitivity:").pack(side=tk.LEFT)
+        self.score_threshold_var = tk.DoubleVar(value=65.0)
+        self.score_threshold_slider = tk.Scale(
+            threshold_frame,
+            from_=50, to=100, resolution=1, orient=tk.HORIZONTAL,
+            variable=self.score_threshold_var,
+            command=self._on_score_threshold_change_event,
+            length=120
         )
-        self.start_btn.pack(side="left", padx=5)
-        
-        self.stop_btn = tk.Button(
-            button_frame,
-            text="⏹ Stop Detection",
-            command=self._on_stop_detection_click,
-            bg="red",
-            fg="white",
-            font=("Arial", 10, "bold"),
-            padx=20,
-            pady=5,
-            state="disabled",
-        )
-        self.stop_btn.pack(side="left", padx=5)
-    
+        self.score_threshold_slider.pack(side=tk.LEFT, padx=(5, 0))
+        self.score_threshold_value_label = tk.Label(threshold_frame, text="65%")
+        self.score_threshold_value_label.pack(side=tk.LEFT, padx=(5, 0))
+
     def _create_log_section(self):
         """Create log viewer section"""
         log_frame = tk.LabelFrame(self.window, text="Log Viewer", padx=10, pady=10)
@@ -331,25 +314,15 @@ class MainView:
         if self.status_label:            self.status_label.config(text=text, fg=color)
     
     def set_detection_state(self, is_running: bool, match_found: bool = False):
-        """Update detection state and UI"""
+        """Update detection state and UI (no control buttons)"""
         self.is_running = is_running
         self.match_found = match_found
-        
         if is_running:
             self.set_status("Status: Running Detection", "green")
-            self.start_btn.pack_forget()
-            self.stop_btn.pack(side="left", padx=5)
-            self.stop_btn.config(state="normal")
         elif match_found:
             self.set_status("Status: Match Found! Detection Stopped", "blue")
-            self.stop_btn.pack_forget()
-            self.start_btn.pack(side="left", padx=5)
-            self.start_btn.config(state="normal", text="▶ Start New Detection")
         else:
             self.set_status("Status: Stopped", "red")
-            self.stop_btn.pack_forget()
-            self.start_btn.pack(side="left", padx=5)
-            self.start_btn.config(state="normal", text="▶ Start Detection")
     
     def update_screenshot(self, img: Optional[Image.Image], timestamp: Optional[datetime.datetime] = None):
         """Update screenshot preview"""
@@ -489,3 +462,15 @@ class MainView:
             "none": "No known pattern detected."
         }
         return mapping.get(name, "Unknown pattern.")
+    
+    def _on_score_threshold_change_event(self, val):
+        percent = float(val)
+        self.score_threshold_value_label.config(text=f"{percent:.0f}%")
+        if hasattr(self, 'on_score_threshold_change') and self.on_score_threshold_change:
+            self.on_score_threshold_change(percent / 100.0)
+
+    def set_score_threshold(self, percent: float):
+        """Set the score threshold slider value (0-1 float)"""
+        value = max(50, min(100, int(percent * 100)))
+        self.score_threshold_var.set(value)
+        self.score_threshold_value_label.config(text=f"{value}%")

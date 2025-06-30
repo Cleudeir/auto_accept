@@ -13,11 +13,16 @@ import time
 class DetectionModel:
     """Model for handling image detection and comparison logic"""
 
-    def __init__(self, screenshot_model=None):
+    def __init__(self, screenshot_model=None, score_threshold: float = 0.65):
         self.logger = logging.getLogger("Dota2AutoAccept.DetectionModel")
         self.reference_images = self._load_reference_images()
         self.screenshot_model = screenshot_model
         self.ocr_cache = {}
+        self.score_threshold = score_threshold
+
+    def set_score_threshold(self, threshold: float):
+        """Set the threshold for highest_score detection"""
+        self.score_threshold = threshold
 
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""
@@ -116,7 +121,7 @@ class DetectionModel:
             print(f"Scores: {scores}")
             highest_score_name = max(scores, key=scores.get)
             highest_score = scores[highest_score_name]
-            if highest_score >= 0.65:
+            if highest_score >= self.score_threshold:
                 return highest_score_name
         return "none"
 
@@ -138,7 +143,7 @@ class DetectionModel:
             print(f"Scores: {scores}")
             highest_score_name = max(scores, key=scores.get)
             highest_score = scores[highest_score_name]
-            if highest_score >= 0.65:
+            if highest_score >= self.score_threshold:
                 return highest_score_name, highest_score
             else:
                 return "none", highest_score
