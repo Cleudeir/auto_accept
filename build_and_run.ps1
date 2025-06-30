@@ -31,7 +31,7 @@ Write-Host "Starting $appName version $appVersion"
 $projectRoot = "$PSScriptRoot"
 $srcDir = Join-Path $projectRoot 'src'
 $mainPy = Join-Path $srcDir 'main.py'
-$distDir = Join-Path $srcDir 'dist'
+$distDir = Join-Path $projectRoot 'dist'
 $exeName = 'main.exe'
 
 # Step 1: Ensure PyInstaller is installed
@@ -43,8 +43,8 @@ if (-not (pip show pyinstaller)) {
 # Step 2: Build the .exe with all data included
 # Collect all files in src/bin and config files
 $binDir = Join-Path $srcDir 'bin'
-$binFiles = Get-ChildItem -Path $binDir -File | ForEach-Object { "--add-data=src\\bin\\$($_.Name);bin" }
-$configFiles = @('--add-data=config.json;.')
+$binFiles = Get-ChildItem -Path $binDir -File | ForEach-Object { "--add-data=$($binDir)\$($_.Name);bin" }
+$configFiles = @("--add-data=$projectRoot\\config.json;.")
 $datas = $binFiles + $configFiles
 
 # Remove previous build
@@ -53,12 +53,14 @@ if (Test-Path (Join-Path $srcDir 'build')) { Remove-Item (Join-Path $srcDir 'bui
 if (Test-Path (Join-Path $srcDir 'main.spec')) { Remove-Item (Join-Path $srcDir 'main.spec') -Force }
 
 # Build the argument list for PyInstaller
-$pyinstallerArgs = @('--onefile', '--noconsole', "--icon=src/bin/icon.ico") + $datas + $mainPy
+$pyinstallerArgs = @('--onefile', '--noconsole', "--icon=$binDir\\icon.ico") + $datas + $mainPy
 Write-Host "Running: pyinstaller $($pyinstallerArgs -join ' ')"
+Push-Location $projectRoot
 pyinstaller @pyinstallerArgs
+Pop-Location
 
 # Step 3: Execute the .exe
-$exePath = Join-Path $projectRoot 'dist/main.exe'
+$exePath = Join-Path $distDir $exeName
 $targetPath = 'C:\Users\CleudeirSilva\My Drive\auto_accept\main.exe'
 
 if (Test-Path $exePath) {
