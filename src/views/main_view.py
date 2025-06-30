@@ -445,10 +445,19 @@ class MainView:
             self.log_text.config(state=tk.DISABLED)
     
     def set_device_options(self, devices: List[str], selected_index: int = 0):
-        """Set audio device options"""
+        """Set audio device options (output devices only, no duplicates, no similar names)"""
         if self.device_combo:
-            self.device_combo['values'] = devices
-            if 0 <= selected_index < len(devices):
+            import re
+            seen = set()
+            unique_devices = []
+            for d in devices:
+                # Normalize: remove content in parentheses and trim
+                base = re.sub(r"\s*\(.*?\)", "", d).strip().lower()
+                if base not in seen:
+                    seen.add(base)
+                    unique_devices.append(d)
+            self.device_combo['values'] = unique_devices
+            if 0 <= selected_index < len(unique_devices):
                 self.device_combo.current(selected_index)
     
     def set_monitor_options(self, monitors: List[str], selected_index: int = 0):
