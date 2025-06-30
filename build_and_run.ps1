@@ -10,25 +10,22 @@ $appVersionFile = Join-Path $PSScriptRoot 'version.txt'
 # Update version from version.txt if present
 if (Test-Path $appVersionFile) {
     $appVersion = Get-Content $appVersionFile | Select-Object -First 1
+    # Auto-increment patch version
+    if ($appVersion -match '^(\\d+)\\.(\\d+)\\.(\\d+)$') {
+        $major = [int]$Matches[1]
+        $minor = [int]$Matches[2]
+        $patch = [int]$Matches[3] + 1
+        $newVersion = "$major.$minor.$patch"
+        Set-Content $appVersionFile $newVersion
+        $appVersion = $newVersion
+        Write-Host "Auto-incremented version to $appVersion"
+    }
 } else {
     $appVersion = '1.0.0'
     Set-Content $appVersionFile $appVersion
 }
 
 Write-Host "Starting $appName version $appVersion"
-
-# Update mechanism: prompt to update version before build
-$updateVersion = Read-Host 'Do you want to update the version? (y/n)'
-if ($updateVersion -eq 'y') {
-    $newVersion = Read-Host 'Enter new version number'
-    if ($newVersion -and $newVersion -ne $appVersion) {
-        Set-Content $appVersionFile $newVersion
-        $appVersion = $newVersion
-        Write-Host "Version updated to $appVersion"
-    } else {
-        Write-Host 'Version not changed.'
-    }
-}
 
 # Set variables
 $projectRoot = "$PSScriptRoot"
