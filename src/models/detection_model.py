@@ -13,7 +13,7 @@ import time
 class DetectionModel:
     """Model for handling image detection and comparison logic"""
 
-    def __init__(self, screenshot_model=None, score_threshold: float = 0.65):
+    def __init__(self, screenshot_model=None, score_threshold: float = 0.7):
         self.logger = logging.getLogger("Dota2AutoAccept.DetectionModel")
         self.reference_images = self._load_reference_images()
         self.screenshot_model = screenshot_model
