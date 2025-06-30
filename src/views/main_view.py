@@ -47,8 +47,8 @@ class MainView:
         self.window.title(self.title)
         
         # Window configuration
-        window_width = 420
-        window_height = 800
+        window_width = 520  # Increased width
+        window_height = 1000  # Increased height
         
         # Center window on screen
         screen_width = self.window.winfo_screenwidth()
@@ -65,8 +65,8 @@ class MainView:
         self._create_status_section()
         self._create_screenshot_section()
         self._create_settings_sections()
-        # self._create_control_section()
-       # self._create_log_section()
+        self._create_control_buttons_section()
+        # self._create_log_section()
      
         # Setup keyboard shortcuts
         self._setup_keyboard_shortcuts()
@@ -267,6 +267,33 @@ class MainView:
         self.window.bind("<KeyPress>", on_key_press)
         self.window.focus_set()
     
+    def _create_control_buttons_section(self):
+        """Create start and pause buttons below the settings sections"""
+        control_frame = tk.Frame(self.window)
+        control_frame.pack(fill="x", padx=10, pady=10)
+        self.start_btn = tk.Button(
+            control_frame,
+            text="▶ Start",
+            command=self._on_start_detection_click,
+            bg="green",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            padx=20,
+            pady=5,
+        )
+        self.start_btn.pack(side="left", padx=5)
+        self.pause_btn = tk.Button(
+            control_frame,
+            text="⏸ Pause",
+            command=self._on_stop_detection_click,
+            bg="orange",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            padx=20,
+            pady=5,
+        )
+        self.pause_btn.pack(side="left", padx=5)
+
     # Event handlers
     def _on_start_detection_click(self):
         if self.on_start_detection:
