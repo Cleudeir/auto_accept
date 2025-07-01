@@ -171,30 +171,11 @@ class MainView:
         # Timestamp label
         self.timestamp_label = tk.Label(screenshot_frame, font=("Segoe UI", 9), fg="#888", bg="#ffffff")
         self.timestamp_label.pack(side=tk.BOTTOM, pady=(2, 0))
-        # Screenshot controls
-        screenshot_controls = tk.Frame(screenshot_frame, bg="#ffffff")
-        screenshot_controls.pack(fill="x", pady=(5, 0))
-        take_screenshot_btn = tk.Button(
-            screenshot_controls,
-            text="📷 Take Screenshot",
-            command=self._on_take_screenshot_click,
-            bg="#1976d2",
-            fg="#fff",
-            activebackground="#1565c0",
-            activeforeground="#fff",
-            font=("Segoe UI", 10, "bold"),
-            padx=12,
-            pady=6,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
-        )
-        take_screenshot_btn.pack(side=tk.LEFT, padx=2)
-    
+        # Removed screenshot controls/button from here
+
     def _create_control_buttons_section(self, parent=None):
         parent = parent or self.window
-        """Create start and stop buttons below the settings sections, centered, with improved style"""
+        """Create start, stop, test sound, and take screenshot buttons below the settings sections, centered, with improved style"""
         control_frame = tk.Frame(parent, bg="#ffffff")
         control_frame.pack(fill="x", padx=10, pady=10)
         # Center the buttons vertically and horizontally
@@ -202,6 +183,9 @@ class MainView:
         control_frame.configure(height=80)  # Give enough height for vertical centering
         button_inner = tk.Frame(control_frame, bg="#ffffff")
         button_inner.place(relx=0.5, rely=0.5, anchor="center")
+        # Standardize button height and font for all control buttons
+        button_height = 2  # tkinter height in text lines
+        button_font = ("Segoe UI", 10, "bold")
         self.start_btn = tk.Button(
             button_inner,
             text="▶ Start",
@@ -210,9 +194,10 @@ class MainView:
             fg="#fff",
             activebackground="#388e3c",
             activeforeground="#fff",
-            font=("Segoe UI", 11, "bold"),
-            padx=28,
-            pady=10,
+            font=button_font,
+            padx=20,
+            pady=0,
+            height=button_height,
             bd=0,
             relief="flat",
             cursor="hand2",
@@ -226,16 +211,53 @@ class MainView:
             fg="#fff",
             activebackground="#b71c1c",
             activeforeground="#fff",
-            font=("Segoe UI", 11, "bold"),
-            padx=28,
-            pady=10,
+            font=button_font,
+            padx=20,
+            pady=0,
+            height=button_height,
             bd=0,
             relief="flat",
             cursor="hand2",
             highlightthickness=0,
         )
-        self.start_btn.pack(side="left", padx=12)
-        self.stop_btn.pack(side="left", padx=12)
+        self.test_sound_btn = tk.Button(
+            button_inner,
+            text="🎵 Test Sound",
+            command=self._on_test_sound_click,
+            bg="#43a047",
+            fg="#fff",
+            activebackground="#388e3c",
+            activeforeground="#fff",
+            font=button_font,
+            padx=12,
+            pady=0,
+            height=button_height,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
+        )
+        self.take_screenshot_btn = tk.Button(
+            button_inner,
+            text="📷 Take Screenshot",
+            command=self._on_take_screenshot_click,
+            bg="#1976d2",
+            fg="#fff",
+            activebackground="#1565c0",
+            activeforeground="#fff",
+            font=button_font,
+            padx=12,
+            pady=0,
+            height=button_height,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
+        )
+        self.start_btn.pack(side="left", padx=8)
+        self.stop_btn.pack(side="left", padx=8)
+        self.test_sound_btn.pack(side="left", padx=8)
+        self.take_screenshot_btn.pack(side="left", padx=8)
         # Initial state: only show start
         self.stop_btn.pack_forget()
 
@@ -264,11 +286,7 @@ class MainView:
             sliderrelief="flat"
         )
         self.volume_slider.pack(pady=5, padx=10, fill="x")
-        # Test sound button
-        test_btn = tk.Button(audio_frame, text="🎵 Test Sound", command=self._on_test_sound_click,
-                             bg="#43a047", fg="#fff", activebackground="#388e3c", activeforeground="#fff",
-                             font=("Segoe UI", 10, "bold"), padx=12, pady=6, bd=0, relief="flat", cursor="hand2", highlightthickness=0)
-        test_btn.pack(pady=8, padx=10, anchor="w")
+        # Removed test sound button from here
 
     def _create_monitor_settings(self, parent=None):
         parent = parent or self.window
