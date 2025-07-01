@@ -46,37 +46,45 @@ class MainView:
         self.window = tk.Tk()
         self.window.title(self.title)
         self.window.configure(bg="#ffffff")  # Set app background to white
-        
+
         # Window configuration
-        window_width = 520  # Increased width
-        window_height = 850  # Increased height
-        
-        # Center window on screen
+        window_width = 1020  # Wider for side-by-side layout
+        window_height = 600
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight()
         x = (screen_width // 2) - (window_width // 2)
         y = (screen_height // 2) - (window_height // 2)
         self.window.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.window.resizable(False, False)
-        
+
         # Set icon
         self._set_window_icon()
-        
-        # Setup window components
-        self._create_status_section()
-        self._create_screenshot_section()
-        self._create_settings_sections()
-        self._create_control_buttons_section()
-        # self._create_log_section()
-     
-        # Setup keyboard shortcuts
+
+        # --- Main horizontal layout ---
+        main_frame = tk.Frame(self.window, bg="#ffffff")
+        main_frame.pack(fill="both", expand=True)
+
+        # Left column: status, screenshot, control buttons
+        left_col = tk.Frame(main_frame, bg="#ffffff")
+        left_col.pack(side=tk.LEFT, fill="both", expand=True)
+        # Right column: settings
+        right_col = tk.Frame(main_frame, bg="#ffffff")
+        right_col.pack(side=tk.RIGHT, fill="y", padx=(10, 18), pady=10)
+
+        # Status and screenshot on left
+        self._create_status_section(parent=left_col)
+        self._create_screenshot_section(parent=left_col)
+        self._create_control_buttons_section(parent=left_col)
+
+        # Settings on right
+        self._create_audio_settings(parent=right_col)
+        self._create_monitor_settings(parent=right_col)
+
+        # Keyboard shortcuts and close handler
         self._setup_keyboard_shortcuts()
-        
-        # Setup window close handler
         self.window.protocol("WM_DELETE_WINDOW", self._on_window_closing)
-        
         return self.window
-    
+
     def _set_window_icon(self):
         """Set the window icon"""
         try:
@@ -86,15 +94,16 @@ class MainView:
         except Exception as e:
             self.logger.warning(f"Could not set window icon: {e}")
     
-    def _create_status_section(self):
+    def _create_status_section(self, parent=None):
+        parent = parent or self.window
         """Create status display section with improved visuals"""
         # Status label
         self.status_label = tk.Label(
-            self.window, text="Status: Stopped", font=("Segoe UI", 14, "bold"), fg="#e53935", bg="#ffffff"
+            parent, text="Status: Stopped", font=("Segoe UI", 14, "bold"), fg="#e53935", bg="#ffffff"
         )
         self.status_label.pack(pady=(18, 8), fill="x")
         # Card-like frame for progress bar and sensitivity
-        card_frame = tk.Frame(self.window, bg="#ffffff", bd=2, relief="groove")
+        card_frame = tk.Frame(parent, bg="#ffffff", bd=2, relief="groove")
         card_frame.pack(pady=(0, 14), padx=18, fill="x")
         # Progress bar with percent
         bar_frame = tk.Frame(card_frame, bg="#ffffff")
@@ -147,9 +156,10 @@ class MainView:
         self.score_threshold_value_label = tk.Label(threshold_frame, text="70%", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#1976d2")
         self.score_threshold_value_label.pack(side=tk.LEFT, padx=(8, 0))
     
-    def _create_screenshot_section(self):
+    def _create_screenshot_section(self, parent=None):
+        parent = parent or self.window
         """Create screenshot preview section with improved visuals"""
-        screenshot_frame = tk.LabelFrame(self.window, text="Screenshot Preview", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
+        screenshot_frame = tk.LabelFrame(parent, text="Screenshot Preview", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
         screenshot_frame.pack(fill="both", expand=True, padx=18, pady=8)
         # Fixed height frame to maintain consistent size
         fixed_height_frame = tk.Frame(screenshot_frame, height=240, bg="#ffffff")
@@ -182,25 +192,55 @@ class MainView:
         )
         take_screenshot_btn.pack(side=tk.LEFT, padx=2)
     
-    def _create_settings_sections(self,):
-        """Create settings sections"""
-        # Main frame for settings
-        main_frame = tk.Frame(self.window, bg="#ffffff")
-        main_frame.pack(fill="both", expand=True, padx=10, pady=5)
-        
-        left_frame = tk.Frame(main_frame, bg="#ffffff")
-        left_frame.pack(side=tk.LEFT, fill="both", expand=True)
-        
-        right_frame = tk.Frame(main_frame, bg="#ffffff")
-        right_frame.pack(side=tk.RIGHT, fill="both", expand=True)
-        
-        # Audio settings
-        self._create_audio_settings(left_frame)
-        
-        # Monitor settings
-        self._create_monitor_settings(right_frame)
-    
-    def _create_audio_settings(self, parent):
+    def _create_control_buttons_section(self, parent=None):
+        parent = parent or self.window
+        """Create start and stop buttons below the settings sections, centered, with improved style"""
+        control_frame = tk.Frame(parent, bg="#ffffff")
+        control_frame.pack(fill="x", padx=10, pady=10)
+        # Center the buttons vertically and horizontally
+        control_frame.pack_propagate(False)
+        control_frame.configure(height=80)  # Give enough height for vertical centering
+        button_inner = tk.Frame(control_frame, bg="#ffffff")
+        button_inner.place(relx=0.5, rely=0.5, anchor="center")
+        self.start_btn = tk.Button(
+            button_inner,
+            text="▶ Start",
+            command=self._on_start_detection_click,
+            bg="#43a047",
+            fg="#fff",
+            activebackground="#388e3c",
+            activeforeground="#fff",
+            font=("Segoe UI", 11, "bold"),
+            padx=28,
+            pady=10,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
+        )
+        self.stop_btn = tk.Button(
+            button_inner,
+            text="⏹ Stop",
+            command=self._on_stop_detection_click,
+            bg="#e53935",
+            fg="#fff",
+            activebackground="#b71c1c",
+            activeforeground="#fff",
+            font=("Segoe UI", 11, "bold"),
+            padx=28,
+            pady=10,
+            bd=0,
+            relief="flat",
+            cursor="hand2",
+            highlightthickness=0,
+        )
+        self.start_btn.pack(side="left", padx=12)
+        self.stop_btn.pack(side="left", padx=12)
+        # Initial state: only show start
+        self.stop_btn.pack_forget()
+
+    def _create_audio_settings(self, parent=None):
+        parent = parent or self.window
         """Create audio settings section with improved visuals"""
         audio_frame = tk.LabelFrame(parent, text="Audio Settings", padx=0, pady=0, bg="#ffffff", fg="#43a047", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
         audio_frame.pack(fill="x", padx=8, pady=8)
@@ -230,7 +270,8 @@ class MainView:
                              font=("Segoe UI", 10, "bold"), padx=12, pady=6, bd=0, relief="flat", cursor="hand2", highlightthickness=0)
         test_btn.pack(pady=8, padx=10, anchor="w")
 
-    def _create_monitor_settings(self, parent):
+    def _create_monitor_settings(self, parent=None):
+        parent = parent or self.window
         """Create monitor settings section with improved visuals"""
         monitor_frame = tk.LabelFrame(parent, text="Monitor Settings", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
         monitor_frame.pack(fill="x", padx=8, pady=8)
@@ -288,52 +329,6 @@ class MainView:
         self.window.bind("<KeyPress>", on_key_press)
         self.window.focus_set()
     
-    def _create_control_buttons_section(self):
-        """Create start and stop buttons below the settings sections, centered, with improved style"""
-        control_frame = tk.Frame(self.window, bg="#ffffff")
-        control_frame.pack(fill="x", padx=10, pady=10)
-        # Center the buttons vertically and horizontally
-        control_frame.pack_propagate(False)
-        control_frame.configure(height=80)  # Give enough height for vertical centering
-        button_inner = tk.Frame(control_frame, bg="#ffffff")
-        button_inner.place(relx=0.5, rely=0.5, anchor="center")
-        self.start_btn = tk.Button(
-            button_inner,
-            text="▶ Start",
-            command=self._on_start_detection_click,
-            bg="#43a047",
-            fg="#fff",
-            activebackground="#388e3c",
-            activeforeground="#fff",
-            font=("Segoe UI", 11, "bold"),
-            padx=28,
-            pady=10,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
-        )
-        self.stop_btn = tk.Button(
-            button_inner,
-            text="⏹ Stop",
-            command=self._on_stop_detection_click,
-            bg="#e53935",
-            fg="#fff",
-            activebackground="#b71c1c",
-            activeforeground="#fff",
-            font=("Segoe UI", 11, "bold"),
-            padx=28,
-            pady=10,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
-        )
-        self.start_btn.pack(side="left", padx=12)
-        self.stop_btn.pack(side="left", padx=12)
-        # Initial state: only show start
-        self.stop_btn.pack_forget()
-
     # Event handlers
     def _on_start_detection_click(self):
         if self.on_start_detection:
