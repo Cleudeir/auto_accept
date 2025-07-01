@@ -34,6 +34,7 @@ class DetectionModel:
             "dota2_plus": os.path.join(base_path, "dota2_plus.jpeg"),
             "read_check": os.path.join(base_path, "read_check.jpg"),
             "long_time": os.path.join(base_path, "long_time.png"),
+            "watch-game": os.path.join(base_path, "watch-game.png"),
             "ad": os.path.join(base_path, "AD.png"),
         }
         for name, path in references.items():
@@ -143,7 +144,7 @@ class DetectionModel:
             print(f"Scores: {scores}")
             highest_score_name = max(scores, key=scores.get)
             highest_score = scores[highest_score_name]
-            if highest_score >= self.score_threshold:
+            if highest_score >= self.score_threshold:             
                 return highest_score_name, highest_score
             else:
                 return "none", highest_score
@@ -178,8 +179,17 @@ class DetectionModel:
     def process_detection_result(self, highest_match: str) -> str:
         """Process detection results and return action taken using only OCR and Enter key"""
         action = "none"
-
-        if highest_match == "long_time":
+        print(f"Processing detection result: {highest_match}")
+        if(highest_match == "watch-game"):            
+            self.focus_dota2_window()
+            print(f"Watch game dialog detected")
+            print(f"Pressing ESC key")
+            pyautogui.press("esc")
+            time.sleep(1)
+            pyautogui.press("esc")
+            action = "watch_game_dialog_detected"
+        if highest_match == "long_time":           
+            self.focus_dota2_window()
             print(f"Long matchmaking wait dialog detected")
             print(f"Pressing ESC key")
             pyautogui.press("esc")
@@ -188,6 +198,7 @@ class DetectionModel:
             action = "long_time_dialog_detected"
 
         elif highest_match == "read_check":
+            self.focus_dota2_window()
             print(f"Pressing Enter key")
             pyautogui.press("enter")
             time.sleep(1)
@@ -196,6 +207,7 @@ class DetectionModel:
             action = "read_check_detected"
 
         elif highest_match in ["dota", "dota2_plus"]:
+            self.focus_dota2_window()
             print(f"Match detected with highest match: {highest_match}")
             self.focus_dota2_window()
             print(f"Pressing Enter key")
@@ -205,6 +217,7 @@ class DetectionModel:
             action = "match_detected"
 
         elif highest_match == "ad":
+            self.focus_dota2_window()
             print(f"Advertisement detected")
             action = "ad_detected"
 
