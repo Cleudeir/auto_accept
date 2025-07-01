@@ -144,7 +144,7 @@ class MainView:
             sliderrelief="flat"
         )
         self.score_threshold_slider.pack(side=tk.LEFT, padx=(8, 0))
-        self.score_threshold_value_label = tk.Label(threshold_frame, text="65%", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#1976d2")
+        self.score_threshold_value_label = tk.Label(threshold_frame, text="70%", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#1976d2")
         self.score_threshold_value_label.pack(side=tk.LEFT, padx=(8, 0))
     
     def _create_screenshot_section(self):

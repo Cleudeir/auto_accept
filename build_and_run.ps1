@@ -61,11 +61,16 @@ Pop-Location
 
 # Step 3: Execute the .exe
 $exePath = Join-Path $distDir $exeName
-$targetPath = 'C:\Users\CleudeirSilva\My Drive\auto_accept\main.exe'
+$targetDir = 'C:\Users\CleudeirSilva\My Drive\auto_accept'
+$versionedExeName = "auto-accept-$appVersion.exe"
+$versionedTargetPath = Join-Path $targetDir $versionedExeName
+$targetPath = Join-Path $targetDir 'main.exe'
 
 if (Test-Path $exePath) {
-    Write-Host "Moving $exePath to $targetPath..."
-    Move-Item -Path $exePath -Destination $targetPath -Force
+    Write-Host "Moving $exePath to $versionedTargetPath..."
+    Move-Item -Path $exePath -Destination $versionedTargetPath -Force
+    Write-Host "Copying $versionedTargetPath to $targetPath..."
+    Copy-Item -Path $versionedTargetPath -Destination $targetPath -Force
     Write-Host "Running $targetPath..."
     Start-Process $targetPath
 } else {
