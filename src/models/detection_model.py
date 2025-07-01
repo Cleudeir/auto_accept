@@ -162,34 +162,32 @@ class DetectionModel:
         """Process detection results and return action taken using only OCR and Enter key"""
         action = "none"
         print(f"Processing detection result: {highest_match}")
-        if(highest_match == "watch-game"):            
-            self.focus_dota2_window()
+        # Only focus Dota 2 window when an action is about to be performed
+        if highest_match == "watch-game":
             print(f"Watch game dialog detected")
+            self.focus_dota2_window()
             print(f"Pressing ESC key")
             pyautogui.press("esc")
             time.sleep(1)
             pyautogui.press("esc")
             action = "watch_game_dialog_detected"
-        if highest_match == "long_time":           
-            self.focus_dota2_window()
+        elif highest_match == "long_time":
             print(f"Long matchmaking wait dialog detected")
+            self.focus_dota2_window()
             print(f"Pressing ESC key")
             pyautogui.press("esc")
             time.sleep(1)
             pyautogui.press("esc")
             action = "long_time_dialog_detected"
-
         elif highest_match == "read_check":
+            print(f"Read-check pattern detected")
             self.focus_dota2_window()
             print(f"Pressing Enter key")
             pyautogui.press("enter")
             time.sleep(1)
             pyautogui.press("enter")
-            print(f"Read-check pattern detected")
             action = "read_check_detected"
-
         elif highest_match in ["dota", "dota2_plus"]:
-            self.focus_dota2_window()
             print(f"Match detected with highest match: {highest_match}")
             self.focus_dota2_window()
             print(f"Pressing Enter key")
@@ -197,24 +195,20 @@ class DetectionModel:
             time.sleep(1)
             pyautogui.press("enter")
             action = "match_detected"
-
         elif highest_match == "ad":
-            self.focus_dota2_window()
             print(f"Advertisement detected")
+            self.focus_dota2_window()
             action = "ad_detected"
-
         return action
 
     def focus_dota2_window(self):
-        """Focus the Dota 2 window"""
+        """Simple: Focus the first Dota 2 window found using pygetwindow only."""
         try:
             dota_window = gw.getWindowsWithTitle("Dota 2")[0]
             if dota_window.isMinimized:
                 dota_window.restore()
             dota_window.activate()
-            self.logger.info("Focused Dota 2 window")
-        except IndexError:
-            self.logger.error("Dota 2 window not found")
+            self.logger.info("Focused Dota 2 window (pygetwindow, simple)")
         except Exception as e:
-            self.logger.error(f"Error focusing Dota 2 window: {e}")
-     
+            self.logger.error(f"Could not focus Dota 2 window: {e}")
+
