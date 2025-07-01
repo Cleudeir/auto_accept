@@ -542,6 +542,7 @@ class MainView:
             "read_check": "Read-Check Confirmation",
             "long_time": "Long Wait Warning",
             "ad": "Advertisement",
+            "watch-game": "Watch Game Dialog",
             "none": "No Match Detected"
         }
         return mapping.get(name, name)

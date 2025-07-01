@@ -150,24 +150,6 @@ class DetectionModel:
                 return "none", highest_score
         return "none", 0.0
 
-    def focus_dota2_window(self):
-        """Focus the Dota 2 window if it exists"""
-        try:
-            dota_windows = gw.getWindowsWithTitle("Dota 2")
-            if dota_windows:
-                dota_window = dota_windows[0]
-                if dota_window.isMinimized:
-                    dota_window.restore()
-                dota_window.activate()
-                self.logger.info("Successfully focused Dota 2 window")
-                return True
-            else:
-                self.logger.warning("Could not find Dota 2 window to focus")
-                return False
-        except Exception as e:
-            self.logger.error(f"Error focusing Dota 2 window: {e}")
-            return False
-
     def send_enter_key(self):
         """Send Enter key press"""
         try:
@@ -222,3 +204,17 @@ class DetectionModel:
             action = "ad_detected"
 
         return action
+
+    def focus_dota2_window(self):
+        """Focus the Dota 2 window"""
+        try:
+            dota_window = gw.getWindowsWithTitle("Dota 2")[0]
+            if dota_window.isMinimized:
+                dota_window.restore()
+            dota_window.activate()
+            self.logger.info("Focused Dota 2 window")
+        except IndexError:
+            self.logger.error("Dota 2 window not found")
+        except Exception as e:
+            self.logger.error(f"Error focusing Dota 2 window: {e}")
+     
