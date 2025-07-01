@@ -32,12 +32,17 @@ class AudioModel:
             self.logger.error(f"Error initializing sound system: {e}")
     
     def get_output_devices(self) -> List[Dict]:
-        """Get list of available audio output devices"""
+        """Get list of available audio output devices, filtering by unique name[:10] and only output devices"""
         devices = sd.query_devices()
         output_devices = []
+        seen = set()
         for i, d in enumerate(devices):
-            if d["max_output_channels"] > 0:
-                output_devices.append({"id": i, "name": d["name"]})
+            # Only include devices that are output devices (not input-only)
+            if d["max_output_channels"] > 0 and d["max_input_channels"] == 0:
+                name_slice = d["name"][:10]
+                if name_slice not in seen:
+                    output_devices.append({"id": i, "name": d["name"]})
+                    seen.add(name_slice)
         return output_devices
     
     def play_alert_sound(self, device_id: Optional[int] = None, volume: float = 1.0):
