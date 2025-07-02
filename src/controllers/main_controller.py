@@ -1,5 +1,6 @@
 import os
 import mss
+import logging
 from typing import List, Tuple
 
 from models.config_model import ConfigModel
@@ -14,13 +15,12 @@ class MainController:
     """Main controller that coordinates between models and views"""
 
     def __init__(self):
-        # Initialize models
+        self.logger = logging.getLogger("Dota2AutoAccept.MainController")
         self.config_model = ConfigModel()
         self.audio_model = AudioModel()
         self.screenshot_model = ScreenshotModel()
-        self.detection_model = DetectionModel()
+        self.detection_model = DetectionModel(config_model=self.config_model)
 
-        # Initialize controllers
         self.detection_controller = DetectionController(
             self.detection_model,
             self.screenshot_model,
@@ -28,21 +28,16 @@ class MainController:
             self.config_model,
         )
 
-        # Initialize view
         self.view = MainView()
 
-        # Setup callbacks
         self._setup_callbacks()
 
-        # Initialize UI
         self._initialize_ui()
 
-        # Setup periodic updates
         self._setup_periodic_updates()
 
     def _setup_callbacks(self):
         """Setup callbacks between controllers and views"""
-        # View callbacks
         self.view.on_start_detection = self._on_start_detection
         self.view.on_stop_detection = self._on_stop_detection
         self.view.on_test_sound = self._on_test_sound
@@ -53,7 +48,6 @@ class MainController:
         self.view.on_always_on_top_change = self._on_always_on_top_change
         self.view.on_closing = self._on_closing
 
-        # Detection controller callbacks
         self.detection_controller.on_match_found = self._on_match_found
         self.detection_controller.on_detection_update = self._on_detection_update
 
@@ -61,7 +55,6 @@ class MainController:
         """Initialize UI with current settings"""
         self.view.create_window()
 
-        # Setup audio devices
         devices = self.audio_model.get_output_devices()
         device_names = [d["name"] for d in devices]
         selected_device_index = 0
@@ -74,10 +67,8 @@ class MainController:
 
         self.view.set_device_options(device_names, selected_device_index)
 
-        # Start detection automatically when app starts
         self.detection_controller.start_detection()
 
-        # Setup monitors
         monitors = self.screenshot_model.get_available_monitors()
         monitor_names = [m[0] for m in monitors]
         selected_monitor_index = 0
@@ -90,11 +81,9 @@ class MainController:
 
         self.view.set_monitor_options(monitor_names, selected_monitor_index)
 
-        # Setup other settings
         self.view.set_volume(int(self.config_model.alert_volume * 100))
         self.view.set_always_on_top(self.config_model.always_on_top)
 
-        # Position window on second monitor if available
         self._position_window_on_second_monitor()
 
     def _position_window_on_second_monitor(self):
@@ -102,11 +91,11 @@ class MainController:
         try:
             with mss.mss() as sct:
                 monitors = sct.monitors
-                if len(monitors) > 2:  # At least two physical monitors
+                if len(monitors) > 2:
+                    
                     second_monitor = monitors[2]
 
-                    # Calculate center position on second monitor
-                    window_width =650
+                    window_width = 650
                     window_height = 600
                     x = (
                         second_monitor["left"]
@@ -133,7 +122,6 @@ class MainController:
         status = self.detection_controller.get_status()
         self.view.set_detection_state(status["is_running"], status["match_found"])
 
-        # Schedule next update
         self.view.after(500, self._update_status)
 
     def _update_screenshot_preview(self):
@@ -141,10 +129,8 @@ class MainController:
         img, timestamp = self.screenshot_model.get_latest_screenshot()
         self.view.update_screenshot(img, timestamp)
 
-        # Schedule next update
         self.view.after(1000, self._update_screenshot_preview)
 
-    # Event handlers
     def _on_start_detection(self):
         """Handle start detection request"""
         if self.detection_controller.start_detection():
@@ -207,11 +193,40 @@ class MainController:
 
     def _on_detection_update(self, img, highest_match, match_score=None):
         """Handle detection update event"""
-        # Update match percent and name in the view if score is provided
         if match_score is not None:
             self.view.set_match_percent_and_name(match_score * 100, highest_match)
-        # This is called frequently during detection, so we don't log it
         pass
+
+    def debug_dota2_windows(self):
+        """Debug method to get information about Dota 2 windows"""
+        try:
+            debug_info = self.detection_model.get_dota2_window_debug_info()
+            self.logger.info("=== Dota 2 Window Debug Information ===")
+            self.logger.info(f"Processes found: {len(debug_info['processes'])}")
+            for proc in debug_info['processes']:
+                self.logger.info(f"  - {proc['name']} (PID: {proc['pid']}) - {proc['exe']}")
+            
+            self.logger.info(f"Windows found: {len(debug_info['windows'])}")
+            for window in debug_info['windows']:
+                self.logger.info(f"  - {window['title']} (PID: {window['pid']}, Minimized: {window['is_minimized']})")
+            
+            return debug_info
+        except Exception as e:
+            self.logger.error(f"Error getting debug info: {e}")
+            return None
+
+    def force_focus_dota2(self):
+        """Manually trigger Dota 2 window focusing"""
+        try:
+            success = self.detection_model.focus_dota2_window_enhanced()
+            if success:
+                self.view.show_info("Window Focus", "Successfully focused Dota 2 window")
+            else:
+                self.view.show_error("Window Focus", "Failed to focus Dota 2 window")
+            return success
+        except Exception as e:
+            self.view.show_error("Window Focus Error", str(e))
+            return False
 
     def run(self):
         """Run the application"""

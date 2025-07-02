@@ -8,17 +8,20 @@ from PIL import Image
 from skimage.metrics import structural_similarity as ssim
 from typing import Tuple, Optional
 import time
+from models.window_model import WindowModel
 
 
 class DetectionModel:
     """Model for handling image detection and comparison logic"""
 
-    def __init__(self, screenshot_model=None, score_threshold: float = 0.7):
+    def __init__(self, screenshot_model=None, score_threshold: float = 0.7, config_model=None):
         self.logger = logging.getLogger("Dota2AutoAccept.DetectionModel")
         self.reference_images = self._load_reference_images()
         self.screenshot_model = screenshot_model
         self.ocr_cache = {}
         self.score_threshold = score_threshold
+        self.config_model = config_model
+        self.window_model = WindowModel(config_model)  # Enhanced window management
 
     def set_score_threshold(self, threshold: float):
         """Set the threshold for highest_score detection"""
@@ -159,56 +162,80 @@ class DetectionModel:
             self.logger.error(f"Error pressing Enter key: {e}")
 
     def process_detection_result(self, highest_match: str) -> str:
-        """Process detection results and return action taken using only OCR and Enter key"""
+        """Process detection results and return action taken using enhanced window focusing"""
         action = "none"
-        print(f"Processing detection result: {highest_match}")
-        # Only focus Dota 2 window when an action is about to be performed
+        print(f"🔍 Processing detection result: {highest_match}")
+        
+        # Check if auto-focus is enabled
+        should_focus = (self.config_model.auto_focus_on_detection 
+                       if self.config_model else True)
+        
+        if should_focus:
+            # Always try to focus Dota 2 window when any detection occurs
+            print("🎯 Attempting to focus Dota 2 window...")
+            focus_success = self.focus_dota2_window_enhanced()
+            if focus_success:
+                print("✅ Successfully focused Dota 2 window")
+            else:
+                print("❌ Failed to focus Dota 2 window, but continuing with action")
+                self.logger.warning("Failed to focus Dota 2 window, but continuing with action")
+        
         if highest_match == "watch-game":
-            print(f"Watch game dialog detected")
-            self.focus_dota2_window()
-            print(f"Pressing ESC key")
+            print("🎮 Watch game dialog detected - dismissing with ESC")
             pyautogui.press("esc")
-            time.sleep(1)
+            time.sleep(0.5)
             pyautogui.press("esc")
             action = "watch_game_dialog_detected"
         elif highest_match == "long_time":
-            print(f"Long matchmaking wait dialog detected")
-            self.focus_dota2_window()
-            print(f"Pressing ESC key")
+            print("⏱️ Long matchmaking wait dialog detected - dismissing with ESC")
             pyautogui.press("esc")
-            time.sleep(1)
+            time.sleep(0.5)
             pyautogui.press("esc")
             action = "long_time_dialog_detected"
         elif highest_match == "read_check":
-            print(f"Read-check pattern detected")
-            self.focus_dota2_window()
-            print(f"Pressing Enter key")
+            print("📖 Read-check pattern detected - confirming with Enter")
             pyautogui.press("enter")
-            time.sleep(1)
+            time.sleep(0.5)
             pyautogui.press("enter")
             action = "read_check_detected"
         elif highest_match in ["dota", "dota2_plus"]:
-            print(f"Match detected with highest match: {highest_match}")
-            self.focus_dota2_window()
-            print(f"Pressing Enter key")
+            print(f"🎉 Match detected ({highest_match}) - accepting with Enter")
             pyautogui.press("enter")
-            time.sleep(1)
+            time.sleep(0.5)
             pyautogui.press("enter")
             action = "match_detected"
         elif highest_match == "ad":
-            print(f"Advertisement detected")
-            self.focus_dota2_window()
+            print("📺 Advertisement detected - window focused")
             action = "ad_detected"
+        
+        print(f"✅ Action completed: {action}")
         return action
 
+    def focus_dota2_window_enhanced(self) -> bool:
+        """Enhanced Dota 2 window focusing with multiple strategies"""
+        return self.window_model.focus_dota2_window_enhanced()
+
     def focus_dota2_window(self):
-        """Simple: Focus the first Dota 2 window found using pygetwindow only."""
+        """Legacy method - now uses enhanced focusing as fallback"""
         try:
+            # Try enhanced method first
+            if self.focus_dota2_window_enhanced():
+                return
+            
+            # Fallback to original simple method
             dota_window = gw.getWindowsWithTitle("Dota 2")[0]
             if dota_window.isMinimized:
                 dota_window.restore()
             dota_window.activate()
-            self.logger.info("Focused Dota 2 window (pygetwindow, simple)")
+            self.logger.info("Focused Dota 2 window (legacy method)")
         except Exception as e:
             self.logger.error(f"Could not focus Dota 2 window: {e}")
+
+    def get_dota2_window_debug_info(self) -> dict:
+        """Get debugging information about Dota 2 windows"""
+        return {
+            'processes': self.window_model.get_dota2_processes(),
+            'windows': self.window_model.get_dota2_windows(),
+            'all_related': self.window_model.list_all_dota2_related_windows()
+        }
 

@@ -1,6 +1,10 @@
 {
   "alert_volume": 0.23,
   "selected_device_id": 4,
-  "selected_monitor_capture_setting": 3,
-  "always_on_top": false
+  "selected_monitor_capture_setting": 1,
+  "always_on_top": false,
+  "enhanced_window_focus": true,
+  "auto_focus_on_detection": true,
+  "focus_retry_attempts": 3,
+  "focus_delay_ms": 100
 }

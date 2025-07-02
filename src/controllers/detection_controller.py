@@ -1,4 +1,3 @@
-import logging
 import threading
 import time
 from typing import Callable, Optional
@@ -8,7 +7,6 @@ class DetectionController:
     """Controller for handling detection logic and threading"""
 
     def __init__(self, detection_model, screenshot_model, audio_model, config_model):
-        self.logger = logging.getLogger("Dota2AutoAccept.DetectionController")
         self.detection_model = detection_model
         self.screenshot_model = screenshot_model
         self.audio_model = audio_model
@@ -31,10 +29,8 @@ class DetectionController:
                 target=self._detection_loop, daemon=True
             )
             self.detection_thread.start()
-            self.logger.info("Detection started!")
             return True
         else:
-            self.logger.warning("Detection already running. Start request ignored.")
             if hasattr(self, "on_start_failed") and callable(self.on_start_failed):
                 self.on_start_failed("Detection is already running.")
         return False
@@ -43,26 +39,20 @@ class DetectionController:
         """Stop the detection process"""
         if self.is_running:
             self.is_running = False
-            self.logger.info("Detection stopped!")
             return True
         return False
 
     def _detection_loop(self):
         """Main detection loop that runs in a separate thread"""
-        self.logger.info("Detection loop started")
 
         try:
             while self.is_running:
                 monitor_index = self.config_model.selected_monitor_capture_setting
                 img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
                 if img is not None:
-                    # Get both highest match and score
                     highest_match, highest_score = self.detection_model.detect_match_in_image_with_score(img)
 
-                    self.logger.info(f"Highest match: {highest_match} ({highest_score:.2f})")
-
                     if highest_match == "ad":
-                        self.logger.info("AD.png detected. Stopping detection loop.")
                         self.is_running = False
                         break
 
@@ -71,29 +61,21 @@ class DetectionController:
                         "dota2_plus",
                         "read_check",
                         "long_time",
+                        "watch-game",
+                        "ad",
                     ]:
                         action = self.detection_model.process_detection_result(
                             highest_match
                         )
 
                         if action == "read_check_detected":
-                            self.logger.info(
-                                "Read-check pattern detected! Pressing Enter."
-                            )
-                            try:
-                                # Simulate pressing Enter or handle read-check here
-                                # (Add your actual code for pressing Enter if needed)
-                                self.logger.debug("Read-check action executed successfully.")
+                            try:                               
+                                pass
                             except Exception as e:
-                                self.logger.error(f"Error during read-check action: {e}")
+                                pass
                         elif action == "long_time_dialog_detected":
-                            self.logger.info(
-                                "Long matchmaking wait dialog detected! Clicking OK button."
-                            )
+                            pass
                         elif action == "match_detected":
-                            self.logger.info(
-                                "Match detected! Focusing Dota 2 window, pressing Enter and playing sound."
-                            )
                             self.audio_model.play_alert_sound(
                                 self.config_model.selected_device_id,
                                 self.config_model.alert_volume,
@@ -101,20 +83,20 @@ class DetectionController:
                             self.match_found = True
                             if self.on_match_found:
                                 self.on_match_found()
+                        elif action == "watch_game_dialog_detected":
+                            pass
 
                     if self.on_detection_update:
                         self.on_detection_update(img, highest_match, highest_score)
                 else:
-                    self.logger.warning(
-                        "Monitor capture failed for this iteration. Will retry."
-                    )
+                    pass
 
                 time.sleep(1)
 
         except Exception as e:
-            self.logger.error(f"Error in detection loop: {e}")
+            pass
         finally:
-            self.logger.info("Detection loop ended")
+            pass
 
     def get_status(self) -> dict:
         """Get current detection status"""

@@ -17,7 +17,11 @@ class ConfigModel:
             "alert_volume": 1.0,
             "selected_device_id": None,
             "selected_monitor_capture_setting": 1,
-            "always_on_top": False
+            "always_on_top": False,
+            "enhanced_window_focus": True,
+            "auto_focus_on_detection": True,
+            "focus_retry_attempts": 3,
+            "focus_delay_ms": 150  # Slightly longer delay for better reliability
         }
     
     def load(self):
@@ -102,3 +106,35 @@ class ConfigModel:
     @always_on_top.setter
     def always_on_top(self, value):
         self.set("always_on_top", bool(value))
+
+    @property
+    def enhanced_window_focus(self):
+        return self._config.get("enhanced_window_focus", True)
+    
+    @enhanced_window_focus.setter
+    def enhanced_window_focus(self, value):
+        self.set("enhanced_window_focus", bool(value))
+
+    @property
+    def auto_focus_on_detection(self):
+        return self._config.get("auto_focus_on_detection", True)
+    
+    @auto_focus_on_detection.setter
+    def auto_focus_on_detection(self, value):
+        self.set("auto_focus_on_detection", bool(value))
+
+    @property
+    def focus_retry_attempts(self):
+        return self._config.get("focus_retry_attempts", 3)
+    
+    @focus_retry_attempts.setter
+    def focus_retry_attempts(self, value):
+        self.set("focus_retry_attempts", int(value))
+
+    @property
+    def focus_delay_ms(self):
+        return self._config.get("focus_delay_ms", 100)
+    
+    @focus_delay_ms.setter
+    def focus_delay_ms(self, value):
+        self.set("focus_delay_ms", int(value))
