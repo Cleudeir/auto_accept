@@ -44,7 +44,7 @@ if (-not (pip show pyinstaller)) {
 # Collect all files in src/bin and config files
 $binDir = Join-Path $srcDir 'bin'
 $binFiles = Get-ChildItem -Path $binDir -File | ForEach-Object { "--add-data=$($binDir)\$($_.Name);bin" }
-$configFiles = @("--add-data=$projectRoot\\config.json;.")
+$configFiles = @("--add-data=$srcDir\\config.json;.")
 $datas = $binFiles + $configFiles
 
 # Remove previous build
