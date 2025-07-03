@@ -29,7 +29,6 @@ class MainView:
         self.on_start_detection = None
         self.on_stop_detection = None
         self.on_test_sound = None
-        self.on_take_screenshot = None
         self.on_device_change = None
         self.on_volume_change = None
         self.on_monitor_change = None
@@ -281,27 +280,9 @@ class MainView:
             padx=10,
             **button_config
         )
-        self.take_screenshot_btn = tk.Button(
-            button_inner,
-            text="📷 Shot",  # Further shortened text
-            command=self._on_take_screenshot_click,
-            bg="#1976d2",
-            fg="#fff",
-            activebackground="#1565c0",
-            activeforeground="#fff",
-            font=button_font,
-            padx=8,  # Further reduced padding
-            pady=0,
-            height=button_height,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
-        )
         self.start_btn.pack(side="left", padx=3)  # Further reduced spacing
         self.stop_btn.pack(side="left", padx=3)
         self.test_sound_btn.pack(side="left", padx=3)
-        self.take_screenshot_btn.pack(side="left", padx=3)
         # Initial state: only show start
         self.stop_btn.pack_forget()
 
@@ -385,8 +366,6 @@ class MainView:
                 self._on_stop_detection_click()
             elif event.keysym == "F3":
                 self._on_test_sound_click()
-            elif event.keysym == "F4":
-                self._on_take_screenshot_click()
                 
         self.window.bind("<KeyPress>", on_key_press)
         self.window.focus_set()
@@ -403,11 +382,7 @@ class MainView:
     def _on_test_sound_click(self):
         if self.on_test_sound:
             self.on_test_sound()
-    
-    def _on_take_screenshot_click(self):
-        if self.on_take_screenshot:
-            self.on_take_screenshot()
-    
+
     def _on_device_change_event(self, event=None):
         if self.on_device_change:
             idx = self.device_combo.current()

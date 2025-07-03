@@ -32,7 +32,6 @@ class ModernMainView:
         self.on_start_detection = None
         self.on_stop_detection = None
         self.on_test_sound = None
-        self.on_take_screenshot = None
         self.on_device_change = None
         self.on_volume_change = None
         # self.on_monitor_change = None
@@ -466,19 +465,6 @@ class ModernMainView:
         )
         self.test_sound_btn.grid(row=0, column=2, padx=8)
 
-        self.take_screenshot_btn = ctk.CTkButton(
-            self.button_container,
-            text="📷 Screenshot",
-            command=self._on_take_screenshot_click,
-            width=100,
-            height=36,
-            font=ctk.CTkFont(size=13, weight="bold"),
-            fg_color=("#2196f3", "#1976d2"),
-            hover_color=("#1976d2", "#1565c0"),
-            corner_radius=8
-        )
-        self.take_screenshot_btn.grid(row=0, column=3, padx=8)
-
     def _toggle_theme(self):
         """Toggle between light and dark themes"""
         if self.theme_mode == "dark":
@@ -505,11 +491,6 @@ class ModernMainView:
         """Handle test sound button click"""
         if self.on_test_sound:
             self.on_test_sound()
-
-    def _on_take_screenshot_click(self):
-        """Handle take screenshot button click"""
-        if self.on_take_screenshot:
-            self.on_take_screenshot()
 
     def _on_device_change_event(self, choice):
         """Handle device selection change"""
@@ -592,8 +573,6 @@ class ModernMainView:
                 self._on_stop_detection_click()
             elif event.keysym == "F3":
                 self._on_test_sound_click()
-            elif event.keysym == "F4":
-                self._on_take_screenshot_click()
                 
         self.window.bind("<KeyPress>", on_key_press)
         self.window.focus_set()

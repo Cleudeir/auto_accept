@@ -46,7 +46,6 @@ class MainController:
         self.view.on_start_detection = self._on_start_detection
         self.view.on_stop_detection = self._on_stop_detection
         self.view.on_test_sound = self._on_test_sound
-        self.view.on_take_screenshot = self._on_take_screenshot
         self.view.on_device_change = self._on_device_change
         self.view.on_volume_change = self._on_volume_change
         self.view.on_always_on_top_change = self._on_always_on_top_change
@@ -151,28 +150,6 @@ class MainController:
             )
         except Exception as e:
             self.view.show_error("Sound Test Error", str(e))
-
-    def _on_take_screenshot(self):
-        """Handle manual screenshot request"""
-        import datetime
-        import os
-        
-        monitor_index = self.screenshot_model.auto_detect_dota_monitor()
-        if monitor_index is None:
-            monitor_index = 1  # Default to primary monitor
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        
-        # Create screenshots directory if it doesn't exist
-        screenshots_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "screenshots")
-        os.makedirs(screenshots_dir, exist_ok=True)
-        
-        filename = os.path.join(screenshots_dir, f"monitor_{monitor_index}_screenshot_{timestamp}.png")
-        
-        success = self.screenshot_model.save_monitor_screenshot(filename)
-        if success:
-            self.view.show_info("Screenshot Saved", f"Screenshot saved to:\n{filename}")
-        else:
-            self.view.show_error("Screenshot Error", "Failed to capture screenshot")
 
     def _on_device_change(self, device_index: int):
         """Handle audio device change"""
