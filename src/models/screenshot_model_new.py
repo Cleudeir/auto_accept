@@ -112,16 +112,85 @@ class ScreenshotModel:
         return self.latest_screenshot_img, self.latest_screenshot_time
 
     def auto_detect_dota_monitor(self) -> Optional[int]:
-        """Auto-detect which monitor contains Dota 2 using process detection (works even if minimized)"""
+        """Auto-detect which monitor contains Dota 2 window, even if minimized (real-time detection)"""
+        try:
+            import pygetwindow as gw
+            import psutil
+            
+            # First, prioritize visible and active Dota 2 windows (real-time detection)
+            for window in gw.getAllWindows():
+                title = window.title.lower()
+                if (('dota 2' in title or 'dota2' in title or 'dota' in title) and 
+                    len(window.title.strip()) > 0 and window.visible and not getattr(window, 'isMinimized', False)):
+                    
+                    # Get window position for active/visible windows
+                    try:
+                        window_center_x = window.left + (window.width // 2)
+                        window_center_y = window.top + (window.height // 2)
+                        
+                        # Check which monitor contains this window
+                        with mss.mss() as sct:
+                            monitors = sct.monitors[1:]  # Skip the combined monitor at index 0
+                            for i, monitor in enumerate(monitors, start=1):
+                                if (monitor['left'] <= window_center_x <= monitor['left'] + monitor['width'] and
+                                    monitor['top'] <= window_center_y <= monitor['top'] + monitor['height']):
+                                    self.logger.info(f"Real-time detection: Active Dota 2 window '{window.title}' on Monitor {i}")
+                                    return i
+                    except Exception as e:
+                        self.logger.warning(f"Error getting window position for '{window.title}': {e}")
+                        continue
+            
+            # If no active/visible windows found, check for minimized ones
+            dota_windows = []
+            for window in gw.getAllWindows():
+                title = window.title.lower()
+                if (('dota 2' in title or 'dota2' in title or 'dota' in title) and 
+                    len(window.title.strip()) > 0):
+                    dota_windows.append(window)
+                    self.logger.debug(f"Found Dota 2 window: '{window.title}' (Visible: {window.visible}, Minimized: {getattr(window, 'isMinimized', False)})")
+            
+            if dota_windows:
+                # Use the first Dota 2 window found (even if minimized)
+                dota_window = dota_windows[0]
+                
+                try:
+                    # Get window position (even if minimized, some properties might be available)
+                    window_center_x = dota_window.left + (dota_window.width // 2) if dota_window.width > 0 else None
+                    window_center_y = dota_window.top + (dota_window.height // 2) if dota_window.height > 0 else None
+                    
+                    # If coordinates are valid, use them
+                    if (window_center_x is not None and window_center_y is not None and
+                        window_center_x > 0 and window_center_y > 0 and 
+                        dota_window.width > 0 and dota_window.height > 0):
+                        
+                        # Check which monitor contains the window center
+                        with mss.mss() as sct:
+                            monitors = sct.monitors[1:]  # Skip the combined monitor at index 0
+                            for i, monitor in enumerate(monitors, start=1):
+                                if (monitor['left'] <= window_center_x <= monitor['left'] + monitor['width'] and
+                                    monitor['top'] <= window_center_y <= monitor['top'] + monitor['height']):
+                                    self.logger.info(f"Auto-detected Dota 2 on Monitor {i} (from window coordinates)")
+                                    return i
+                    
+                except Exception as e:
+                    self.logger.warning(f"Error getting window position: {e}")
+            
+            # Fallback: try process-based detection
+            return self._detect_by_process()
+            
+        except ImportError as e:
+            self.logger.error(f"Required modules not available for auto-detection: {e}")
+            return None
+        except Exception as e:
+            self.logger.error(f"Error during auto-detection: {e}")
+            return None
+
+    def _detect_by_process(self) -> Optional[int]:
+        """Fallback detection using process information"""
         try:
             import psutil
-            import ctypes
-            from ctypes import wintypes
             
-            # Windows API functions
-            user32 = ctypes.windll.user32
-            
-            # Find Dota 2 processes
+            # Look for Dota 2 processes
             dota_processes = []
             for proc in psutil.process_iter(['pid', 'name', 'exe']):
                 try:
@@ -135,73 +204,18 @@ class ScreenshotModel:
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     continue
             
-            if not dota_processes:
-                self.logger.warning("No Dota 2 processes found")
-                return None
+            if dota_processes:
+                # If we found processes but can't determine monitor, default to primary
+                self.logger.info("Found Dota 2 process but couldn't determine monitor, defaulting to Monitor 1")
+                return 1
             
-            # Find windows belonging to Dota 2 processes
-            for proc in dota_processes:
-                try:
-                    # Store windows list in a way that can be accessed by the callback
-                    windows = []
-                    
-                    # Get all windows for this process
-                    def enum_windows_callback(hwnd, lparam):
-                        if user32.IsWindow(hwnd):
-                            pid = wintypes.DWORD()
-                            user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-                            if pid.value == proc.pid:
-                                # Get window title
-                                length = user32.GetWindowTextLengthW(hwnd)
-                                if length > 0:
-                                    buffer = ctypes.create_unicode_buffer(length + 1)
-                                    user32.GetWindowTextW(hwnd, buffer, length + 1)
-                                    title = buffer.value
-                                    if title:  # Only add windows with titles
-                                        windows.append((hwnd, title))
-                        return True
-                    
-                    EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
-                    user32.EnumWindows(EnumWindowsProc(enum_windows_callback), 0)
-                    
-                    # Find the main Dota 2 window
-                    for hwnd, title in windows:
-                        title_lower = title.lower()
-                        if ('dota 2' in title_lower or 'dota2' in title_lower or 'dota' in title_lower):
-                            try:
-                                # Get window rectangle (works even if minimized)
-                                rect = wintypes.RECT()
-                                if user32.GetWindowRect(hwnd, ctypes.byref(rect)):
-                                    window_center_x = (rect.left + rect.right) // 2
-                                    window_center_y = (rect.top + rect.bottom) // 2
-                                    
-                                    # Check which monitor contains this window
-                                    with mss.mss() as sct:
-                                        monitors = sct.monitors[1:]  # Skip the combined monitor at index 0
-                                        for i, monitor in enumerate(monitors, start=1):
-                                            if (monitor['left'] <= window_center_x <= monitor['left'] + monitor['width'] and
-                                                monitor['top'] <= window_center_y <= monitor['top'] + monitor['height']):
-                                                self.logger.info(f"Process-based detection: Dota 2 process '{title}' on Monitor {i}")
-                                                return i
-                            except Exception as e:
-                                self.logger.warning(f"Error getting window rect for '{title}': {e}")
-                                continue
-                                
-                except Exception as e:
-                    self.logger.warning(f"Error processing Dota 2 process {proc.pid}: {e}")
-                    continue
-            
-            # If we found processes but couldn't determine monitor, default to primary
-            self.logger.info("Found Dota 2 process but couldn't determine monitor, defaulting to Monitor 1")
-            return 1
-            
-        except ImportError as e:
-            self.logger.error(f"Required modules not available for process-based detection: {e}")
+            self.logger.warning("No Dota 2 processes found")
             return None
+            
         except Exception as e:
-            self.logger.error(f"Error during process-based auto-detection: {e}")
+            self.logger.error(f"Error in process detection: {e}")
             return None
 
     def get_dota_process_monitor(self) -> Optional[int]:
-        """Get monitor associated with Dota 2 process"""
+        """Get monitor associated with Dota 2 process, prioritizing active windows"""
         return self.auto_detect_dota_monitor()

@@ -49,9 +49,12 @@ class MainController:
         self.view.on_take_screenshot = self._on_take_screenshot
         self.view.on_device_change = self._on_device_change
         self.view.on_volume_change = self._on_volume_change
-        self.view.on_monitor_change = self._on_monitor_change
         self.view.on_always_on_top_change = self._on_always_on_top_change
         self.view.on_closing = self._on_closing
+
+        # Add callback for score threshold changes if the view supports it
+        if hasattr(self.view, 'on_score_threshold_change'):
+            self.view.on_score_threshold_change = self._on_score_threshold_change
 
         self.detection_controller.on_match_found = self._on_match_found
         self.detection_controller.on_detection_update = self._on_detection_update
@@ -74,20 +77,14 @@ class MainController:
 
         self.detection_controller.start_detection()
 
-        monitors = self.screenshot_model.get_available_monitors()
-        monitor_names = [m[0] for m in monitors]
-        selected_monitor_index = 0
 
-        if monitors:
-            for i, (_, monitor_id) in enumerate(monitors):
-                if monitor_id == self.config_model.selected_monitor_capture_setting:
-                    selected_monitor_index = i
-                    break
-
-        self.view.set_monitor_options(monitor_names, selected_monitor_index)
 
         self.view.set_volume(int(self.config_model.alert_volume * 100))
         self.view.set_always_on_top(self.config_model.always_on_top)
+
+        # Set initial threshold value if the view supports it
+        if hasattr(self.view, 'set_score_threshold'):
+            self.view.set_score_threshold(self.config_model.detection_threshold)
 
         self._position_window_on_second_monitor()
 
@@ -157,11 +154,23 @@ class MainController:
 
     def _on_take_screenshot(self):
         """Handle manual screenshot request"""
-        img = self.screenshot_model.capture_monitor_screenshot(
-            self.config_model.selected_monitor_capture_setting
-        )
-        if img is not None:
-            pass
+        import datetime
+        import os
+        
+        monitor_index = self.screenshot_model.auto_detect_dota_monitor()
+        if monitor_index is None:
+            monitor_index = 1  # Default to primary monitor
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Create screenshots directory if it doesn't exist
+        screenshots_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "screenshots")
+        os.makedirs(screenshots_dir, exist_ok=True)
+        
+        filename = os.path.join(screenshots_dir, f"monitor_{monitor_index}_screenshot_{timestamp}.png")
+        
+        success = self.screenshot_model.save_monitor_screenshot(filename)
+        if success:
+            self.view.show_info("Screenshot Saved", f"Screenshot saved to:\n{filename}")
         else:
             self.view.show_error("Screenshot Error", "Failed to capture screenshot")
 
@@ -176,17 +185,18 @@ class MainController:
         """Handle volume change"""
         self.config_model.alert_volume = volume / 100.0
 
-    def _on_monitor_change(self, monitor_index: int):
-        """Handle monitor change"""
-        monitors = self.screenshot_model.get_available_monitors()
-        if 0 <= monitor_index < len(monitors):
-            monitor_id = monitors[monitor_index][1]
-            self.config_model.selected_monitor_capture_setting = monitor_id
+
 
     def _on_always_on_top_change(self, always_on_top: bool):
         """Handle always on top change"""
         self.config_model.always_on_top = always_on_top
         self.view.set_always_on_top(always_on_top)
+
+    def _on_score_threshold_change(self, threshold: float):
+        """Handle score threshold change"""
+        self.detection_model.set_score_threshold(threshold)
+
+
 
     def _on_closing(self):
         """Handle application closing"""
@@ -232,6 +242,10 @@ class MainController:
         except Exception as e:
             self.view.show_error("Window Focus Error", str(e))
             return False
+
+    def manual_detect_monitor(self):
+        """Manually trigger monitor auto-detection"""
+        return self._auto_detect_and_set_monitor()
 
     def run(self):
         """Run the application"""

@@ -35,9 +35,10 @@ class ModernMainView:
         self.on_take_screenshot = None
         self.on_device_change = None
         self.on_volume_change = None
-        self.on_monitor_change = None
+        # self.on_monitor_change = None
         self.on_always_on_top_change = None
         self.on_score_threshold_change = None  # Add sensitivity callback
+        self.on_auto_detect_monitor = None  # Add auto-detect callback
         self.on_closing = None
         
         # UI State
@@ -401,19 +402,7 @@ class ModernMainView:
             font=ctk.CTkFont(size=14, weight="bold")
         ).grid(row=0, column=0, sticky="w", padx=15, pady=(15, 10))
 
-        # Monitor selection
-        ctk.CTkLabel(
-            self.monitor_card,
-            text="Capture Monitor:",
-            font=ctk.CTkFont(size=12)
-        ).grid(row=1, column=0, sticky="w", padx=15, pady=(0, 5))
-
-        self.monitor_combo = ctk.CTkComboBox(
-            self.monitor_card,
-            command=self._on_monitor_change_event,
-            font=ctk.CTkFont(size=12)
-        )
-        self.monitor_combo.grid(row=2, column=0, sticky="ew", padx=15, pady=(0, 10))
+        # (Monitor selection UI removed)
 
         # Always on top option
         self.always_on_top_var = ctk.BooleanVar()
@@ -424,7 +413,7 @@ class ModernMainView:
             command=self._on_always_on_top_change_event,
             font=ctk.CTkFont(size=12)
         )
-        self.always_on_top_check.grid(row=3, column=0, sticky="w", padx=15, pady=(0, 15))
+        self.always_on_top_check.grid(row=4, column=0, sticky="w", padx=15, pady=(0, 15))
 
     def _create_control_section(self):
         """Create modern control buttons section"""
@@ -532,10 +521,10 @@ class ModernMainView:
         if self.on_volume_change:
             self.on_volume_change(int(value))
 
-    def _on_monitor_change_event(self, choice):
-        """Handle monitor selection change"""
-        if self.on_monitor_change:
-            self.on_monitor_change(choice)
+    # def _on_monitor_change_event(self, choice):
+    #     """Handle monitor selection change"""
+    #     if self.on_monitor_change:
+    #         self.on_monitor_change(choice)
 
     def _on_always_on_top_change_event(self):
         """Handle always on top checkbox change"""
@@ -561,9 +550,32 @@ class ModernMainView:
         
         # Call the callback if it exists
         if hasattr(self, 'on_score_threshold_change') and self.on_score_threshold_change:
-            # Convert to 0.0-1.0 range for the detection system
-            normalized_value = percent / 100.0
+            # Convert from 0-100 scale to 0-1 scale for the callback
+            normalized_value = value / 100.0
             self.on_score_threshold_change(normalized_value)
+
+    def _on_auto_detect_monitor(self):
+        """Handle auto-detect monitor button click"""
+        if hasattr(self, 'on_auto_detect_monitor') and self.on_auto_detect_monitor:
+            self.on_auto_detect_monitor()
+
+    def set_score_threshold(self, threshold: float):
+        """Set the score threshold slider value"""
+        if hasattr(self, 'score_threshold_slider'):
+            # Convert from 0-1 scale to 0-100 scale for the slider
+            self.score_threshold_slider.set(threshold * 100)
+            # Update the display label
+            self._on_score_threshold_change_event(threshold * 100)
+
+    # def set_monitor_selection(self, monitor_index: int):
+    #     """Set the selected monitor in the combobox"""
+    #     if hasattr(self, 'monitor_combo'):
+    #         try:
+    #             values = self.monitor_combo.cget("values")
+    #             if 0 <= monitor_index < len(values):
+    #                 self.monitor_combo.set(values[monitor_index])
+    #         except Exception as e:
+    #             pass
 
     def _on_window_closing(self):
         """Handle window closing event"""
@@ -693,12 +705,12 @@ class ModernMainView:
             if 0 <= selected_index < len(unique_devices):
                 self.device_combo.set(unique_devices[selected_index])
 
-    def set_monitor_options(self, monitors: List[str], selected_index: int = 0):
-        """Set monitor options"""
-        if self.monitor_combo:
-            self.monitor_combo.configure(values=monitors)
-            if 0 <= selected_index < len(monitors):
-                self.monitor_combo.set(monitors[selected_index])
+    # def set_monitor_options(self, monitors: List[str], selected_index: int = 0):
+    #     """Set monitor options"""
+    #     if self.monitor_combo:
+    #         self.monitor_combo.configure(values=monitors)
+    #         if 0 <= selected_index < len(monitors):
+    #             self.monitor_combo.set(monitors[selected_index])
 
     def set_volume(self, volume: int):
         """Set volume slider value"""

@@ -19,13 +19,20 @@ class DetectionModel:
         self.reference_images = self._load_reference_images()
         self.screenshot_model = screenshot_model
         self.ocr_cache = {}
-        self.score_threshold = score_threshold
         self.config_model = config_model
+        # Use threshold from config if available, otherwise use the passed parameter
+        if config_model and hasattr(config_model, 'detection_threshold'):
+            self.score_threshold = config_model.detection_threshold
+        else:
+            self.score_threshold = score_threshold
         self.window_model = WindowModel(config_model)  # Enhanced window management
 
     def set_score_threshold(self, threshold: float):
         """Set the threshold for highest_score detection"""
         self.score_threshold = threshold
+        # Also update the config model if available
+        if self.config_model:
+            self.config_model.detection_threshold = threshold
 
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""

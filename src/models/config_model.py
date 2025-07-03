@@ -16,14 +16,15 @@ class ConfigModel:
         return {
             "alert_volume": 1.0,
             "selected_device_id": None,
-            "selected_monitor_capture_setting": 1,
             "always_on_top": False,
             "enhanced_window_focus": True,
             "auto_focus_on_detection": True,
             "focus_retry_attempts": 3,
             "focus_delay_ms": 150,  # Slightly longer delay for better reliability
             "ui_theme": "dark",  # UI theme: "dark", "light", "system"
-            "use_modern_ui": True  # Use modern CustomTkinter UI
+            "use_modern_ui": True,  # Use modern CustomTkinter UI
+            "detection_threshold": 0.7,  # Detection threshold for image matching
+            "auto_detect_dota_monitor": False  # Auto-detect monitor with Dota 2
         }
     
     def load(self):
@@ -93,13 +94,6 @@ class ConfigModel:
     def selected_device_id(self, value):
         self.set("selected_device_id", value)
     
-    @property
-    def selected_monitor_capture_setting(self):
-        return self._config["selected_monitor_capture_setting"]
-    
-    @selected_monitor_capture_setting.setter
-    def selected_monitor_capture_setting(self, value):
-        self.set("selected_monitor_capture_setting", int(value))
     
     @property
     def always_on_top(self):
@@ -156,3 +150,19 @@ class ConfigModel:
     @use_modern_ui.setter
     def use_modern_ui(self, value):
         self.set("use_modern_ui", bool(value))
+
+    @property
+    def detection_threshold(self):
+        return self._config.get("detection_threshold", 0.7)
+    
+    @detection_threshold.setter
+    def detection_threshold(self, value):
+        self.set("detection_threshold", float(value))
+
+    @property
+    def auto_detect_dota_monitor(self):
+        return self._config.get("auto_detect_dota_monitor", False)
+    
+    @auto_detect_dota_monitor.setter
+    def auto_detect_dota_monitor(self, value):
+        self.set("auto_detect_dota_monitor", bool(value))

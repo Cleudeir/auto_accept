@@ -47,7 +47,7 @@ class DetectionController:
 
         try:
             while self.is_running:
-                monitor_index = self.config_model.selected_monitor_capture_setting
+                monitor_index = self.screenshot_model.auto_detect_dota_monitor()
                 img = self.screenshot_model.capture_monitor_screenshot(monitor_index)
                 if img is not None:
                     highest_match, highest_score = self.detection_model.detect_match_in_image_with_score(img)
