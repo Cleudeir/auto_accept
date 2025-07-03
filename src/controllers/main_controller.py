@@ -28,7 +28,7 @@ class MainController:
             self.config_model,
         )
 
-        self.view = MainView()
+        self.view = MainView(config_model=self.config_model)
 
         self._setup_callbacks()
 

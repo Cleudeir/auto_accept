@@ -9,10 +9,11 @@ from typing import Callable, Optional, List, Tuple
 class MainView:
     """Main GUI view for the Dota 2 Auto Accept application"""
     
-    def __init__(self, title: str = "Dota 2 Auto Accept - Control Panel"):
+    def __init__(self, title: str = "Dota 2 Auto Accept - Control Panel", config_model=None):
         self.logger = logging.getLogger("Dota2AutoAccept.MainView")
         self.window = None
         self.title = title
+        self.config_model = config_model
         
         # UI Components
         self.status_label = None
@@ -40,6 +41,8 @@ class MainView:
         self.match_found = False
         self.current_match_percent = 0.0
         self.current_match_name = "none"
+        # Initialize settings expanded state from config or default to False
+        self.settings_expanded = config_model.settings_panel_expanded if config_model else False
         
     def create_window(self):
         """Create and setup the main window"""
@@ -48,7 +51,7 @@ class MainView:
         self.window.configure(bg="#ffffff")  # Set app background to white
 
         # Window configuration
-        window_width = 1020  # Wider for side-by-side layout
+        window_width = 1020 if self.settings_expanded else 720  # Adjust width based on settings visibility
         window_height = 600
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight()
@@ -65,20 +68,21 @@ class MainView:
         main_frame.pack(fill="both", expand=True)
 
         # Left column: status, screenshot, control buttons
-        left_col = tk.Frame(main_frame, bg="#ffffff")
-        left_col.pack(side=tk.LEFT, fill="both", expand=True)
-        # Right column: settings
-        right_col = tk.Frame(main_frame, bg="#ffffff")
-        right_col.pack(side=tk.RIGHT, fill="y", padx=(10, 18), pady=10)
+        self.left_col = tk.Frame(main_frame, bg="#ffffff")
+        self.left_col.pack(side=tk.LEFT, fill="both", expand=True)
+        
+        # Right column: settings (expandable)
+        self.right_col = tk.Frame(main_frame, bg="#ffffff")
+        self.right_col.pack(side=tk.RIGHT, fill="y", padx=(10, 18), pady=10)
 
         # Status and screenshot on left
-        self._create_status_section(parent=left_col)
-        self._create_screenshot_section(parent=left_col)
-        self._create_control_buttons_section(parent=left_col)
+        self._create_status_section(parent=self.left_col)
+        self._create_screenshot_section(parent=self.left_col)
+        self._create_control_buttons_section(parent=self.left_col)
 
-        # Settings on right
-        self._create_audio_settings(parent=right_col)
-        self._create_monitor_settings(parent=right_col)
+        # Settings toggle button and panels on right
+        self._create_settings_toggle(parent=self.right_col)
+        self._create_expandable_settings(parent=self.right_col)
 
         # Keyboard shortcuts and close handler
         self._setup_keyboard_shortcuts()
@@ -570,3 +574,71 @@ class MainView:
         value = max(50, min(100, int(percent * 100)))
         self.score_threshold_var.set(value)
         self.score_threshold_value_label.config(text=f"{value}%")
+    
+    def _create_settings_toggle(self, parent=None):
+        """Create the settings toggle button"""
+        parent = parent or self.window
+        
+        # Toggle button frame
+        toggle_frame = tk.Frame(parent, bg="#ffffff")
+        toggle_frame.pack(fill="x", pady=(0, 5))
+        
+        # Settings toggle button
+        self.settings_toggle_btn = tk.Button(
+            toggle_frame,
+            text="◀ Settings" if self.settings_expanded else "▶ Settings",
+            command=self._toggle_settings,
+            bg="#f5f5f5",
+            fg="#333",
+            activebackground="#e0e0e0",
+            activeforeground="#333",
+            font=("Segoe UI", 10, "bold"),
+            padx=15,
+            pady=5,
+            bd=1,
+            relief="solid",
+            cursor="hand2",
+            highlightthickness=0,
+        )
+        self.settings_toggle_btn.pack(fill="x")
+
+    def _create_expandable_settings(self, parent=None):
+        """Create the expandable settings panel"""
+        parent = parent or self.window
+        
+        # Settings container frame
+        self.settings_panel = tk.Frame(parent, bg="#ffffff")
+        
+        # Create the settings sections inside the panel
+        self._create_audio_settings(parent=self.settings_panel)
+        self._create_monitor_settings(parent=self.settings_panel)
+        
+        # Pack the panel - it will be shown/hidden based on settings_expanded state
+        if self.settings_expanded:
+            self.settings_panel.pack(fill="both", expand=True, pady=(5, 0))
+
+    def _toggle_settings(self):
+        """Toggle the visibility of the settings panel"""
+        self.settings_expanded = not self.settings_expanded
+        
+        # Save the state to config if available
+        if self.config_model:
+            self.config_model.settings_panel_expanded = self.settings_expanded
+        
+        if self.settings_expanded:
+            # Show settings
+            self.settings_panel.pack(fill="both", expand=True, pady=(5, 0))
+            self.settings_toggle_btn.config(text="◀ Settings")
+            # Expand window width to accommodate settings
+            self.window.geometry("1020x600")
+        else:
+            # Hide settings
+            self.settings_panel.pack_forget()
+            self.settings_toggle_btn.config(text="▶ Settings")
+            # Shrink window width when settings are hidden
+            self.window.geometry("720x600")
+
+        # Update window layout
+        self.window.update_idletasks()
+
+    # ... existing methods continue below ...

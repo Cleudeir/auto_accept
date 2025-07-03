@@ -21,7 +21,8 @@ class ConfigModel:
             "enhanced_window_focus": True,
             "auto_focus_on_detection": True,
             "focus_retry_attempts": 3,
-            "focus_delay_ms": 150  # Slightly longer delay for better reliability
+            "focus_delay_ms": 150,  # Slightly longer delay for better reliability
+            "settings_panel_expanded": False  # Settings panel expanded state
         }
     
     def load(self):
@@ -138,3 +139,11 @@ class ConfigModel:
     @focus_delay_ms.setter
     def focus_delay_ms(self, value):
         self.set("focus_delay_ms", int(value))
+
+    @property
+    def settings_panel_expanded(self):
+        return self._config.get("settings_panel_expanded", False)
+    
+    @settings_panel_expanded.setter
+    def settings_panel_expanded(self, value):
+        self.set("settings_panel_expanded", bool(value))
