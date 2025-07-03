@@ -37,6 +37,7 @@ class ModernMainView:
         self.on_volume_change = None
         self.on_monitor_change = None
         self.on_always_on_top_change = None
+        self.on_score_threshold_change = None  # Add sensitivity callback
         self.on_closing = None
         
         # UI State
@@ -243,33 +244,46 @@ class ModernMainView:
         )
         self.match_name_label.grid(row=0, column=1, sticky="e")
 
-        # Sensitivity slider
+        # Sensitivity slider with enhanced feedback
         self.sensitivity_frame = ctk.CTkFrame(self.status_card, fg_color="transparent")
         self.sensitivity_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=(0, 15))
         self.sensitivity_frame.grid_columnconfigure(1, weight=1)
 
-        ctk.CTkLabel(
+        # Sensitivity label with tooltip info
+        sensitivity_label = ctk.CTkLabel(
             self.sensitivity_frame,
-            text="Detection Sensitivity:",
+            text="Detection Threshold:",
             font=ctk.CTkFont(size=12)
-        ).grid(row=0, column=0, sticky="w", padx=(0, 10))
+        )
+        sensitivity_label.grid(row=0, column=0, sticky="w", padx=(0, 10))
 
         self.score_threshold_slider = ctk.CTkSlider(
             self.sensitivity_frame,
             from_=50,
-            to=100,
-            number_of_steps=50,
+            to=95,  # Reduced max to 95% for better UX
+            number_of_steps=45,
             command=self._on_score_threshold_change_event
         )
         self.score_threshold_slider.grid(row=0, column=1, sticky="ew", padx=(0, 10))
         self.score_threshold_slider.set(70)
 
+        # Enhanced threshold display with color coding
         self.score_threshold_value_label = ctk.CTkLabel(
             self.sensitivity_frame,
             text="70%",
-            font=ctk.CTkFont(size=12, weight="bold")
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color=("#ff9800", "#ffa726")  # Orange for medium sensitivity
         )
         self.score_threshold_value_label.grid(row=0, column=2, sticky="e")
+        
+        # Add helpful threshold info
+        threshold_info = ctk.CTkLabel(
+            self.sensitivity_frame,
+            text="Lower = More Sensitive | Higher = More Strict",
+            font=ctk.CTkFont(size=10),
+            text_color=("gray60", "gray40")
+        )
+        threshold_info.grid(row=1, column=0, columnspan=3, sticky="ew", pady=(5, 0))
 
     def _create_screenshot_section(self):
         """Create modern screenshot preview section"""
@@ -529,11 +543,27 @@ class ModernMainView:
             self.on_always_on_top_change(self.always_on_top_var.get())
 
     def _on_score_threshold_change_event(self, value):
-        """Handle sensitivity slider change"""
+        """Handle sensitivity slider change with enhanced feedback"""
         percent = int(value)
+        
+        # Update the percentage display
         self.score_threshold_value_label.configure(text=f"{percent}%")
+        
+        # Color code the threshold value based on sensitivity level
+        if percent <= 60:  # High sensitivity (low threshold)
+            color = ("#4caf50", "#66bb6a")  # Green - More detections
+        elif percent <= 75:  # Medium sensitivity 
+            color = ("#ff9800", "#ffa726")  # Orange - Balanced
+        else:  # Low sensitivity (high threshold)
+            color = ("#f44336", "#ef5350")  # Red - Strict detection
+            
+        self.score_threshold_value_label.configure(text_color=color)
+        
+        # Call the callback if it exists
         if hasattr(self, 'on_score_threshold_change') and self.on_score_threshold_change:
-            self.on_score_threshold_change(percent / 100.0)
+            # Convert to 0.0-1.0 range for the detection system
+            normalized_value = percent / 100.0
+            self.on_score_threshold_change(normalized_value)
 
     def _on_window_closing(self):
         """Handle window closing event"""
@@ -683,12 +713,24 @@ class ModernMainView:
             self.window.attributes("-topmost", always_on_top)
 
     def set_score_threshold(self, percent: float):
-        """Set the score threshold slider value (0-1 float)"""
-        value = max(50, min(100, int(percent * 100)))
+        """Set the score threshold slider value (0-1 float) with color coding"""
+        value = max(50, min(95, int(percent * 100)))  # Updated range 50-95
+        
         if self.score_threshold_slider:
             self.score_threshold_slider.set(value)
+            
         if self.score_threshold_value_label:
             self.score_threshold_value_label.configure(text=f"{value}%")
+            
+            # Apply color coding based on threshold level
+            if value <= 60:  # High sensitivity (low threshold)
+                color = ("#4caf50", "#66bb6a")  # Green
+            elif value <= 75:  # Medium sensitivity 
+                color = ("#ff9800", "#ffa726")  # Orange
+            else:  # Low sensitivity (high threshold)
+                color = ("#f44336", "#ef5350")  # Red
+                
+            self.score_threshold_value_label.configure(text_color=color)
 
     def show_error(self, title: str, message: str):
         """Show error message"""

@@ -34,6 +34,7 @@ class MainView:
         self.on_volume_change = None
         self.on_monitor_change = None
         self.on_always_on_top_change = None
+        self.on_score_threshold_change = None  # Add sensitivity callback
         self.on_closing = None
         
         # UI State
@@ -171,17 +172,17 @@ class MainView:
         )
         self.match_name_label.pack(pady=(0, 4))
         
-        # Sensitivity slider - compact and modern
+        # Enhanced sensitivity slider with better feedback
         threshold_frame = tk.Frame(card_frame, bg="#f8f9fa")
         threshold_frame.pack(pady=(0, 6))
-        tk.Label(threshold_frame, text="Sensitivity:", font=("Segoe UI", 8), bg="#f8f9fa", fg="#666").pack(side=tk.LEFT)  # Smaller font
-        self.score_threshold_var = tk.DoubleVar(value=65.0)
+        tk.Label(threshold_frame, text="Threshold:", font=("Segoe UI", 8), bg="#f8f9fa", fg="#666").pack(side=tk.LEFT)
+        self.score_threshold_var = tk.DoubleVar(value=70.0)
         self.score_threshold_slider = tk.Scale(
             threshold_frame,
-            from_=50, to=100, resolution=1, orient=tk.HORIZONTAL,
+            from_=50, to=95, resolution=1, orient=tk.HORIZONTAL,  # Updated range 50-95
             variable=self.score_threshold_var,
             command=self._on_score_threshold_change_event,
-            length=80,  # Further reduced for compactness
+            length=80,
             showvalue=0,
             bg="#f8f9fa",
             fg="#666",
@@ -191,7 +192,10 @@ class MainView:
             activebackground="#1976d2"
         )
         self.score_threshold_slider.pack(side=tk.LEFT, padx=(4, 0))
-        self.score_threshold_value_label = tk.Label(threshold_frame, text="70%", font=("Segoe UI", 8, "bold"), bg="#f8f9fa", fg="#1976d2")
+        self.score_threshold_value_label = tk.Label(
+            threshold_frame, text="70%", font=("Segoe UI", 8, "bold"), 
+            bg="#f8f9fa", fg="#ff9800"  # Start with orange (medium sensitivity)
+        )
         self.score_threshold_value_label.pack(side=tk.LEFT, padx=(4, 0))
     
     def _create_screenshot_section(self, parent=None):
@@ -600,16 +604,41 @@ class MainView:
         return mapping.get(name, "Unknown pattern.")
     
     def _on_score_threshold_change_event(self, val):
+        """Handle sensitivity slider change with enhanced feedback"""
         percent = float(val)
+        
+        # Update percentage display
         self.score_threshold_value_label.config(text=f"{percent:.0f}%")
+        
+        # Color code the threshold value based on sensitivity level
+        if percent <= 60:  # High sensitivity (low threshold)
+            color = "#4caf50"  # Green - More detections
+        elif percent <= 75:  # Medium sensitivity 
+            color = "#ff9800"  # Orange - Balanced
+        else:  # Low sensitivity (high threshold)
+            color = "#f44336"  # Red - Strict detection
+            
+        self.score_threshold_value_label.config(fg=color)
+        
+        # Call the callback if it exists
         if hasattr(self, 'on_score_threshold_change') and self.on_score_threshold_change:
             self.on_score_threshold_change(percent / 100.0)
 
     def set_score_threshold(self, percent: float):
-        """Set the score threshold slider value (0-1 float)"""
-        value = max(50, min(100, int(percent * 100)))
+        """Set the score threshold slider value (0-1 float) with color coding"""
+        value = max(50, min(95, int(percent * 100)))  # Updated range 50-95
         self.score_threshold_var.set(value)
         self.score_threshold_value_label.config(text=f"{value}%")
+        
+        # Apply color coding based on threshold level
+        if value <= 60:  # High sensitivity (low threshold)
+            color = "#4caf50"  # Green
+        elif value <= 75:  # Medium sensitivity 
+            color = "#ff9800"  # Orange
+        else:  # Low sensitivity (high threshold)
+            color = "#f44336"  # Red
+            
+        self.score_threshold_value_label.config(fg=color)
     
     def _create_permanent_settings(self, parent=None):
         """Create the permanently visible settings panel"""
