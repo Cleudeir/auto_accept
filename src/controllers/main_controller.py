@@ -28,7 +28,12 @@ class MainController:
             self.config_model,
         )
 
-        self.view = MainView(config_model=self.config_model)
+        # Choose UI based on config preference
+        if self.config_model.use_modern_ui:
+            from views.modern_main_view import ModernMainView
+            self.view = ModernMainView(config_model=self.config_model)
+        else:
+            self.view = MainView(config_model=self.config_model)
 
         self._setup_callbacks()
 

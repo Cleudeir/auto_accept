@@ -22,7 +22,8 @@ class ConfigModel:
             "auto_focus_on_detection": True,
             "focus_retry_attempts": 3,
             "focus_delay_ms": 150,  # Slightly longer delay for better reliability
-            "settings_panel_expanded": False  # Settings panel expanded state
+            "ui_theme": "dark",  # UI theme: "dark", "light", "system"
+            "use_modern_ui": True  # Use modern CustomTkinter UI
         }
     
     def load(self):
@@ -141,9 +142,17 @@ class ConfigModel:
         self.set("focus_delay_ms", int(value))
 
     @property
-    def settings_panel_expanded(self):
-        return self._config.get("settings_panel_expanded", False)
+    def ui_theme(self):
+        return self._config.get("ui_theme", "dark")
     
-    @settings_panel_expanded.setter
-    def settings_panel_expanded(self, value):
-        self.set("settings_panel_expanded", bool(value))
+    @ui_theme.setter
+    def ui_theme(self, value):
+        self.set("ui_theme", str(value))
+
+    @property
+    def use_modern_ui(self):
+        return self._config.get("use_modern_ui", True)
+    
+    @use_modern_ui.setter
+    def use_modern_ui(self, value):
+        self.set("use_modern_ui", bool(value))

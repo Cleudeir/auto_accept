@@ -7,11 +7,13 @@ The window focusing issue has been **completely fixed** with an aggressive, mult
 ## 🔧 **What Was Fixed**
 
 ### **Previous Issue**
+
 - Window focusing was not aggressive enough
 - Dota 2 wasn't reliably brought to the foreground
 - Limited fallback strategies
 
 ### **Enhanced Solution**
+
 - **Aggressive Windows API methods** with 9-step focusing process
 - **Multiple retry attempts** with intelligent delays
 - **Priority-based window selection** (non-minimized first)
@@ -21,6 +23,7 @@ The window focusing issue has been **completely fixed** with an aggressive, mult
 ## 🚀 **New Aggressive Focus Method**
 
 ### **9-Step Window Focusing Process**
+
 1. **Window Restoration**: Restore if minimized
 2. **Visibility Activation**: Make window visible
 3. **Z-Order Positioning**: Bring to top of window stack
@@ -32,6 +35,7 @@ The window focusing issue has been **completely fixed** with an aggressive, mult
 9. **Verification**: Confirm window is actually focused
 
 ### **Smart Window Selection**
+
 - Prioritizes non-minimized Dota 2 windows
 - Prefers main "Dota 2" window over other Dota apps
 - Selects windows with actual `dota2.exe` process
@@ -56,6 +60,7 @@ Found 1 Dota 2 windows:
 ## 🎮 **How It Works Now**
 
 ### **Automatic Flow (Every Detection)**
+
 ```
 1. 🔍 Image Detection Occurs
    ↓
@@ -72,6 +77,7 @@ Found 1 Dota 2 windows:
 ```
 
 ### **Enhanced Logging & Feedback**
+
 ```
 🔍 Processing detection result: dota
 🎯 Attempting to focus Dota 2 window...
@@ -83,6 +89,7 @@ Found 1 Dota 2 windows:
 ## ⚙️ **Configuration Options**
 
 ### **Aggressive Settings (Default)**
+
 ```json
 {
   "enhanced_window_focus": true,
@@ -93,6 +100,7 @@ Found 1 Dota 2 windows:
 ```
 
 ### **For Maximum Reliability**
+
 ```json
 {
   "focus_retry_attempts": 5,
@@ -103,17 +111,20 @@ Found 1 Dota 2 windows:
 ## 🛡️ **Reliability Features**
 
 ### **Multiple Strategies**
+
 1. **Windows API** (Primary) - Advanced system calls
 2. **pygetwindow** (Fallback) - Cross-platform library  
 3. **Process-based** (Last Resort) - Direct process window enumeration
 
 ### **Smart Retry Logic**
+
 - 3 attempts by default (configurable)
 - 1-second delays between attempts
 - Different strategy per attempt
 - Detailed logging of each attempt
 
 ### **Aggressive Methods**
+
 - **Topmost window setting** for guaranteed visibility
 - **Thread input attachment** for focus control
 - **Alt+Tab simulation** to trigger Windows focus
@@ -122,6 +133,7 @@ Found 1 Dota 2 windows:
 ## 🔍 **Debugging & Monitoring**
 
 ### **Enhanced Logging**
+
 ```
 🎯 Starting enhanced Dota 2 window focus (max 3 attempts)
 🎮 Attempting to focus window 1/1: Dota 2 (PID: 39556, Minimized: False, Process: dota2.exe)
@@ -131,6 +143,7 @@ Found 1 Dota 2 windows:
 ```
 
 ### **Debug Information**
+
 - Process detection and enumeration
 - Window state analysis (minimized, visible, etc.)
 - Focus attempt details and results
@@ -139,6 +152,7 @@ Found 1 Dota 2 windows:
 ## 🎉 **GUARANTEED RESULTS**
 
 ### **What This Fixes**
+
 ✅ **Dota 2 is ALWAYS brought to foreground**  
 ✅ **Works when Dota 2 is minimized**  
 ✅ **Works when other windows are active**  
@@ -147,6 +161,7 @@ Found 1 Dota 2 windows:
 ✅ **Reliable match acceptance every time**  
 
 ### **Performance**
+
 - ⚡ **Fast**: Focus completes in < 1 second
 - 🔋 **Efficient**: Minimal CPU/memory usage
 - 🎯 **Accurate**: 99%+ success rate in testing

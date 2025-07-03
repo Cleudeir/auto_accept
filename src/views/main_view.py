@@ -41,48 +41,74 @@ class MainView:
         self.match_found = False
         self.current_match_percent = 0.0
         self.current_match_name = "none"
-        # Initialize settings expanded state from config or default to False
-        self.settings_expanded = config_model.settings_panel_expanded if config_model else False
         
     def create_window(self):
-        """Create and setup the main window"""
+        """Create and setup the main window with modern responsive design"""
         self.window = tk.Tk()
         self.window.title(self.title)
         self.window.configure(bg="#ffffff")  # Set app background to white
 
-        # Window configuration
-        window_width = 1020 if self.settings_expanded else 720  # Adjust width based on settings visibility
-        window_height = 600
+        # Modern responsive window configuration
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight()
-        x = (screen_width // 2) - (window_width // 2)
-        y = (screen_height // 2) - (window_height // 2)
+        
+        # Calculate responsive dimensions based on screen size and resolution
+        # Ensure minimum height of 800px for all screen sizes
+        if screen_height <= 768:  # Small screens (laptops, tablets)
+            window_width = min(750, int(screen_width * 0.9))
+            window_height = max(800, min(int(screen_height * 0.9), 800))  # Force min 800px height
+            min_width, min_height = 700, 800
+        elif screen_height <= 1080:  # Medium screens (1080p)
+            window_width = min(850, int(screen_width * 0.85))
+            window_height = max(800, min(820, int(screen_height * 0.75)))
+            min_width, min_height = 800, 800
+        elif screen_height <= 1440:  # High resolution screens (1440p)
+            window_width = min(950, int(screen_width * 0.8))
+            window_height = max(800, min(850, int(screen_height * 0.65)))
+            min_width, min_height = 850, 800
+        else:  # Ultra-high resolution screens (4K+)
+            window_width = min(1050, int(screen_width * 0.75))
+            window_height = max(800, min(900, int(screen_height * 0.6)))
+            min_width, min_height = 900, 800
+        
+        # Smart positioning - avoid taskbars and system areas
+        if screen_width > 2560:  # Ultra-wide or multi-monitor setups
+            x = int(screen_width * 0.1)  # Position towards left on very wide screens
+        elif screen_width > 1920:  # Wide screens
+            x = int(screen_width * 0.15)  # Slightly offset from center
+        else:
+            x = (screen_width // 2) - (window_width // 2)  # Center on standard screens
+        
+        # Position slightly above center, accounting for taskbar
+        y = max(30, (screen_height // 2) - (window_height // 2) - 40)
+        
         self.window.geometry(f"{window_width}x{window_height}+{x}+{y}")
-        self.window.resizable(False, False)
+        self.window.resizable(True, True)
+        self.window.minsize(min_width, min_height)
 
         # Set icon
         self._set_window_icon()
 
-        # --- Main horizontal layout ---
+        # --- Modern layout with improved spacing ---
         main_frame = tk.Frame(self.window, bg="#ffffff")
-        main_frame.pack(fill="both", expand=True)
+        main_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
         # Left column: status, screenshot, control buttons
         self.left_col = tk.Frame(main_frame, bg="#ffffff")
         self.left_col.pack(side=tk.LEFT, fill="both", expand=True)
         
-        # Right column: settings (expandable)
-        self.right_col = tk.Frame(main_frame, bg="#ffffff")
-        self.right_col.pack(side=tk.RIGHT, fill="y", padx=(10, 18), pady=10)
+        # Right column: settings with modern spacing
+        self.right_col = tk.Frame(main_frame, bg="#ffffff", width=250)
+        self.right_col.pack(side=tk.RIGHT, fill="y", padx=(8, 5), pady=5)
+        self.right_col.pack_propagate(False)  # Maintain fixed width
 
-        # Status and screenshot on left
+        # Status and screenshot on left with modern layout
         self._create_status_section(parent=self.left_col)
         self._create_screenshot_section(parent=self.left_col)
         self._create_control_buttons_section(parent=self.left_col)
 
-        # Settings toggle button and panels on right
-        self._create_settings_toggle(parent=self.right_col)
-        self._create_expandable_settings(parent=self.right_col)
+        # Settings permanently visible on right
+        self._create_permanent_settings(parent=self.right_col)
 
         # Keyboard shortcuts and close handler
         self._setup_keyboard_shortcuts()
@@ -100,96 +126,124 @@ class MainView:
     
     def _create_status_section(self, parent=None):
         parent = parent or self.window
-        """Create status display section with improved visuals"""
-        # Status label
+        """Create modern status display section with improved visuals"""
+        # Status label with modern styling
         self.status_label = tk.Label(
-            parent, text="Status: Stopped", font=("Segoe UI", 14, "bold"), fg="#e53935", bg="#ffffff"
+            parent, text="Status: Stopped", font=("Segoe UI", 11, "bold"), fg="#e53935", bg="#ffffff"
         )
-        self.status_label.pack(pady=(18, 8), fill="x")
-        # Card-like frame for progress bar and sensitivity
-        card_frame = tk.Frame(parent, bg="#ffffff", bd=2, relief="groove")
-        card_frame.pack(pady=(0, 14), padx=18, fill="x")
-        # Progress bar with percent
-        bar_frame = tk.Frame(card_frame, bg="#ffffff")
-        bar_frame.pack(pady=(12, 2), padx=10, fill="x")
+        self.status_label.pack(pady=(8, 4), fill="x")
+        
+        # Modern card-like frame for progress bar and sensitivity
+        card_frame = tk.Frame(parent, bg="#f8f9fa", bd=1, relief="solid")
+        card_frame.pack(pady=(0, 6), padx=8, fill="x")
+        
+        # Progress bar with percent - compact and modern
+        bar_frame = tk.Frame(card_frame, bg="#f8f9fa")
+        bar_frame.pack(pady=(6, 3), padx=6, fill="x")
+        
         self.match_percent_bar = ttk.Progressbar(
             bar_frame,
             orient="horizontal",
-            length=220,
+            length=160,  # Further reduced for compactness
             mode="determinate",
             maximum=100
         )
         self.match_percent_bar.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
         self.match_percent_text = tk.Label(
             bar_frame,
             text="0.0%",
-            font=("Segoe UI", 10, "bold"),
-            fg="#333",
-            bg="#ffffff",
-            width=7,
+            font=("Segoe UI", 8, "bold"),  # Further reduced font size
+            fg="#555",
+            bg="#f8f9fa",
+            width=5,
             anchor="e"
         )
-        self.match_percent_text.pack(side=tk.LEFT, padx=(8, 0))
-        # Detected image name
+        self.match_percent_text.pack(side=tk.LEFT, padx=(4, 0))
+        
+        # Detected image name - compact
         self.match_name_label = tk.Label(
             card_frame,
             text="none",
-            font=("Segoe UI", 12, "bold"),
+            font=("Segoe UI", 9, "bold"),  # Further reduced font size
             fg="#1976d2",
-            bg="#ffffff"
+            bg="#f8f9fa"
         )
-        self.match_name_label.pack(pady=(0, 8))
-        # Sensitivity slider
-        threshold_frame = tk.Frame(card_frame, bg="#ffffff")
-        threshold_frame.pack(pady=(0, 10))
-        tk.Label(threshold_frame, text="Detection Sensitivity:", font=("Segoe UI", 10), bg="#ffffff").pack(side=tk.LEFT)
+        self.match_name_label.pack(pady=(0, 4))
+        
+        # Sensitivity slider - compact and modern
+        threshold_frame = tk.Frame(card_frame, bg="#f8f9fa")
+        threshold_frame.pack(pady=(0, 6))
+        tk.Label(threshold_frame, text="Sensitivity:", font=("Segoe UI", 8), bg="#f8f9fa", fg="#666").pack(side=tk.LEFT)  # Smaller font
         self.score_threshold_var = tk.DoubleVar(value=65.0)
         self.score_threshold_slider = tk.Scale(
             threshold_frame,
             from_=50, to=100, resolution=1, orient=tk.HORIZONTAL,
             variable=self.score_threshold_var,
             command=self._on_score_threshold_change_event,
-            length=120,
+            length=80,  # Further reduced for compactness
             showvalue=0,
-            bg="#ffffff",
+            bg="#f8f9fa",
+            fg="#666",
             highlightthickness=0,
-            troughcolor="#e3e3e3",
-            sliderrelief="flat"
+            bd=0,
+            troughcolor="#e0e0e0",
+            activebackground="#1976d2"
         )
-        self.score_threshold_slider.pack(side=tk.LEFT, padx=(8, 0))
-        self.score_threshold_value_label = tk.Label(threshold_frame, text="70%", font=("Segoe UI", 10, "bold"), bg="#ffffff", fg="#1976d2")
-        self.score_threshold_value_label.pack(side=tk.LEFT, padx=(8, 0))
+        self.score_threshold_slider.pack(side=tk.LEFT, padx=(4, 0))
+        self.score_threshold_value_label = tk.Label(threshold_frame, text="70%", font=("Segoe UI", 8, "bold"), bg="#f8f9fa", fg="#1976d2")
+        self.score_threshold_value_label.pack(side=tk.LEFT, padx=(4, 0))
     
     def _create_screenshot_section(self, parent=None):
         parent = parent or self.window
-        """Create screenshot preview section with improved visuals"""
-        screenshot_frame = tk.LabelFrame(parent, text="Screenshot Preview", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
-        screenshot_frame.pack(fill="both", expand=True, padx=18, pady=8)
-        # Fixed height frame to maintain consistent size
-        fixed_height_frame = tk.Frame(screenshot_frame, height=240, bg="#ffffff")
+        """Create compact screenshot preview section"""
+        screenshot_frame = tk.LabelFrame(
+            parent, text="Screenshot", padx=0, pady=0, bg="#ffffff", 
+            fg="#1976d2", font=("Segoe UI", 9, "bold"), bd=1, relief="solid"
+        )
+        screenshot_frame.pack(fill="both", expand=True, padx=8, pady=4)
+        
+        # Compact fixed height frame
+        fixed_height_frame = tk.Frame(screenshot_frame, height=160, bg="#ffffff")  # Further reduced
         fixed_height_frame.pack(fill=tk.X)
         fixed_height_frame.pack_propagate(False)
-        # Screenshot label
-        self.screenshot_label = tk.Label(fixed_height_frame, bg="#e3e3e3", relief="ridge", bd=1)
-        self.screenshot_label.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
-        # Timestamp label
-        self.timestamp_label = tk.Label(screenshot_frame, font=("Segoe UI", 9), fg="#888", bg="#ffffff")
-        self.timestamp_label.pack(side=tk.BOTTOM, pady=(2, 0))
+        
+        # Screenshot label with modern styling
+        self.screenshot_label = tk.Label(
+            fixed_height_frame, bg="#f5f5f5", relief="flat", bd=1
+        )
+        self.screenshot_label.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+        
+        # Compact timestamp label
+        self.timestamp_label = tk.Label(
+            screenshot_frame, font=("Segoe UI", 7), fg="#999", bg="#ffffff"
+        )
+        self.timestamp_label.pack(side=tk.BOTTOM, pady=(1, 2))
         # Removed screenshot controls/button from here
 
     def _create_control_buttons_section(self, parent=None):
         parent = parent or self.window
-        """Create start, stop, test sound, and take screenshot buttons below the settings sections, centered, with improved style"""
+        """Create compact control buttons section"""
         control_frame = tk.Frame(parent, bg="#ffffff")
-        control_frame.pack(fill="x", padx=10, pady=10)
+        control_frame.pack(fill="x", padx=5, pady=5)
         # Center the buttons vertically and horizontally
         control_frame.pack_propagate(False)
-        control_frame.configure(height=80)  # Give enough height for vertical centering
+        control_frame.configure(height=60)  # Reduced from 80
         button_inner = tk.Frame(control_frame, bg="#ffffff")
         button_inner.place(relx=0.5, rely=0.5, anchor="center")
-        # Standardize button height and font for all control buttons
-        button_height = 2  # tkinter height in text lines
-        button_font = ("Segoe UI", 10, "bold")
+        # Compact button styling with modern look
+        button_height = 1  # Reduced from 2
+        button_font = ("Segoe UI", 9, "bold")  # Reduced font size
+        button_config = {
+            "font": button_font,
+            "pady": 0,
+            "height": button_height,
+            "bd": 0,
+            "relief": "flat",
+            "cursor": "hand2",
+            "highlightthickness": 0,
+        }
+        
         self.start_btn = tk.Button(
             button_inner,
             text="▶ Start",
@@ -198,14 +252,8 @@ class MainView:
             fg="#fff",
             activebackground="#388e3c",
             activeforeground="#fff",
-            font=button_font,
-            padx=20,
-            pady=0,
-            height=button_height,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
+            padx=12,
+            **button_config
         )
         self.stop_btn = tk.Button(
             button_inner,
@@ -215,42 +263,30 @@ class MainView:
             fg="#fff",
             activebackground="#b71c1c",
             activeforeground="#fff",
-            font=button_font,
-            padx=20,
-            pady=0,
-            height=button_height,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
+            padx=12,
+            **button_config
         )
         self.test_sound_btn = tk.Button(
             button_inner,
-            text="🎵 Test Sound",
+            text="🎵 Sound",  # Shortened text
             command=self._on_test_sound_click,
-            bg="#43a047",
+            bg="#ff9800",
             fg="#fff",
-            activebackground="#388e3c",
+            activebackground="#f57c00",
             activeforeground="#fff",
-            font=button_font,
-            padx=12,
-            pady=0,
-            height=button_height,
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            highlightthickness=0,
+            padx=10,
+            **button_config
         )
         self.take_screenshot_btn = tk.Button(
             button_inner,
-            text="📷 Take Screenshot",
+            text="📷 Shot",  # Further shortened text
             command=self._on_take_screenshot_click,
             bg="#1976d2",
             fg="#fff",
             activebackground="#1565c0",
             activeforeground="#fff",
             font=button_font,
-            padx=12,
+            padx=8,  # Further reduced padding
             pady=0,
             height=button_height,
             bd=0,
@@ -258,65 +294,65 @@ class MainView:
             cursor="hand2",
             highlightthickness=0,
         )
-        self.start_btn.pack(side="left", padx=8)
-        self.stop_btn.pack(side="left", padx=8)
-        self.test_sound_btn.pack(side="left", padx=8)
-        self.take_screenshot_btn.pack(side="left", padx=8)
+        self.start_btn.pack(side="left", padx=3)  # Further reduced spacing
+        self.stop_btn.pack(side="left", padx=3)
+        self.test_sound_btn.pack(side="left", padx=3)
+        self.take_screenshot_btn.pack(side="left", padx=3)
         # Initial state: only show start
         self.stop_btn.pack_forget()
 
     def _create_audio_settings(self, parent=None):
         parent = parent or self.window
-        """Create audio settings section with improved visuals"""
-        audio_frame = tk.LabelFrame(parent, text="Audio Settings", padx=0, pady=0, bg="#ffffff", fg="#43a047", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
-        audio_frame.pack(fill="x", padx=8, pady=8)
-        # Device selection
-        tk.Label(audio_frame, text="Output Device:", font=("Segoe UI", 10), bg="#ffffff", fg="#333").pack(pady=(8, 0), anchor="w", padx=10)
-        self.device_combo = ttk.Combobox(audio_frame, state="readonly", font=("Segoe UI", 10))
-        self.device_combo.pack(pady=5, padx=10, fill="x")
+        """Create compact audio settings section"""
+        audio_frame = tk.LabelFrame(parent, text="Audio", padx=0, pady=0, bg="#ffffff", fg="#43a047", font=("Segoe UI", 10, "bold"), bd=1, relief="groove")
+        audio_frame.pack(fill="x", padx=5, pady=5)
+        # Device selection with reduced spacing
+        tk.Label(audio_frame, text="Device:", font=("Segoe UI", 9), bg="#ffffff", fg="#333").pack(pady=(5, 0), anchor="w", padx=8)
+        self.device_combo = ttk.Combobox(audio_frame, state="readonly", font=("Segoe UI", 9))
+        self.device_combo.pack(pady=3, padx=8, fill="x")
         self.device_combo.bind("<<ComboboxSelected>>", self._on_device_change_event)
-        # Volume control
-        tk.Label(audio_frame, text="Volume:", font=("Segoe UI", 10), bg="#ffffff", fg="#333").pack(pady=(10, 0), anchor="w", padx=10)
+        # Volume control with reduced spacing
+        tk.Label(audio_frame, text="Volume:", font=("Segoe UI", 9), bg="#ffffff", fg="#333").pack(pady=(5, 0), anchor="w", padx=8)
         self.volume_slider = tk.Scale(
             audio_frame,
             from_=0,
             to=100,
             orient=tk.HORIZONTAL,
             command=self._on_volume_change_event,
-            length=160,
+            length=120,  # Reduced from 160
             bg="#ffffff",
             highlightthickness=0,
             troughcolor="#e3e3e3",
             sliderrelief="flat"
         )
-        self.volume_slider.pack(pady=5, padx=10, fill="x")
+        self.volume_slider.pack(pady=3, padx=8, fill="x")
         # Removed test sound button from here
 
     def _create_monitor_settings(self, parent=None):
         parent = parent or self.window
-        """Create monitor settings section with improved visuals"""
-        monitor_frame = tk.LabelFrame(parent, text="Monitor Settings", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 11, "bold"), bd=2, relief="groove")
-        monitor_frame.pack(fill="x", padx=8, pady=8)
-        # Monitor selection
-        tk.Label(monitor_frame, text="Capture Monitor:", font=("Segoe UI", 10), bg="#ffffff", fg="#333").pack(pady=(8, 0), anchor="w", padx=10)
-        self.monitor_combo = ttk.Combobox(monitor_frame, state="readonly", font=("Segoe UI", 10))
-        self.monitor_combo.pack(pady=5, padx=10, fill="x")
+        """Create compact monitor settings section"""
+        monitor_frame = tk.LabelFrame(parent, text="Monitor", padx=0, pady=0, bg="#ffffff", fg="#1976d2", font=("Segoe UI", 10, "bold"), bd=1, relief="groove")
+        monitor_frame.pack(fill="x", padx=5, pady=5)
+        # Monitor selection with reduced spacing
+        tk.Label(monitor_frame, text="Capture:", font=("Segoe UI", 9), bg="#ffffff", fg="#333").pack(pady=(5, 0), anchor="w", padx=8)
+        self.monitor_combo = ttk.Combobox(monitor_frame, state="readonly", font=("Segoe UI", 9))
+        self.monitor_combo.pack(pady=3, padx=8, fill="x")
         self.monitor_combo.bind("<<ComboboxSelected>>", self._on_monitor_change_event)
-        # Always on top option
+        # Always on top option with reduced spacing
         self.always_on_top_var = tk.BooleanVar()
         self.always_on_top_check = tk.Checkbutton(
             monitor_frame,
-            text="Keep window on top",
+            text="Always on top",  # Shortened text
             variable=self.always_on_top_var,
             command=self._on_always_on_top_change_event,
-            font=("Segoe UI", 10),
+            font=("Segoe UI", 9),
             bg="#ffffff",
             fg="#333",
             activebackground="#e3e3e3",
             selectcolor="#e3e3e3",
             highlightthickness=0
         )
-        self.always_on_top_check.pack(pady=8, padx=10, anchor="w")
+        self.always_on_top_check.pack(pady=5, padx=8, anchor="w")
         
     def _create_log_section(self):
         """Create log viewer section"""
@@ -418,12 +454,12 @@ class MainView:
         """Update screenshot preview"""
         if img is not None:
             try:
-                # Resize image for preview
+                # Resize image for compact preview
                 img_copy = img.copy()
                 width, height = img_copy.size
                 
-                max_width = 360
-                max_height = 240
+                max_width = 280  # Reduced from 360
+                max_height = 180  # Reduced from 240
                 ratio = min(max_width / width, max_height / height)
                 new_width = int(width * ratio)
                 new_height = int(height * ratio)
@@ -445,8 +481,8 @@ class MainView:
                 self.screenshot_label.config(image=None, text=f"Error: {str(e)}")
                 self.timestamp_label.config(text="")
         else:
-            # Create an empty image with fixed dimensions to maintain layout
-            empty_img = Image.new('RGB', (360, 240), color=(240, 240, 240))
+            # Create a compact empty image with fixed dimensions to maintain layout
+            empty_img = Image.new('RGB', (280, 180), color=(240, 240, 240))  # Reduced from 360x240
             photo = ImageTk.PhotoImage(empty_img)
             self.screenshot_label.config(image=photo, text="No screenshot available")
             self.screenshot_label.image = photo  # Keep reference
@@ -575,70 +611,22 @@ class MainView:
         self.score_threshold_var.set(value)
         self.score_threshold_value_label.config(text=f"{value}%")
     
-    def _create_settings_toggle(self, parent=None):
-        """Create the settings toggle button"""
+    def _create_permanent_settings(self, parent=None):
+        """Create the permanently visible settings panel"""
         parent = parent or self.window
         
-        # Toggle button frame
-        toggle_frame = tk.Frame(parent, bg="#ffffff")
-        toggle_frame.pack(fill="x", pady=(0, 5))
-        
-        # Settings toggle button
-        self.settings_toggle_btn = tk.Button(
-            toggle_frame,
-            text="◀ Settings" if self.settings_expanded else "▶ Settings",
-            command=self._toggle_settings,
-            bg="#f5f5f5",
-            fg="#333",
-            activebackground="#e0e0e0",
-            activeforeground="#333",
-            font=("Segoe UI", 10, "bold"),
-            padx=15,
-            pady=5,
-            bd=1,
-            relief="solid",
-            cursor="hand2",
-            highlightthickness=0,
+        # Settings header - more compact
+        settings_header = tk.Label(
+            parent,
+            text="⚙️ Settings",
+            font=("Segoe UI", 11, "bold"),  # Reduced font size
+            fg="#1976d2",
+            bg="#ffffff"
         )
-        self.settings_toggle_btn.pack(fill="x")
-
-    def _create_expandable_settings(self, parent=None):
-        """Create the expandable settings panel"""
-        parent = parent or self.window
+        settings_header.pack(pady=(0, 5))  # Reduced padding
         
-        # Settings container frame
-        self.settings_panel = tk.Frame(parent, bg="#ffffff")
-        
-        # Create the settings sections inside the panel
-        self._create_audio_settings(parent=self.settings_panel)
-        self._create_monitor_settings(parent=self.settings_panel)
-        
-        # Pack the panel - it will be shown/hidden based on settings_expanded state
-        if self.settings_expanded:
-            self.settings_panel.pack(fill="both", expand=True, pady=(5, 0))
-
-    def _toggle_settings(self):
-        """Toggle the visibility of the settings panel"""
-        self.settings_expanded = not self.settings_expanded
-        
-        # Save the state to config if available
-        if self.config_model:
-            self.config_model.settings_panel_expanded = self.settings_expanded
-        
-        if self.settings_expanded:
-            # Show settings
-            self.settings_panel.pack(fill="both", expand=True, pady=(5, 0))
-            self.settings_toggle_btn.config(text="◀ Settings")
-            # Expand window width to accommodate settings
-            self.window.geometry("1020x600")
-        else:
-            # Hide settings
-            self.settings_panel.pack_forget()
-            self.settings_toggle_btn.config(text="▶ Settings")
-            # Shrink window width when settings are hidden
-            self.window.geometry("720x600")
-
-        # Update window layout
-        self.window.update_idletasks()
+        # Create the settings sections
+        self._create_audio_settings(parent=parent)
+        self._create_monitor_settings(parent=parent)
 
     # ... existing methods continue below ...
