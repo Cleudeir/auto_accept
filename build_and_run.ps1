@@ -21,7 +21,7 @@ if (Test-Path $appVersionFile) {
         Write-Host "Auto-incremented version to $appVersion"
     }
 } else {
-    $appVersion = '1.0.0'
+    $appVersion = '3.0.0'
     Set-Content $appVersionFile $appVersion
 }
 

@@ -66,11 +66,17 @@ class MainController:
         device_names = [d["name"] for d in devices]
         selected_device_index = 0
 
+        # Try to find the previously selected device
         if devices and self.config_model.selected_device_id is not None:
             for i, d in enumerate(devices):
                 if d["id"] == self.config_model.selected_device_id:
                     selected_device_index = i
                     break
+            else:
+                # If the configured device is not found, reset to default (first device)
+                self.logger.warning(f"Previously selected device ID {self.config_model.selected_device_id} not found. Using default device.")
+                self.config_model.selected_device_id = devices[0]["id"] if devices else None
+                selected_device_index = 0
 
         self.view.set_device_options(device_names, selected_device_index)
 
@@ -132,19 +138,49 @@ class MainController:
 
         self.view.after(1000, self._update_screenshot_preview)
 
+    def refresh_audio_devices(self):
+        """Refresh the list of available audio devices"""
+        try:
+            self.audio_model.refresh_devices()
+            devices = self.audio_model.get_output_devices()
+            device_names = [d["name"] for d in devices]
+            
+            # Check if current device is still available
+            selected_device_index = 0
+            if devices and self.config_model.selected_device_id is not None:
+                for i, d in enumerate(devices):
+                    if d["id"] == self.config_model.selected_device_id:
+                        selected_device_index = i
+                        break
+                else:
+                    # Current device not found, reset to first device
+                    self.logger.warning("Current audio device no longer available. Switching to first available device.")
+                    self.config_model.selected_device_id = devices[0]["id"] if devices else None
+                    selected_device_index = 0
+            
+            self.view.set_device_options(device_names, selected_device_index)
+            self.logger.info(f"Audio devices refreshed: {len(devices)} devices available")
+            
+        except Exception as e:
+            self.logger.error(f"Error refreshing audio devices: {e}")
+
     def _on_start_detection(self):
         """Handle start detection request"""
-        if self.detection_controller.start_detection():
-            pass
+        self.detection_controller.start_detection()
 
     def _on_stop_detection(self):
         """Handle stop detection request"""
-        if self.detection_controller.stop_detection():
-            pass
+        self.detection_controller.stop_detection()
 
     def _on_test_sound(self):
         """Handle test sound request"""
         try:
+            # Check if device is still available before testing
+            if (self.config_model.selected_device_id is not None and 
+                not self.audio_model.is_device_available(self.config_model.selected_device_id)):
+                self.logger.warning("Selected audio device is no longer available. Refreshing devices.")
+                self.refresh_audio_devices()
+            
             self.audio_model.test_sound(
                 self.config_model.selected_device_id, self.config_model.alert_volume
             )
@@ -156,7 +192,15 @@ class MainController:
         devices = self.audio_model.get_output_devices()
         if 0 <= device_index < len(devices):
             device_id = devices[device_index]["id"]
+            device_name = devices[device_index]["name"]
             self.config_model.selected_device_id = device_id
+            self.logger.info(f"Audio device changed to: {device_name} (ID: {device_id})")
+        else:
+            self.logger.warning(f"Invalid device index: {device_index}")
+            # Reset to first device if invalid index
+            if devices:
+                self.config_model.selected_device_id = devices[0]["id"]
+                self.view.set_device_options([d["name"] for d in devices], 0)
 
     def _on_volume_change(self, volume: int):
         """Handle volume change"""

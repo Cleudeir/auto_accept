@@ -2,7 +2,7 @@
 
 ![Interface](image.png)
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 
 An intelligent application that automatically detects and accepts Dota 2 matches using computer vision and image recognition. Built with a clean MVC architecture and featuring both classic and modern UI themes.
 
@@ -11,11 +11,21 @@ An intelligent application that automatically detects and accepts Dota 2 matches
 - **🔍 Smart Detection**: Uses OpenCV and template matching to detect Dota 2 match acceptance dialogs
 - **🎵 Audio Alerts**: Customizable sound notifications when a match is found
 - **📱 Modern UI**: Beautiful dark-themed interface with CustomTkinter
-- **🖥️ Multi-Monitor Support**: Works across multiple monitors
+- **🖥️ Automatic Monitor Detection**: Intelligently detects which monitor Dota 2 is running on using process-based detection
 - **⚙️ Configurable Settings**: Adjustable volume, sensitivity, and detection preferences
 - **🎯 Auto Focus**: Automatically brings Dota 2 window to focus when match found
-- **📊 Real-time Monitoring**: Live screenshot preview and detection statistics
+- **📊 Real-time Monitoring**: Live detection statistics and process tracking
 - **🔧 Easy Setup**: One-click build script and executable generation
+
+## 🆕 Version 2.0.0 Updates
+
+### Major Improvements
+
+- **🎯 Automatic Monitor Detection**: Completely removed manual monitor selection - the app now intelligently detects which monitor Dota 2 is running on using process-based detection
+- **🔧 Process-Based Detection**: Uses Windows APIs and process monitoring to find Dota 2, works even when minimized or moved between monitors
+- **📱 Simplified UI**: Removed screenshot button and manual monitor controls for a cleaner, more streamlined interface
+- **⚡ Real-time Tracking**: Automatically updates monitor detection when you move Dota 2 between displays
+- **🔍 Enhanced Reliability**: More robust detection system that doesn't rely on window visibility
 
 ## 🚀 Quick Start
 
@@ -59,7 +69,7 @@ This will:
 ## 🎮 How to Use
 
 1. **Launch the application** - Run `main.py` or the built executable
-2. **Configure settings** - Adjust audio device, volume, and monitor selection
+2. **Configure settings** - Adjust audio device and volume (monitor detection is automatic)
 3. **Start detection** - Click "Start Detection" to begin monitoring
 4. **Queue for Dota 2** - Start searching for a match in Dota 2
 5. **Automatic acceptance** - The app will detect and accept matches automatically
@@ -72,7 +82,6 @@ The application stores settings in `src/config.json`:
 {
   "alert_volume": 0.23,
   "selected_device_id": 6,
-  "selected_monitor_capture_setting": 2,
   "always_on_top": true,
   "enhanced_window_focus": true,
   "auto_focus_on_detection": true,
@@ -87,11 +96,19 @@ The application stores settings in `src/config.json`:
 
 - **alert_volume**: Volume level for match notifications (0.0 - 1.0)
 - **selected_device_id**: Audio output device ID
-- **selected_monitor_capture_setting**: Which monitor to capture (0, 1, 2...)
 - **always_on_top**: Keep application window on top
 - **enhanced_window_focus**: Advanced window focusing features
 - **auto_focus_on_detection**: Automatically focus Dota 2 when match found
 - **use_modern_ui**: Enable modern CustomTkinter interface
+
+## 🎯 Automatic Monitor Detection
+
+The application now features **intelligent process-based monitor detection** that:
+
+- **Automatically finds Dota 2**: Locates the running Dota 2 process without manual configuration
+- **Works when minimized**: Uses Windows APIs to detect monitor location even when Dota 2 is minimized
+- **Real-time tracking**: Automatically updates when you move Dota 2 between monitors
+- **No manual setup required**: Eliminates the need for manual monitor selection
 
 ## 🏗️ Architecture
 
@@ -130,6 +147,7 @@ src/
 - **Pillow (PIL)** - Image handling and manipulation
 - **MSS** - Fast screenshot capture
 - **PyAudio** - Audio playback for notifications
+- **psutil** - Process detection and monitoring for automatic monitor detection
 
 ### UI Dependencies
 
@@ -173,9 +191,10 @@ The application can detect various Dota 2 interface elements:
 
 **Detection not working?**
 
-- Ensure Dota 2 is running in windowed or borderless mode
-- Check monitor selection in settings
+- Ensure Dota 2 is running (the app will automatically detect which monitor it's on)
+- Check that Dota 2 process is visible in Task Manager
 - Verify template images are up to date
+- Try restarting the application if Dota 2 was moved between monitors
 
 **No audio alerts?**
 
