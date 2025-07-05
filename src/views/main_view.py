@@ -559,9 +559,7 @@ class MainView:
             "dota": "Match Found!",
             "dota2_plus": "Dota Plus Offer",
             "read_check": "Read-Check Confirmation",
-            "long_time": "Long Wait Warning",
             "ad": "Advertisement",
-            "watch-game": "Watch Game Dialog",
             "none": "No Match Detected"
         }
         return mapping.get(name, name)
@@ -572,7 +570,6 @@ class MainView:
             "dota": "A Dota 2 match has been found. Ready to accept!",
             "dota2_plus": "Dota Plus subscription dialog detected.",
             "read_check": "Read-check dialog detected. Please confirm to continue.",
-            "long_time": "Long matchmaking wait dialog detected.",
             "ad": "Advertisement detected on screen.",
             "none": "No known pattern detected."
         }

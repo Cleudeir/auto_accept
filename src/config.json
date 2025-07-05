@@ -1,5 +1,5 @@
 {
-  "alert_volume": 0.22,
+  "alert_volume": 1.0,
   "selected_device_id": 6,
   "always_on_top": true,
   "enhanced_window_focus": true,

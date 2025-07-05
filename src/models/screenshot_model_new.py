@@ -14,6 +14,9 @@ class ScreenshotModel:
         self.logger = logging.getLogger("Dota2AutoAccept.ScreenshotModel")
         self.latest_screenshot_img = None
         self.latest_screenshot_time = None
+        
+        # Clean up old screenshots on startup
+        self.cleanup_old_screenshots()
     
     def get_available_monitors(self) -> List[Tuple[str, int]]:
         """Get list of available monitors"""
@@ -26,30 +29,20 @@ class ScreenshotModel:
                         monitor_options.append(
                             (f"Monitor {i} ({monitor['width']}x{monitor['height']})", i)
                         )
-                else:
-                    self.logger.warning(
-                        "No individual monitors detected by mss, only the combined virtual screen."
-                    )
-        except Exception as e:
-            self.logger.error(f"Error getting monitor list: {e}")
+        except:
+            pass
         return monitor_options
     
     def capture_monitor_screenshot(self, _unused=None) -> Optional[Image.Image]:
         """Capture screenshot from the monitor where Dota 2 is running (auto-detect, even if minimized)"""
         monitor_index = self.auto_detect_dota_monitor()
         if monitor_index is None:
-            self.logger.warning("Could not auto-detect Dota 2 monitor, defaulting to primary monitor.")
             monitor_index = 1
         with mss.mss() as sct:
             monitors = sct.monitors
             if not monitors or len(monitors) <= 1:
-                self.logger.warning("No distinct monitors found by mss to capture from!")
                 return None
             if not isinstance(monitor_index, int) or not (0 < monitor_index < len(monitors)):
-                self.logger.warning(
-                    f"Invalid monitor index {monitor_index} specified. "
-                    f"Available: 1 to {len(monitors)-1}. Screenshot not taken."
-                )
                 return None
             monitor = monitors[monitor_index]
             try:
@@ -58,11 +51,7 @@ class ScreenshotModel:
                 self.latest_screenshot_time = datetime.datetime.now()
                 self.latest_screenshot_img = img.copy()
                 return img
-            except Exception as e:
-                self.logger.error(
-                    f"An unexpected error occurred while capturing screenshot from "
-                    f"Monitor {monitor_index}: {e}"
-                )
+            except:
                 return None
     
     def save_monitor_screenshot(self, filename: str, target_monitor_index: int = None) -> bool:
@@ -75,14 +64,9 @@ class ScreenshotModel:
         with mss.mss() as sct:
             monitors = sct.monitors
             if not monitors or len(monitors) <= 1:
-                self.logger.warning("No distinct monitors found by mss to capture from!")
                 return False
             
             if not isinstance(target_monitor_index, int) or not (0 < target_monitor_index < len(monitors)):
-                self.logger.warning(
-                    f"Invalid monitor index {target_monitor_index} specified. "
-                    f"Available: 1 to {len(monitors)-1}. Screenshot not taken."
-                )
                 return False
             
             monitor_to_capture = monitors[target_monitor_index]
@@ -93,18 +77,8 @@ class ScreenshotModel:
                 img_np = np.array(img)
                 img_bgr = cv2.cvtColor(img_np, cv2.COLOR_BGRA2BGR)
                 cv2.imwrite(filename, img_bgr)
-                self.logger.info(f"Screenshot of Monitor {target_monitor_index} saved to {filename}")
                 return True
-            except mss.exception.ScreenShotError as e:
-                self.logger.error(
-                    f"Error capturing screenshot from Monitor {target_monitor_index} using mss: {e}"
-                )
-                return False
-            except Exception as e:
-                self.logger.error(
-                    f"An unexpected error occurred while capturing/saving screenshot "
-                    f"from Monitor {target_monitor_index}: {e}"
-                )
+            except:
                 return False
 
     def get_latest_screenshot(self):
@@ -112,12 +86,11 @@ class ScreenshotModel:
         return self.latest_screenshot_img, self.latest_screenshot_time
 
     def auto_detect_dota_monitor(self) -> Optional[int]:
-        """Auto-detect which monitor contains Dota 2 window, even if minimized (real-time detection)"""
+        """Auto-detect which monitor contains Dota 2 window - minimal detection"""
         try:
             import pygetwindow as gw
-            import psutil
             
-            # First, prioritize visible and active Dota 2 windows (real-time detection)
+            # Quick detection: only check visible and active Dota 2 windows
             for window in gw.getAllWindows():
                 title = window.title.lower()
                 if (('dota 2' in title or 'dota2' in title or 'dota' in title) and 
@@ -134,88 +107,43 @@ class ScreenshotModel:
                             for i, monitor in enumerate(monitors, start=1):
                                 if (monitor['left'] <= window_center_x <= monitor['left'] + monitor['width'] and
                                     monitor['top'] <= window_center_y <= monitor['top'] + monitor['height']):
-                                    self.logger.info(f"Real-time detection: Active Dota 2 window '{window.title}' on Monitor {i}")
                                     return i
-                    except Exception as e:
-                        self.logger.warning(f"Error getting window position for '{window.title}': {e}")
+                    except:
                         continue
             
-            # If no active/visible windows found, check for minimized ones
-            dota_windows = []
-            for window in gw.getAllWindows():
-                title = window.title.lower()
-                if (('dota 2' in title or 'dota2' in title or 'dota' in title) and 
-                    len(window.title.strip()) > 0):
-                    dota_windows.append(window)
-                    self.logger.debug(f"Found Dota 2 window: '{window.title}' (Visible: {window.visible}, Minimized: {getattr(window, 'isMinimized', False)})")
+            # If no active Dota 2 window found, default to primary monitor
+            return 1
             
-            if dota_windows:
-                # Use the first Dota 2 window found (even if minimized)
-                dota_window = dota_windows[0]
-                
-                try:
-                    # Get window position (even if minimized, some properties might be available)
-                    window_center_x = dota_window.left + (dota_window.width // 2) if dota_window.width > 0 else None
-                    window_center_y = dota_window.top + (dota_window.height // 2) if dota_window.height > 0 else None
-                    
-                    # If coordinates are valid, use them
-                    if (window_center_x is not None and window_center_y is not None and
-                        window_center_x > 0 and window_center_y > 0 and 
-                        dota_window.width > 0 and dota_window.height > 0):
-                        
-                        # Check which monitor contains the window center
-                        with mss.mss() as sct:
-                            monitors = sct.monitors[1:]  # Skip the combined monitor at index 0
-                            for i, monitor in enumerate(monitors, start=1):
-                                if (monitor['left'] <= window_center_x <= monitor['left'] + monitor['width'] and
-                                    monitor['top'] <= window_center_y <= monitor['top'] + monitor['height']):
-                                    self.logger.info(f"Auto-detected Dota 2 on Monitor {i} (from window coordinates)")
-                                    return i
-                    
-                except Exception as e:
-                    self.logger.warning(f"Error getting window position: {e}")
-            
-            # Fallback: try process-based detection
-            return self._detect_by_process()
-            
-        except ImportError as e:
-            self.logger.error(f"Required modules not available for auto-detection: {e}")
-            return None
-        except Exception as e:
-            self.logger.error(f"Error during auto-detection: {e}")
-            return None
-
-    def _detect_by_process(self) -> Optional[int]:
-        """Fallback detection using process information"""
-        try:
-            import psutil
-            
-            # Look for Dota 2 processes
-            dota_processes = []
-            for proc in psutil.process_iter(['pid', 'name', 'exe']):
-                try:
-                    proc_name = proc.info['name'].lower() if proc.info['name'] else ''
-                    proc_exe = proc.info['exe'].lower() if proc.info['exe'] else ''
-                    
-                    if ('dota2' in proc_name or 'dota 2' in proc_name or 
-                        'dota2.exe' in proc_exe or 'dota' in proc_name):
-                        dota_processes.append(proc)
-                        self.logger.debug(f"Found Dota 2 process: {proc.info['name']} (PID: {proc.info['pid']})")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                    continue
-            
-            if dota_processes:
-                # If we found processes but can't determine monitor, default to primary
-                self.logger.info("Found Dota 2 process but couldn't determine monitor, defaulting to Monitor 1")
-                return 1
-            
-            self.logger.warning("No Dota 2 processes found")
-            return None
-            
-        except Exception as e:
-            self.logger.error(f"Error in process detection: {e}")
-            return None
+        except:
+            return 1  # Default to primary monitor
 
     def get_dota_process_monitor(self) -> Optional[int]:
         """Get monitor associated with Dota 2 process, prioritizing active windows"""
         return self.auto_detect_dota_monitor()
+
+    def cleanup_old_screenshots(self, max_age_hours: int = 24):
+        """Delete old screenshot files to free up space"""
+        try:
+            screenshots_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'screenshots')
+            if not os.path.exists(screenshots_dir):
+                return
+            
+            current_time = datetime.datetime.now()
+            deleted_count = 0
+            
+            for filename in os.listdir(screenshots_dir):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    file_path = os.path.join(screenshots_dir, filename)
+                    try:
+                        # Get file modification time
+                        file_time = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+                        age_hours = (current_time - file_time).total_seconds() / 3600
+                        
+                        if age_hours > max_age_hours:
+                            os.remove(file_path)
+                            deleted_count += 1
+                    except:
+                        pass
+            
+        except:
+            pass

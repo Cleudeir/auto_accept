@@ -661,9 +661,7 @@ class ModernMainView:
             "dota": "🎯 Match Found!",
             "dota2_plus": "⭐ Dota Plus Offer",
             "read_check": "✅ Read-Check Required",
-            "long_time": "⏰ Long Wait Warning",
             "ad": "📢 Advertisement",
-            "watch-game": "👁️ Watch Game Dialog",
             "none": "❌ No Match Detected"
         }
         return mapping.get(name, f"🔍 {name}")

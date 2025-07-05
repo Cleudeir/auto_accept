@@ -60,8 +60,7 @@ class DetectionController:
                         "dota",
                         "dota2_plus",
                         "read_check",
-                        "long_time",
-                        "watch-game",
+                  
                         "ad",
                     ]:
                         action = self.detection_model.process_detection_result(
@@ -73,8 +72,6 @@ class DetectionController:
                                 pass
                             except Exception as e:
                                 pass
-                        elif action == "long_time_dialog_detected":
-                            pass
                         elif action == "match_detected":
                             self.audio_model.play_alert_sound(
                                 self.config_model.selected_device_id,

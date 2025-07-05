@@ -43,8 +43,6 @@ class DetectionModel:
             "dota": os.path.join(base_path, "dota.png"),
             "dota2_plus": os.path.join(base_path, "dota2_plus.jpeg"),
             "read_check": os.path.join(base_path, "read_check.jpg"),
-            "long_time": os.path.join(base_path, "long_time.png"),
-            "watch-game": os.path.join(base_path, "watch-game.png"),
             "ad": os.path.join(base_path, "AD.png"),
         }
         for name, path in references.items():
@@ -187,19 +185,7 @@ class DetectionModel:
                 print("❌ Failed to focus Dota 2 window, but continuing with action")
                 self.logger.warning("Failed to focus Dota 2 window, but continuing with action")
         
-        if highest_match == "watch-game":
-            print("🎮 Watch game dialog detected - dismissing with ESC")
-            pyautogui.press("esc")
-            time.sleep(0.5)
-            pyautogui.press("esc")
-            action = "watch_game_dialog_detected"
-        elif highest_match == "long_time":
-            print("⏱️ Long matchmaking wait dialog detected - dismissing with ESC")
-            pyautogui.press("esc")
-            time.sleep(0.5)
-            pyautogui.press("esc")
-            action = "long_time_dialog_detected"
-        elif highest_match == "read_check":
+        if highest_match == "read_check":
             print("📖 Read-check pattern detected - confirming with Enter")
             pyautogui.press("enter")
             time.sleep(0.5)
