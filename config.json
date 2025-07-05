@@ -1,7 +1,7 @@
 {
   "alert_volume": 0.75,
   "selected_device_id": 5,
-  "always_on_top": true,
+  "always_on_top": false,
   "enhanced_window_focus": true,
   "auto_focus_on_detection": true,
   "focus_retry_attempts": 3,
