@@ -92,8 +92,7 @@ class EnhancedDetectionController:
                             self.match_found = True
                             if self.on_match_found:
                                 self.on_match_found()
-                        elif action == "watch_game_dialog_detected":
-                            pass
+                     
 
                     if self.on_detection_update:
                         self.on_detection_update(img, highest_match, highest_score)
