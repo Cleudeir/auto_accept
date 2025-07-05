@@ -1,6 +1,6 @@
 import os
 import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image
 import datetime
 import logging
 from typing import Callable, Optional, List, Tuple
@@ -628,9 +628,9 @@ class ModernMainView:
                 display_size = (400, 250)
                 pil_image.thumbnail(display_size, Image.Resampling.LANCZOS)
                 
-                photo = ImageTk.PhotoImage(pil_image)
-                self.screenshot_label.configure(image=photo, text="")
-                self.screenshot_label.image = photo  # Keep reference
+                # Use CTkImage for proper CustomTkinter compatibility and HiDPI scaling
+                ctk_image = ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=pil_image.size)
+                self.screenshot_label.configure(image=ctk_image, text="")
                 
                 if timestamp and self.timestamp_label:
                     self.timestamp_label.configure(text=f"Captured: {timestamp}")
