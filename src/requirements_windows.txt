@@ -1,16 +1,1 @@
-pycaw==20240210
-PyGetWindow==0.0.9
-PyRect==0.2.0
-pywin32==310
-pywin32-ctypes==0.2.3
-winrt-runtime==2.3.0
-winrt-Windows.Devices.Bluetooth==2.3.0
-winrt-Windows.Devices.Bluetooth.Advertisement==2.3.0
-winrt-Windows.Devices.Bluetooth.GenericAttributeProfile==2.3.0
-winrt-Windows.Devices.Enumeration==2.3.0
-winrt-Windows.Foundation==2.3.0
-winrt-Windows.Foundation.Collections==2.3.0
-winrt-Windows.Storage.Streams==2.3.0
-
-# On Windows, install with:
-#    python -m pip install -r src/windows-requirements.txt
+# This file was merged into src/requirements.txt and can be removed.
