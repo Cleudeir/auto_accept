@@ -30,13 +30,15 @@ else:
 class DetectionModel:
     """Model for handling image detection and comparison logic"""
 
-    def __init__(self, screenshot_model=None, score_threshold: float = 0.7, config_model=None):
+    def __init__(
+        self, screenshot_model=None, score_threshold: float = 0.7, config_model=None
+    ):
         self.reference_images = self._load_reference_images()
         self.screenshot_model = screenshot_model
         self.ocr_cache = {}
         self.config_model = config_model
         # Use threshold from config if available, otherwise use the passed parameter
-        if config_model and hasattr(config_model, 'detection_threshold'):
+        if config_model and hasattr(config_model, "detection_threshold"):
             self.score_threshold = config_model.detection_threshold
         else:
             self.score_threshold = score_threshold
@@ -112,7 +114,9 @@ class DetectionModel:
 
             # Verify both arrays have the same shape (should be guaranteed now)
             if img_np.shape != ref_np.shape:
-                print(f"⚠️ Image shapes don't match after equalization: {img_np.shape} vs {ref_np.shape}")
+                print(
+                    f"⚠️ Image shapes don't match after equalization: {img_np.shape} vs {ref_np.shape}"
+                )
                 return 0.0
 
             # Compute SSIM on raw color images without any color space conversion
@@ -142,9 +146,7 @@ class DetectionModel:
                 return highest_score_name
         return "none"
 
-    def detect_match_in_image_with_score(
-        self, img: Image.Image
-    ) -> Tuple[str, float]:
+    def detect_match_in_image_with_score(self, img: Image.Image) -> Tuple[str, float]:
         """
         Detect reference patterns in the given image
         Returns (name, score) of the reference image with the highest score
@@ -159,7 +161,7 @@ class DetectionModel:
         if scores:
             highest_score_name = max(scores, key=scores.get)
             highest_score = scores[highest_score_name]
-            if highest_score >= self.score_threshold:             
+            if highest_score >= self.score_threshold:
                 return highest_score_name, highest_score
             else:
                 return "none", highest_score
@@ -176,11 +178,12 @@ class DetectionModel:
         """Process detection results and return action taken using enhanced window focusing"""
         action = "none"
         print(f"🔍 Processing detection result: {highest_match}")
-        
+
         # Check if auto-focus is enabled
-        should_focus = (self.config_model.auto_focus_on_detection 
-                       if self.config_model else True)
-        
+        should_focus = (
+            self.config_model.auto_focus_on_detection if self.config_model else True
+        )
+
         if should_focus:
             # Always try to focus Dota 2 window when any detection occurs
             print("🎯 Attempting to focus Dota 2 window...")
@@ -189,19 +192,19 @@ class DetectionModel:
                 print("✅ Successfully focused Dota 2 window")
             else:
                 print("❌ Failed to focus Dota 2 window, but continuing with action")
-        
+
         if highest_match == "read_check":
             print("📖 Read-check pattern detected - confirming with Enter")
-            pyautogui.press("enter")           
+            pyautogui.press("enter")
             action = "read_check_detected"
         elif highest_match in ["dota", "dota2_plus"]:
             print(f"🎉 Match detected ({highest_match}) - accepting with Enter")
-            pyautogui.press("enter")          
+            pyautogui.press("enter")
             action = "match_detected"
         elif highest_match == "ad":
             print("📺 Advertisement detected - window focused")
             action = "ad_detected"
-        
+
         print(f"✅ Action completed: {action}")
         return action
 
@@ -215,7 +218,7 @@ class DetectionModel:
             # Try enhanced method first
             if self.focus_dota2_window_enhanced():
                 return
-            
+
             # Fallback to original simple method
             dota_window = gw.getWindowsWithTitle("Dota 2")[0]
             if dota_window.isMinimized:
@@ -228,9 +231,9 @@ class DetectionModel:
     def get_dota2_window_debug_info(self) -> dict:
         """Get debugging information about Dota 2 windows"""
         return {
-            'processes': self.window_model.get_dota2_processes(),
-            'windows': self.window_model.get_dota2_windows(),
-            'all_related': self.window_model.list_all_dota2_related_windows()
+            "processes": self.window_model.get_dota2_processes(),
+            "windows": self.window_model.get_dota2_windows(),
+            "all_related": self.window_model.list_all_dota2_related_windows(),
         }
 
     def find_dota2_monitor(self) -> Optional[int]:
@@ -241,27 +244,29 @@ class DetectionModel:
         try:
             # Get all monitors
             monitors = pyautogui.getAllMonitors()
-            
+
             # Try to find Dota 2 window
             dota_windows = gw.getWindowsWithTitle("Dota 2")
             if not dota_windows:
                 return None
-            
+
             dota_window = dota_windows[0]
-            
+
             # Determine which monitor contains the Dota 2 window
             window_center_x = dota_window.left + dota_window.width // 2
             window_center_y = dota_window.top + dota_window.height // 2
-            
+
             for i, monitor in enumerate(monitors):
-                if (monitor.left <= window_center_x < monitor.left + monitor.width and
-                    monitor.top <= window_center_y < monitor.top + monitor.height):
+                if (
+                    monitor.left <= window_center_x < monitor.left + monitor.width
+                    and monitor.top <= window_center_y < monitor.top + monitor.height
+                ):
                     self.dota2_monitor = i
                     return i
-            
+
             self.dota2_monitor = 0
             return 0
-            
+
         except Exception as e:
             return None
 
@@ -271,14 +276,16 @@ class DetectionModel:
         Returns True if Dota 2 is running, False otherwise
         """
         try:
-            for process in psutil.process_iter(['pid', 'name']):
-                if 'dota2' in process.info['name'].lower():
+            for process in psutil.process_iter(["pid", "name"]):
+                if "dota2" in process.info["name"].lower():
                     return True
             return False
         except Exception as e:
             return False
 
-    def capture_monitor_screenshot(self, monitor_number: Optional[int] = None) -> Optional[Image.Image]:
+    def capture_monitor_screenshot(
+        self, monitor_number: Optional[int] = None
+    ) -> Optional[Image.Image]:
         """
         Capture screenshot from specific monitor
         If monitor_number is None, uses the monitor where Dota 2 is running
@@ -288,21 +295,23 @@ class DetectionModel:
                 monitor_number = self.find_dota2_monitor()
                 if monitor_number is None:
                     return None
-            
+
             monitors = pyautogui.getAllMonitors()
             if monitor_number >= len(monitors):
                 return None
-            
+
             monitor = monitors[monitor_number]
-            
+
             # Capture screenshot from specific monitor
-            screenshot = pyautogui.screenshot(region=(monitor.left, monitor.top, monitor.width, monitor.height))
-            
+            screenshot = pyautogui.screenshot(
+                region=(monitor.left, monitor.top, monitor.width, monitor.height)
+            )
+
             # Cache the screenshot
             self.monitor_screenshots[monitor_number] = screenshot
-            
+
             return screenshot
-            
+
         except Exception as e:
             return None
 
@@ -311,74 +320,81 @@ class DetectionModel:
         Get comprehensive information about Dota 2 monitoring
         """
         info = {
-            'is_running': self.is_dota2_running(),
-            'monitor_number': self.find_dota2_monitor(),
-            'available_monitors': len(pyautogui.getAllMonitors()),
-            'monitors': [],
-            'window_info': None
+            "is_running": self.is_dota2_running(),
+            "monitor_number": self.find_dota2_monitor(),
+            "available_monitors": len(pyautogui.getAllMonitors()),
+            "monitors": [],
+            "window_info": None,
         }
-        
+
         # Add monitor details
         for i, monitor in enumerate(pyautogui.getAllMonitors()):
-            info['monitors'].append({
-                'number': i,
-                'left': monitor.left,
-                'top': monitor.top,
-                'width': monitor.width,
-                'height': monitor.height,
-                'is_dota2_monitor': i == info['monitor_number']
-            })
-        
+            info["monitors"].append(
+                {
+                    "number": i,
+                    "left": monitor.left,
+                    "top": monitor.top,
+                    "width": monitor.width,
+                    "height": monitor.height,
+                    "is_dota2_monitor": i == info["monitor_number"],
+                }
+            )
+
         # Add window info if Dota 2 is found
         try:
             dota_windows = gw.getWindowsWithTitle("Dota 2")
             if dota_windows:
                 window = dota_windows[0]
-                info['window_info'] = {
-                    'title': window.title,
-                    'left': window.left,
-                    'top': window.top,
-                    'width': window.width,
-                    'height': window.height,
-                    'is_minimized': window.isMinimized,
-                    'is_maximized': window.isMaximized
+                info["window_info"] = {
+                    "title": window.title,
+                    "left": window.left,
+                    "top": window.top,
+                    "width": window.width,
+                    "height": window.height,
+                    "is_minimized": window.isMinimized,
+                    "is_maximized": window.isMaximized,
                 }
         except:
             pass
-        
+
         return info
 
     def print_dota2_monitor_status(self):
         """
         Print detailed status about Dota 2 monitoring
         """
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("🔍 DOTA 2 MONITOR STATUS")
-        print("="*50)
-        
+        print("=" * 50)
+
         info = self.get_dota2_monitor_info()
-        
+
         print(f"🎮 Dota 2 Running: {'✅ YES' if info['is_running'] else '❌ NO'}")
         print(f"🖥️ Available Monitors: {info['available_monitors']}")
-        
-        if info['monitor_number'] is not None:
+
+        if info["monitor_number"] is not None:
             print(f"📍 Dota 2 Monitor: Monitor {info['monitor_number']}")
         else:
             print("📍 Dota 2 Monitor: ❌ Not detected")
-        
+
         print("\n📊 Monitor Details:")
-        for monitor in info['monitors']:
-            status = "🎮 (Dota 2)" if monitor['is_dota2_monitor'] else ""
-            print(f"   Monitor {monitor['number']}: {monitor['width']}x{monitor['height']} "
-                  f"at ({monitor['left']}, {monitor['top']}) {status}")
-        
-        if info['window_info']:
+        for monitor in info["monitors"]:
+            status = "🎮 (Dota 2)" if monitor["is_dota2_monitor"] else ""
+            print(
+                f"   Monitor {monitor['number']}: {monitor['width']}x{monitor['height']} "
+                f"at ({monitor['left']}, {monitor['top']}) {status}"
+            )
+
+        if info["window_info"]:
             print(f"\n🪟 Window Info:")
             print(f"   Title: {info['window_info']['title']}")
-            print(f"   Position: ({info['window_info']['left']}, {info['window_info']['top']})")
-            print(f"   Size: {info['window_info']['width']}x{info['window_info']['height']}")
+            print(
+                f"   Position: ({info['window_info']['left']}, {info['window_info']['top']})"
+            )
+            print(
+                f"   Size: {info['window_info']['width']}x{info['window_info']['height']}"
+            )
             print(f"   Minimized: {info['window_info']['is_minimized']}")
             print(f"   Maximized: {info['window_info']['is_maximized']}")
-        
-        print("="*50 + "\n")
 
+        print("=" * 50 + "\n")

@@ -6,15 +6,16 @@ import sys
 import platform
 from typing import List, Dict, Optional
 
+
 class AudioModel:
     """Model for handling audio system and sound playback"""
-    
+
     def __init__(self):
         self.logger = logging.getLogger("Dota2AutoAccept.AudioModel")
         self.sound = None
         self.sound_loaded = False
         self.initialize_sound_system()
-    
+
     def initialize_sound_system(self):
         """Initialize the sound system at application startup"""
         try:
@@ -30,11 +31,11 @@ class AudioModel:
                 self.logger.warning(f"Alert sound file not found at {mp3_path}")
         except Exception as e:
             self.logger.error(f"Error initializing sound system: {e}")
-    
+
     def get_default_output_device(self) -> Optional[Dict]:
         """Get the system default output device"""
         try:
-            default_device = sd.query_devices(kind='output')
+            default_device = sd.query_devices(kind="output")
             if default_device and default_device.get("max_output_channels", 0) > 0:
                 devices = sd.query_devices()
                 for i, d in enumerate(devices):
@@ -50,13 +51,18 @@ class AudioModel:
         devices = sd.query_devices()
         output_devices = []
         seen = set()
-        
+
         # First, try to add the system default device at the top
         default_device = self.get_default_output_device()
         if default_device:
-            output_devices.append({"id": default_device["id"], "name": f"🔊 {default_device['name']} (Default)"})
+            output_devices.append(
+                {
+                    "id": default_device["id"],
+                    "name": f"🔊 {default_device['name']} (Default)",
+                }
+            )
             seen.add(default_device["name"][:10])
-        
+
         for i, d in enumerate(devices):
             # Include any device that has output capabilities (regardless of input capabilities)
             if d["max_output_channels"] > 0:
@@ -65,7 +71,7 @@ class AudioModel:
                     output_devices.append({"id": i, "name": d["name"]})
                     seen.add(name_slice)
         return output_devices
-    
+
     def play_alert_sound(self, device_id: Optional[int] = None, volume: float = 1.0):
         """Play the alert sound using the configured settings"""
         try:
@@ -75,7 +81,10 @@ class AudioModel:
                     try:
                         # Validate device exists and has output capabilities
                         devices = sd.query_devices()
-                        if device_id < len(devices) and devices[device_id].get("max_output_channels", 0) > 0:
+                        if (
+                            device_id < len(devices)
+                            and devices[device_id].get("max_output_channels", 0) > 0
+                        ):
                             # Get raw audio data from pygame Sound
                             arr = pygame.sndarray.array(self.sound)
                             # Apply volume to the audio array
@@ -85,15 +94,21 @@ class AudioModel:
                             # Play using sounddevice with selected output device
                             sd.play(arr, samplerate=sample_rate, device=device_id)
                             sd.wait()  # Wait for sound to finish
-                            self.logger.info(f"Played alert sound on device {device_id} ({devices[device_id]['name']})")
+                            self.logger.info(
+                                f"Played alert sound on device {device_id} ({devices[device_id]['name']})"
+                            )
                         else:
-                            self.logger.warning(f"Invalid device ID {device_id}, falling back to default")
+                            self.logger.warning(
+                                f"Invalid device ID {device_id}, falling back to default"
+                            )
                             # Fallback to pygame's playback
                             self.sound.set_volume(volume)
                             self.sound.play()
                             self.logger.info("Played alert sound with pygame fallback")
                     except Exception as e:
-                        self.logger.error(f"Error playing sound with sounddevice on device {device_id}: {e}")
+                        self.logger.error(
+                            f"Error playing sound with sounddevice on device {device_id}: {e}"
+                        )
                         # Fallback to pygame's playback
                         self.sound.set_volume(volume)
                         self.sound.play()
@@ -114,7 +129,7 @@ class AudioModel:
                 self._play_fallback_beep()
             except:
                 pass  # If even this fails, just continue silently
-    
+
     def refresh_devices(self):
         """Refresh the list of available audio devices"""
         try:
@@ -130,8 +145,10 @@ class AudioModel:
         """Check if a specific device ID is currently available"""
         try:
             devices = sd.query_devices()
-            return (device_id < len(devices) and 
-                   devices[device_id].get("max_output_channels", 0) > 0)
+            return (
+                device_id < len(devices)
+                and devices[device_id].get("max_output_channels", 0) > 0
+            )
         except Exception as e:
             self.logger.error(f"Error checking device availability: {e}")
             return False
@@ -145,6 +162,7 @@ class AudioModel:
         try:
             if platform.system() == "Windows":
                 import winsound
+
                 winsound.Beep(1000, 500)
             else:
                 # For Linux/Unix systems, use system bell or print beep
