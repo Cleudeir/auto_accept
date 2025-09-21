@@ -2,8 +2,8 @@ import os
 import logging
 import pygame
 import sounddevice as sd
-import winsound
 import sys
+import platform
 from typing import List, Dict, Optional
 
 class AudioModel:
@@ -104,14 +104,14 @@ class AudioModel:
                     self.sound.play()
                     self.logger.info("Played alert sound with pygame (system default)")
             else:
-                # Use Windows beep as fallback
+                # Use cross-platform beep as fallback
                 self.logger.warning("Sound not loaded, using fallback beep")
-                winsound.Beep(1000, 500)
+                self._play_fallback_beep()
         except Exception as e:
             self.logger.error(f"Error playing alert sound: {e}")
             try:
                 # Ultimate fallback
-                winsound.Beep(1000, 500)
+                self._play_fallback_beep()
             except:
                 pass  # If even this fails, just continue silently
     
@@ -139,3 +139,19 @@ class AudioModel:
     def test_sound(self, device_id: Optional[int] = None, volume: float = 1.0):
         """Test the alert sound"""
         self.play_alert_sound(device_id, volume)
+
+    def _play_fallback_beep(self):
+        """Play a cross-platform fallback beep sound"""
+        try:
+            if platform.system() == "Windows":
+                import winsound
+                winsound.Beep(1000, 500)
+            else:
+                # For Linux/Unix systems, use system bell or print beep
+                try:
+                    os.system('printf "\a"')
+                except:
+                    # If all else fails, just log the beep
+                    self.logger.info("BEEP! (Alert sound fallback)")
+        except Exception as e:
+            self.logger.error(f"Error playing fallback beep: {e}")

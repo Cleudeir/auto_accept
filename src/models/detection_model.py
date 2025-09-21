@@ -3,14 +3,28 @@ import logging
 import cv2
 import numpy as np
 import pyautogui
-import pygetwindow as gw
+import platform
 from PIL import Image
 from skimage.metrics import structural_similarity as ssim
 from typing import Tuple, Optional, Dict, List
 from models.window_model import WindowModel
 import psutil
-import win32gui
-import win32process
+
+# Windows-specific imports with platform check
+if platform.system() == "Windows":
+    try:
+        import pygetwindow as gw
+        import win32gui
+        import win32process
+    except Exception:
+        gw = None
+        win32gui = None
+        win32process = None
+else:
+    # Stubs for non-Windows platforms
+    gw = None
+    win32gui = None
+    win32process = None
 
 
 class DetectionModel:

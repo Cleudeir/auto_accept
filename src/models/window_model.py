@@ -1,13 +1,24 @@
 import logging
 import time
-import ctypes
-import ctypes.wintypes
-import pygetwindow as gw
+import platform
 import psutil
 from typing import Optional, List, Tuple
-import win32gui
-import win32con
-import win32process
+
+# Windows-specific imports with platform check
+if platform.system() == "Windows":
+    import ctypes
+    import ctypes.wintypes
+    import pygetwindow as gw
+    import win32gui
+    import win32con
+    import win32process
+else:
+    # Linux alternatives - define stubs so module can be imported on non-Windows
+    ctypes = None
+    gw = None
+    win32gui = None
+    win32con = None
+    win32process = None
 
 
 class WindowModel:
@@ -49,6 +60,11 @@ class WindowModel:
     def get_dota2_windows(self) -> List[dict]:
         """Get all Dota 2 windows with detailed information"""
         windows = []
+
+        # If not on Windows, return empty list as we cannot enumerate windows
+        if platform.system() != "Windows":
+            self.logger.debug("get_dota2_windows: non-Windows platform detected, returning empty list")
+            return windows
         
         def enum_window_callback(hwnd, windows_list):
             try:
@@ -88,6 +104,11 @@ class WindowModel:
 
     def force_focus_window(self, hwnd: int) -> bool:
         """Force focus on a window using aggressive Windows API methods"""
+        # On non-Windows platforms, we cannot force focus using Win32 APIs
+        if platform.system() != "Windows":
+            self.logger.warning("force_focus_window: non-Windows platform detected, skipping aggressive focus")
+            return False
+
         try:
             # Get delay from config or use default
             delay = (self.config_model.focus_delay_ms / 1000.0) if self.config_model else 0.1
@@ -211,6 +232,16 @@ class WindowModel:
             
             # Strategy 1: Windows API with improved window selection
             try:
+                # If not Windows, skip aggressive focusing but still try to detect processes
+                if platform.system() != "Windows":
+                    self.logger.info("Non-Windows platform detected - skipping window focusing and returning process info only")
+                    dota_processes = self.get_dota2_processes()
+                    # If a Dota process exists, consider this a 'soft success' to allow rest of app to proceed
+                    if dota_processes:
+                        self.logger.info(f"Found {len(dota_processes)} Dota 2 processes (no window operations on Linux)")
+                        return True
+                    return False
+
                 dota_windows = self.get_dota2_windows()
                 self.logger.info(f"Found {len(dota_windows)} Dota 2 windows")
                 

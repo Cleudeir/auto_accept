@@ -1,0 +1,17 @@
+*** Begin Patch
+*** Update File: src/requirements.txt
+@@
++pycaw==20240210; sys_platform == 'win32'
++PyGetWindow==0.0.9; sys_platform == 'win32'
++PyRect==0.2.0; sys_platform == 'win32'
++pywin32==310; sys_platform == 'win32'
++pywin32-ctypes==0.2.3; sys_platform == 'win32'
++winrt-runtime==2.3.0; sys_platform == 'win32'
++winrt-Windows.Devices.Bluetooth==2.3.0; sys_platform == 'win32'
++winrt-Windows.Devices.Bluetooth.Advertisement==2.3.0; sys_platform == 'win32'
++winrt-Windows.Devices.Bluetooth.GenericAttributeProfile==2.3.0; sys_platform == 'win32'
++winrt-Windows.Devices.Enumeration==2.3.0; sys_platform == 'win32'
++winrt-Windows.Foundation==2.3.0; sys_platform == 'win32'
++winrt-Windows.Foundation.Collections==2.3.0; sys_platform == 'win32'
++winrt-Windows.Storage.Streams==2.3.0; sys_platform == 'win32'
+*** End Patch
