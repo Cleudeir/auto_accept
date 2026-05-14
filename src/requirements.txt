@@ -1,0 +1,38 @@
+# Unified requirements for auto_accept
+# Split into cross-platform (Linux/macOS) and Windows-only sections.
+# Install with: python -m pip install -r src/requirements.txt
+
+# Cross-platform / Linux (pinned)
+mss==10.0.0
+numpy==1.26.4
+opencv-python==4.8.1.78
+Pillow==11.2.1
+pygame==2.6.1
+pyautogui==0.9.54
+customtkinter==5.2.2
+psutil==7.0.0
+pyperclip==1.9.0
+requests==2.31.0
+PyYAML==6.0.2
+sounddevice==0.5.2
+scikit-image==0.25.2
+matplotlib==3.8.2
+pytesseract==0.3.13
+PyScreeze==1.0.1
+
+# Windows-only packages
+# These packages are required only on Windows. Install them on Windows environments only.
+# Example: python -m pip install -r src/requirements.txt --use-feature=fast-deps
+pycaw==20240210
+PyGetWindow==0.0.9
+PyRect==0.2.0
+pywin32==310
+pywin32-ctypes==0.2.3
+winrt-runtime==2.3.0
+winrt-Windows.Devices.Bluetooth==2.3.0
+winrt-Windows.Devices.Bluetooth.Advertisement==2.3.0
+winrt-Windows.Devices.Bluetooth.GenericAttributeProfile==2.3.0
+winrt-Windows.Devices.Enumeration==2.3.0
+winrt-Windows.Foundation==2.3.0
+winrt-Windows.Foundation.Collections==2.3.0
+winrt-Windows.Storage.Streams==2.3.0
