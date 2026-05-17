@@ -5,6 +5,7 @@ import sounddevice as sd
 import sys
 import platform
 from typing import List, Dict, Optional
+from utils import get_resource_path
 
 
 class AudioModel:
@@ -20,9 +21,8 @@ class AudioModel:
         """Initialize the sound system at application startup"""
         try:
             pygame.mixer.init()
-            # Use the src directory as base path for bin/dota2.mp3
-            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            mp3_path = os.path.join(base_path, "bin", "dota2.mp3")
+            base_path = get_resource_path("bin")
+            mp3_path = os.path.join(base_path, "dota2.mp3")
             if os.path.exists(mp3_path):
                 self.sound = pygame.mixer.Sound(mp3_path)
                 self.sound_loaded = True

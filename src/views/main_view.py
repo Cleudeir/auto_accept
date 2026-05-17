@@ -5,6 +5,7 @@ from PIL import ImageTk, Image
 import datetime
 import logging
 from typing import Callable, Optional, List, Tuple
+from utils import get_resource_path
 
 class MainView:
     """Main GUI view for the Dota 2 Auto Accept application"""
@@ -123,7 +124,7 @@ class MainView:
     def _set_window_icon(self):
         """Set the window icon"""
         try:
-            icon_path = os.path.join("bin", "icon.ico")
+            icon_path = get_resource_path(os.path.join("bin", "icon.ico"))
             if os.path.exists(icon_path):
                 self.window.iconbitmap(icon_path)
         except Exception as e:

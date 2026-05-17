@@ -20,7 +20,8 @@ if (Test-Path $appVersionFile) {
         $appVersion = $newVersion
         Write-Host "Auto-incremented version to $appVersion"
     }
-} else {
+}
+else {
     $appVersion = '3.0.0'
     Set-Content $appVersionFile $appVersion
 }
@@ -44,7 +45,8 @@ if (-not (pip show pyinstaller)) {
 # Collect all files in src/bin and config files
 $binDir = Join-Path $srcDir 'bin'
 $binFiles = Get-ChildItem -Path $binDir -File | ForEach-Object { "--add-data=$($binDir)\$($_.Name);bin" }
-$configFiles = @("--add-data=$srcDir\\config.json;.")
+$configFile = Join-Path $projectRoot 'config.json'
+$configFiles = @("--add-data=$configFile;.")
 $datas = $binFiles + $configFiles
 
 # Remove previous build
@@ -67,12 +69,20 @@ $versionedTargetPath = Join-Path $targetDir $versionedExeName
 $targetPath = Join-Path $targetDir 'main.exe'
 
 if (Test-Path $exePath) {
-    Write-Host "Moving $exePath to $versionedTargetPath..."
-    Move-Item -Path $exePath -Destination $versionedTargetPath -Force
-    Write-Host "Copying $versionedTargetPath to $targetPath..."
-    Copy-Item -Path $versionedTargetPath -Destination $targetPath -Force
-    Write-Host "Running $targetPath..."
-    Start-Process $targetPath
-} else {
+    Write-Host "Executable created at $exePath"
+    if (Test-Path $targetDir) {
+        Write-Host "Moving $exePath to $versionedTargetPath..."
+        Move-Item -Path $exePath -Destination $versionedTargetPath -Force
+        Write-Host "Copying $versionedTargetPath to $targetPath..."
+        Copy-Item -Path $versionedTargetPath -Destination $targetPath -Force
+        Write-Host "Running $targetPath..."
+        Start-Process $targetPath
+    }
+    else {
+        Write-Host "Target directory does not exist: $targetDir"
+        Write-Host "Skipping move/copy/execute step. Use the executable in $exePath."
+    }
+}
+else {
     Write-Host "Executable not found: $exePath"
 }

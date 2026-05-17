@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from utils import get_config_load_path, get_config_save_path
 
 class ConfigModel:
     """Model for handling application configuration"""
@@ -34,8 +35,9 @@ class ConfigModel:
     def load(self):
         """Load configuration from file"""
         try:
-            if os.path.exists(self.config_file):
-                with open(self.config_file, "r") as f:
+            config_path = get_config_load_path(self.config_file)
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
                     data = json.load(f)
                     # Update config with loaded values, keeping defaults for missing keys
                     for key, value in data.items():
@@ -50,18 +52,19 @@ class ConfigModel:
                                     )
                             else:
                                 self._config[key] = value
-                self.logger.info("Configuration loaded successfully")
+                self.logger.info(f"Configuration loaded successfully from {config_path}")
             else:
-                self.logger.info(f"Config file {self.config_file} not found. Using defaults.")
+                self.logger.info(f"Config file {config_path} not found. Using defaults.")
         except Exception as e:
             self.logger.error(f"Error loading config: {e}. Using defaults.")
     
     def save(self):
         """Save configuration to file"""
         try:
-            with open(self.config_file, "w") as f:
+            save_path = get_config_save_path(self.config_file)
+            with open(save_path, "w") as f:
                 json.dump(self._config, f, indent=2)
-            self.logger.info("Configuration saved successfully")
+            self.logger.info(f"Configuration saved successfully to {save_path}")
         except Exception as e:
             self.logger.error(f"Error saving config: {e}")
     

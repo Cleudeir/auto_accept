@@ -9,6 +9,7 @@ from skimage.metrics import structural_similarity as ssim
 from typing import Tuple, Optional, Dict, List
 from models.window_model import WindowModel
 import psutil
+from utils import get_resource_path
 
 # Windows-specific imports with platform check
 if platform.system() == "Windows":
@@ -55,9 +56,7 @@ class DetectionModel:
 
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""
-        base_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bin"
-        )
+        base_path = get_resource_path("bin")
         references = {
             "dota": os.path.join(base_path, "dota.png"),
             "dota2_plus": os.path.join(base_path, "dota2_plus.jpeg"),
