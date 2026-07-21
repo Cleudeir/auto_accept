@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.exe
 debug_screenshots/*
 src/logs/*
 # Distribution / packaging

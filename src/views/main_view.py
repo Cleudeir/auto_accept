@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+import webbrowser
 from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
 import datetime
@@ -40,6 +41,9 @@ class MainView:
         self.on_telegram_bot_token_change = None
         self.on_telegram_chat_id_change = None
         self.on_telegram_message_change = None
+        self.on_telegram_send_screenshots_change = None
+        self.on_telegram_screenshot_interval_change = None
+        self.on_telegram_notify_events_change = None
         self.on_closing = None
         
         # UI State
@@ -524,6 +528,19 @@ class MainView:
             self.telegram_message_entry.delete(0, tk.END)
             self.telegram_message_entry.insert(0, message)
 
+    def set_telegram_send_screenshots(self, enabled: bool):
+        if hasattr(self, 'telegram_send_screenshots_var'):
+            self.telegram_send_screenshots_var.set(enabled)
+
+    def set_telegram_screenshot_interval(self, interval: int):
+        if hasattr(self, 'telegram_screenshot_interval_entry'):
+            self.telegram_screenshot_interval_entry.delete(0, tk.END)
+            self.telegram_screenshot_interval_entry.insert(0, str(interval))
+
+    def set_telegram_notify_events(self, enabled: bool):
+        if hasattr(self, 'telegram_notify_events_var'):
+            self.telegram_notify_events_var.set(enabled)
+
     def set_volume(self, volume: int):
         """Set volume slider value"""
         if self.volume_slider:
@@ -713,6 +730,90 @@ class MainView:
         self.telegram_bot_token_entry.bind("<FocusOut>", self._on_telegram_bot_token_change_event)
         self.telegram_bot_token_entry.bind("<Return>", self._on_telegram_bot_token_change_event)
 
+        self.telegram_token_link = tk.Label(
+            telegram_frame,
+            text="How to create a token?",
+            font=("Segoe UI", 8, "underline"),
+            fg="#0066cc",
+            bg="#ffffff",
+            cursor="hand2"
+        )
+        self.telegram_token_link.pack(pady=(0, 5), padx=8, anchor="w")
+        self.telegram_token_link.bind("<Button-1>", lambda e: webbrowser.open("https://core.telegram.org/bots#how-do-i-create-a-bot"))
+
+        # --- Periodic Screenshots ---
+        tk.Label(
+            telegram_frame,
+            text="📸 Periodic Screenshots",
+            font=("Segoe UI", 10, "bold"),
+            bg="#ffffff",
+            fg="#555"
+        ).pack(pady=(8, 2), padx=8, anchor="w")
+
+        self.telegram_send_screenshots_var = tk.BooleanVar()
+        self.telegram_send_screenshots_check = tk.Checkbutton(
+            telegram_frame,
+            text="Send screenshots automatically",
+            variable=self.telegram_send_screenshots_var,
+            command=self._on_telegram_send_screenshots_change_event,
+            font=("Segoe UI", 9),
+            bg="#ffffff",
+            fg="#333",
+            activebackground="#e3e3e3",
+            selectcolor="#e3e3e3",
+            highlightthickness=0
+        )
+        self.telegram_send_screenshots_check.pack(pady=(0, 2), padx=8, anchor="w")
+
+        interval_frame = tk.Frame(telegram_frame, bg="#ffffff")
+        interval_frame.pack(pady=(0, 2), padx=8, fill="x", anchor="w")
+        tk.Label(
+            interval_frame,
+            text="Interval (seconds):",
+            font=("Segoe UI", 9),
+            bg="#ffffff",
+            fg="#333"
+        ).pack(side="left", padx=(0, 5))
+        self.telegram_screenshot_interval_entry = tk.Entry(
+            interval_frame,
+            width=8,
+            font=("Segoe UI", 9)
+        )
+        self.telegram_screenshot_interval_entry.pack(side="left")
+        self.telegram_screenshot_interval_entry.bind("<FocusOut>", self._on_telegram_screenshot_interval_change_event)
+        self.telegram_screenshot_interval_entry.bind("<Return>", self._on_telegram_screenshot_interval_change_event)
+
+        # --- Event Notifications ---
+        tk.Label(
+            telegram_frame,
+            text="🔔 Event Notifications",
+            font=("Segoe UI", 10, "bold"),
+            bg="#ffffff",
+            fg="#555"
+        ).pack(pady=(8, 2), padx=8, anchor="w")
+
+        self.telegram_notify_events_var = tk.BooleanVar()
+        self.telegram_notify_events_check = tk.Checkbutton(
+            telegram_frame,
+            text="Notify about all detection events",
+            variable=self.telegram_notify_events_var,
+            command=self._on_telegram_notify_events_change_event,
+            font=("Segoe UI", 9),
+            bg="#ffffff",
+            fg="#333",
+            activebackground="#e3e3e3",
+            selectcolor="#e3e3e3",
+            highlightthickness=0
+        )
+        self.telegram_notify_events_check.pack(pady=(0, 5), padx=8, anchor="w")
+
+        # Separator
+        tk.Label(
+            telegram_frame,
+            text="",
+            bg="#ffffff"
+        ).pack()
+
         tk.Label(
             telegram_frame,
             text="Message:",
@@ -762,5 +863,21 @@ class MainView:
     def _on_telegram_message_change_event(self, event=None):
         if self.on_telegram_message_change:
             self.on_telegram_message_change(self.telegram_message_entry.get())
+
+    def _on_telegram_send_screenshots_change_event(self):
+        if self.on_telegram_send_screenshots_change:
+            self.on_telegram_send_screenshots_change(self.telegram_send_screenshots_var.get())
+
+    def _on_telegram_screenshot_interval_change_event(self, event=None):
+        if self.on_telegram_screenshot_interval_change:
+            try:
+                val = int(self.telegram_screenshot_interval_entry.get())
+                self.on_telegram_screenshot_interval_change(val)
+            except ValueError:
+                pass
+
+    def _on_telegram_notify_events_change_event(self):
+        if self.on_telegram_notify_events_change:
+            self.on_telegram_notify_events_change(self.telegram_notify_events_var.get())
 
     # ... existing methods continue below ...

@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+import webbrowser
 import customtkinter as ctk
 from PIL import Image
 import datetime
@@ -43,6 +44,9 @@ class ModernMainView:
         self.on_telegram_bot_token_change = None
         self.on_telegram_chat_id_change = None
         self.on_telegram_message_change = None
+        self.on_telegram_send_screenshots_change = None
+        self.on_telegram_screenshot_interval_change = None
+        self.on_telegram_notify_events_change = None
         self.on_test_telegram = None
         self.on_auto_detect_monitor = None  # Add auto-detect callback
         self.on_closing = None
@@ -470,21 +474,99 @@ class ModernMainView:
             placeholder_text="Enter bot token",
             font=ctk.CTkFont(size=12)
         )
-        self.telegram_bot_token_entry.grid(row=3, column=0, sticky="ew", padx=15, pady=(0, 10))
+        self.telegram_bot_token_entry.grid(row=3, column=0, sticky="ew", padx=15, pady=(0, 5))
         self.telegram_bot_token_entry.bind("<FocusOut>", self._on_telegram_bot_token_change_event)
         self.telegram_bot_token_entry.bind("<Return>", self._on_telegram_bot_token_change_event)
+
+        self.telegram_token_link = ctk.CTkLabel(
+            self.telegram_card,
+            text="How to create a token?",
+            font=ctk.CTkFont(size=10, underline=True),
+            text_color=("gray60", "gray40"),
+            cursor="hand2"
+        )
+        self.telegram_token_link.grid(row=4, column=0, sticky="w", padx=15, pady=(0, 10))
+        self.telegram_token_link.bind("<Button-1>", lambda e: webbrowser.open("https://core.telegram.org/bots#how-do-i-create-a-bot"))
+
+        # --- Periodic Screenshots Section ---
+        ctk.CTkLabel(
+            self.telegram_card,
+            text="",
+            font=ctk.CTkFont(size=6)
+        ).grid(row=5, column=0, sticky="ew", padx=15)
+
+        ctk.CTkLabel(
+            self.telegram_card,
+            text="📸 Periodic Screenshots",
+            font=ctk.CTkFont(size=13, weight="bold")
+        ).grid(row=6, column=0, sticky="w", padx=15, pady=(0, 5))
+
+        self.telegram_send_screenshots_var = ctk.BooleanVar()
+        self.telegram_send_screenshots_check = ctk.CTkCheckBox(
+            self.telegram_card,
+            text="Send screenshots automatically",
+            variable=self.telegram_send_screenshots_var,
+            command=self._on_telegram_send_screenshots_change_event,
+            font=ctk.CTkFont(size=12)
+        )
+        self.telegram_send_screenshots_check.grid(row=7, column=0, sticky="w", padx=15, pady=(0, 5))
+
+        # Interval row
+        self.telegram_screenshot_interval_frame = ctk.CTkFrame(self.telegram_card, fg_color="transparent")
+        self.telegram_screenshot_interval_frame.grid(row=8, column=0, sticky="ew", padx=15, pady=(0, 5))
+        self.telegram_screenshot_interval_frame.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(
+            self.telegram_screenshot_interval_frame,
+            text="Interval (seconds):",
+            font=ctk.CTkFont(size=12)
+        ).grid(row=0, column=0, sticky="w", padx=(0, 5))
+
+        self.telegram_screenshot_interval_entry = ctk.CTkEntry(
+            self.telegram_screenshot_interval_frame,
+            placeholder_text="60",
+            width=70,
+            font=ctk.CTkFont(size=12)
+        )
+        self.telegram_screenshot_interval_entry.grid(row=0, column=1, sticky="w")
+        self.telegram_screenshot_interval_entry.bind("<FocusOut>", self._on_telegram_screenshot_interval_change_event)
+        self.telegram_screenshot_interval_entry.bind("<Return>", self._on_telegram_screenshot_interval_change_event)
+
+        # --- Event Notifications Section ---
+        ctk.CTkLabel(
+            self.telegram_card,
+            text="🔔 Event Notifications",
+            font=ctk.CTkFont(size=13, weight="bold")
+        ).grid(row=9, column=0, sticky="w", padx=15, pady=(5, 5))
+
+        self.telegram_notify_events_var = ctk.BooleanVar()
+        self.telegram_notify_events_check = ctk.CTkCheckBox(
+            self.telegram_card,
+            text="Notify about all detection events",
+            variable=self.telegram_notify_events_var,
+            command=self._on_telegram_notify_events_change_event,
+            font=ctk.CTkFont(size=12)
+        )
+        self.telegram_notify_events_check.grid(row=10, column=0, sticky="w", padx=15, pady=(0, 10))
+
+        # Separator before message
+        ctk.CTkLabel(
+            self.telegram_card,
+            text="",
+            font=ctk.CTkFont(size=4)
+        ).grid(row=11, column=0, sticky="ew", padx=15)
 
         ctk.CTkLabel(
             self.telegram_card,
             text="Message:",
             font=ctk.CTkFont(size=12)
-        ).grid(row=7, column=0, sticky="w", padx=15, pady=(0, 5))
+        ).grid(row=12, column=0, sticky="w", padx=15, pady=(0, 5))
         self.telegram_message_entry = ctk.CTkEntry(
             self.telegram_card,
             placeholder_text="Enter Telegram alert message",
             font=ctk.CTkFont(size=12)
         )
-        self.telegram_message_entry.grid(row=8, column=0, sticky="ew", padx=15, pady=(0, 10))
+        self.telegram_message_entry.grid(row=13, column=0, sticky="ew", padx=15, pady=(0, 10))
         self.telegram_message_entry.bind("<FocusOut>", self._on_telegram_message_change_event)
         self.telegram_message_entry.bind("<Return>", self._on_telegram_message_change_event)
 
@@ -498,7 +580,7 @@ class ModernMainView:
             corner_radius=8,
             font=ctk.CTkFont(size=12, weight="bold")
         )
-        self.telegram_test_btn.grid(row=9, column=0, sticky="ew", padx=15, pady=(5, 10))
+        self.telegram_test_btn.grid(row=14, column=0, sticky="ew", padx=15, pady=(5, 10))
 
         self.telegram_info_label = ctk.CTkLabel(
             self.telegram_card,
@@ -506,7 +588,7 @@ class ModernMainView:
             font=ctk.CTkFont(size=10),
             text_color=("gray60", "gray40")
         )
-        self.telegram_info_label.grid(row=10, column=0, sticky="w", padx=15, pady=(0, 15))
+        self.telegram_info_label.grid(row=15, column=0, sticky="w", padx=15, pady=(0, 15))
 
     def _on_telegram_enabled_change_event(self):
         if self.on_telegram_enabled_change:
@@ -519,6 +601,22 @@ class ModernMainView:
     def _on_telegram_message_change_event(self, event=None):
         if self.on_telegram_message_change:
             self.on_telegram_message_change(self.telegram_message_entry.get())
+
+    def _on_telegram_send_screenshots_change_event(self):
+        if self.on_telegram_send_screenshots_change:
+            self.on_telegram_send_screenshots_change(self.telegram_send_screenshots_var.get())
+
+    def _on_telegram_screenshot_interval_change_event(self, event=None):
+        if self.on_telegram_screenshot_interval_change:
+            try:
+                val = int(self.telegram_screenshot_interval_entry.get())
+                self.on_telegram_screenshot_interval_change(val)
+            except ValueError:
+                pass
+
+    def _on_telegram_notify_events_change_event(self):
+        if self.on_telegram_notify_events_change:
+            self.on_telegram_notify_events_change(self.telegram_notify_events_var.get())
 
     def _on_test_telegram_click(self):
         if self.on_test_telegram:
@@ -542,6 +640,19 @@ class ModernMainView:
         if hasattr(self, 'telegram_message_entry'):
             self.telegram_message_entry.delete(0, tk.END)
             self.telegram_message_entry.insert(0, message)
+
+    def set_telegram_send_screenshots(self, enabled: bool):
+        if hasattr(self, 'telegram_send_screenshots_var'):
+            self.telegram_send_screenshots_var.set(enabled)
+
+    def set_telegram_screenshot_interval(self, interval: int):
+        if hasattr(self, 'telegram_screenshot_interval_entry'):
+            self.telegram_screenshot_interval_entry.delete(0, tk.END)
+            self.telegram_screenshot_interval_entry.insert(0, str(interval))
+
+    def set_telegram_notify_events(self, enabled: bool):
+        if hasattr(self, 'telegram_notify_events_var'):
+            self.telegram_notify_events_var.set(enabled)
 
     def _create_control_section(self):
         """Create modern control buttons section"""

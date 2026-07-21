@@ -29,7 +29,10 @@ class ConfigModel:
             "telegram_enabled": False,
             "telegram_bot_token": "",
             "telegram_chat_id": "",
-            "telegram_message": "⚠️ Partida encontrada no Dota 2! Aceitando automaticamente."
+            "telegram_message": "⚠️ Partida encontrada no Dota 2! Aceitando automaticamente.",
+            "telegram_send_screenshots": True,
+            "telegram_screenshot_interval": 60,
+            "telegram_notify_events": True
         }
     
     def load(self):
@@ -197,6 +200,30 @@ class ConfigModel:
     @telegram_message.setter
     def telegram_message(self, value):
         self.set("telegram_message", str(value))
+
+    @property
+    def telegram_send_screenshots(self):
+        return self._config.get("telegram_send_screenshots", True)
+    
+    @telegram_send_screenshots.setter
+    def telegram_send_screenshots(self, value):
+        self.set("telegram_send_screenshots", bool(value))
+
+    @property
+    def telegram_screenshot_interval(self):
+        return self._config.get("telegram_screenshot_interval", 60)
+    
+    @telegram_screenshot_interval.setter
+    def telegram_screenshot_interval(self, value):
+        self.set("telegram_screenshot_interval", int(value))
+
+    @property
+    def telegram_notify_events(self):
+        return self._config.get("telegram_notify_events", True)
+    
+    @telegram_notify_events.setter
+    def telegram_notify_events(self, value):
+        self.set("telegram_notify_events", bool(value))
 
     @property
     def auto_detect_dota_monitor(self):

@@ -1,3 +1,4 @@
+import io
 import os
 import mss
 import logging
@@ -5,6 +6,8 @@ import requests
 import threading
 import time
 from typing import List, Tuple
+
+from PIL import Image
 
 from models.config_model import ConfigModel
 from models.audio_model import AudioModel
@@ -33,6 +36,9 @@ class MainController:
 
         self._telegram_session = requests.Session()
         self._last_telegram_sent = 0
+        self._last_telegram_photo_sent = 0
+        self._last_telegram_event_sent = 0
+        self._prev_detection_state = None
 
         # Choose UI based on config preference
         if self.config_model.use_modern_ui:
@@ -70,6 +76,12 @@ class MainController:
             self.view.on_telegram_chat_id_change = self._on_telegram_chat_id_change
         if hasattr(self.view, 'on_telegram_message_change'):
             self.view.on_telegram_message_change = self._on_telegram_message_change
+        if hasattr(self.view, 'on_telegram_send_screenshots_change'):
+            self.view.on_telegram_send_screenshots_change = self._on_telegram_send_screenshots_change
+        if hasattr(self.view, 'on_telegram_screenshot_interval_change'):
+            self.view.on_telegram_screenshot_interval_change = self._on_telegram_screenshot_interval_change
+        if hasattr(self.view, 'on_telegram_notify_events_change'):
+            self.view.on_telegram_notify_events_change = self._on_telegram_notify_events_change
 
         self.detection_controller.on_match_found = self._on_match_found
         self.detection_controller.on_detection_update = self._on_detection_update
@@ -115,6 +127,12 @@ class MainController:
             self.view.set_telegram_chat_id(self.config_model.telegram_chat_id)
         if hasattr(self.view, 'set_telegram_message'):
             self.view.set_telegram_message(self.config_model.telegram_message)
+        if hasattr(self.view, 'set_telegram_send_screenshots'):
+            self.view.set_telegram_send_screenshots(self.config_model.telegram_send_screenshots)
+        if hasattr(self.view, 'set_telegram_screenshot_interval'):
+            self.view.set_telegram_screenshot_interval(self.config_model.telegram_screenshot_interval)
+        if hasattr(self.view, 'set_telegram_notify_events'):
+            self.view.set_telegram_notify_events(self.config_model.telegram_notify_events)
 
         self._position_window_on_second_monitor()
 
@@ -148,6 +166,7 @@ class MainController:
         """Setup periodic UI updates"""
         self._update_status()
         self._update_screenshot_preview()
+        self._telegram_screenshot_timer()
 
     def _update_status(self):
         """Update detection status in UI"""
@@ -192,10 +211,12 @@ class MainController:
     def _on_start_detection(self):
         """Handle start detection request"""
         self.detection_controller.start_detection()
+        self._send_telegram_event("started", "🟢 Detection Started — Monitoring for Dota 2 matches.")
 
     def _on_stop_detection(self):
         """Handle stop detection request"""
         self.detection_controller.stop_detection()
+        self._send_telegram_event("stopped", "🔴 Detection Stopped — Monitoring ended.")
 
     def _on_test_sound(self):
         """Handle test sound request"""
@@ -259,6 +280,30 @@ class MainController:
     def _on_telegram_message_change(self, message: str):
         self.config_model.telegram_message = message.strip()
 
+    def _on_telegram_send_screenshots_change(self, enabled: bool):
+        self.config_model.telegram_send_screenshots = enabled
+        if enabled:
+            self.logger.info("Telegram periodic screenshots enabled.")
+        else:
+            self.logger.info("Telegram periodic screenshots disabled.")
+
+    def _on_telegram_screenshot_interval_change(self, interval: int):
+        try:
+            val = int(interval)
+            if val < 10:
+                val = 10
+            self.config_model.telegram_screenshot_interval = val
+            self.logger.info(f"Telegram screenshot interval changed to {val}s.")
+        except (ValueError, TypeError):
+            self.logger.warning(f"Invalid screenshot interval: {interval}")
+
+    def _on_telegram_notify_events_change(self, enabled: bool):
+        self.config_model.telegram_notify_events = enabled
+        if enabled:
+            self.logger.info("Telegram event notifications enabled.")
+        else:
+            self.logger.info("Telegram event notifications disabled.")
+
     def _send_telegram_notification(self, message: str, force: bool = False):
         """Send a Telegram message asynchronously if configured."""
         if not self.config_model.telegram_enabled and not force:
@@ -310,6 +355,69 @@ class MainController:
 
         threading.Thread(target=send, daemon=True).start()
 
+    def _send_telegram_event(self, event_type: str, message: str):
+        """Send a Telegram event notification if event notifications are enabled."""
+        if not self.config_model.telegram_notify_events:
+            return
+        # Minimum 10s debounce between event sends to avoid bursts
+        now = time.time()
+        if now - self._last_telegram_event_sent < 10:
+            return
+        self._last_telegram_event_sent = now
+        self._send_telegram_notification(message, force=False)
+
+    def _send_telegram_photo(self):
+        """Capture a screenshot and send it as a photo via Telegram."""
+        if not self.config_model.telegram_enabled:
+            return
+        bot_token = self.config_model.telegram_bot_token
+        chat_id = self.config_model.telegram_chat_id
+        if not bot_token or not chat_id:
+            return
+
+        now = time.time()
+        if now - self._last_telegram_photo_sent < 3:
+            return
+        self._last_telegram_photo_sent = now
+
+        def capture_and_send():
+            try:
+                img = self.screenshot_model.capture_monitor_screenshot()
+                if img is None:
+                    self.logger.warning("Telegram screenshot: capture returned None.")
+                    return
+
+                buf = io.BytesIO()
+                img.save(buf, format="JPEG", quality=85)
+                buf.seek(0)
+
+                self._telegram_session.post(
+                    f"https://api.telegram.org/bot{bot_token}/sendPhoto",
+                    files={"photo": ("screenshot.jpg", buf, "image/jpeg")},
+                    data={"chat_id": chat_id},
+                    timeout=15,
+                )
+                self.logger.info("Telegram screenshot sent.")
+            except Exception as e:
+                self.logger.warning(f"Telegram screenshot send failed: {e}")
+
+        threading.Thread(target=capture_and_send, daemon=True).start()
+
+    def _telegram_screenshot_timer(self):
+        """Periodic timer that sends a screenshot if enabled and enough time has elapsed."""
+        try:
+            if (self.config_model.telegram_enabled
+                    and self.config_model.telegram_send_screenshots
+                    and self.config_model.telegram_bot_token
+                    and self.config_model.telegram_chat_id):
+                interval = max(10, self.config_model.telegram_screenshot_interval)
+                now = time.time()
+                if now - self._last_telegram_photo_sent >= interval:
+                    self._send_telegram_photo()
+        except Exception as e:
+            self.logger.debug(f"Telegram screenshot timer error: {e}")
+
+        self.view.after(1000, self._telegram_screenshot_timer)
 
     def _fetch_telegram_chat_id(self):
         """Fetch chat id from Telegram getUpdates using the bot token."""
@@ -373,6 +481,7 @@ class MainController:
     def _on_closing(self):
         """Handle application closing"""
         self.detection_controller.stop_detection()
+        self._send_telegram_event("closing", "👋 App Closing — Dota 2 Auto Accept is shutting down.")
 
     def _on_match_found(self):
         """Handle match found event"""
@@ -382,7 +491,14 @@ class MainController:
         """Handle detection update event"""
         if match_score is not None:
             self.view.set_match_percent_and_name(match_score * 100, highest_match)
-        pass
+
+        # Send event on state change
+        if self._prev_detection_state != highest_match:
+            prev = self._prev_detection_state or "none"
+            score_str = f" ({match_score:.1f}%)" if match_score is not None else ""
+            msg = f"🔄 Detection: {prev} → {highest_match}{score_str}"
+            self._send_telegram_event("state_change", msg)
+            self._prev_detection_state = highest_match
 
     def debug_dota2_windows(self):
         """Debug method to get information about Dota 2 windows"""
