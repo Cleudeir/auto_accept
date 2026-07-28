@@ -55,7 +55,7 @@ if (Test-Path (Join-Path $srcDir 'build')) { Remove-Item (Join-Path $srcDir 'bui
 if (Test-Path (Join-Path $srcDir 'main.spec')) { Remove-Item (Join-Path $srcDir 'main.spec') -Force }
 
 # Build the argument list for PyInstaller
-$pyinstallerArgs = @('--onefile', '--noconsole', "--icon=$binDir\\icon.ico") + $datas + $mainPy
+$pyinstallerArgs = @('--onefile', '--noconsole', "--icon=$binDir\\icon.ico", '--hidden-import=sounddevice') + $datas + $mainPy
 Write-Host "Running: pyinstaller $($pyinstallerArgs -join ' ')"
 Push-Location $projectRoot
 pyinstaller @pyinstallerArgs

@@ -3,6 +3,7 @@
 Enhanced detection controller with debug output on first run
 """
 
+import logging
 import threading
 import time
 from typing import Callable, Optional
@@ -11,6 +12,7 @@ class EnhancedDetectionController:
     """Enhanced controller with debug output for first screenshot"""
 
     def __init__(self, detection_model, screenshot_model, audio_model, config_model):
+        self.logger = logging.getLogger("Dota2AutoAccept.EnhancedDetectionController")
         self.detection_model = detection_model
         self.screenshot_model = screenshot_model
         self.audio_model = audio_model
@@ -102,9 +104,9 @@ class EnhancedDetectionController:
                 time.sleep(1)
 
         except Exception as e:
-            pass
+            self.logger.error(f"Detection loop error: {e}", exc_info=True)
         finally:
-            pass
+            self.logger.info("Detection loop ended")
 
     def get_status(self) -> dict:
         """Get current detection status"""

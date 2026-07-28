@@ -129,6 +129,14 @@ class WindowModel:
 
             self.logger.info(f"Starting aggressive window focus for HWND: {hwnd}")
 
+            # Step 0: Tell Windows to allow foreground changes - use AllowSetForegroundWindow
+            # ASFW_ANY = -1 means any process can set foreground
+            try:
+                ctypes.windll.user32.AllowSetForegroundWindow(-1)  # ASFW_ANY
+                self.logger.info("Called AllowSetForegroundWindow(-1) to remove foreground lock")
+            except Exception as e:
+                self.logger.warning(f"AllowSetForegroundWindow failed: {e}")
+
             # Step 1: Ensure window is visible and not minimized
             if win32gui.IsIconic(hwnd):
                 self.logger.info("Window is minimized, restoring...")
@@ -191,6 +199,28 @@ class WindowModel:
 
                 except Exception as e:
                     self.logger.warning(f"Advanced foreground setting failed: {e}")
+
+            # Step 5b: Simulate mouse click on window title bar to bypass foreground lock
+            # This works because Windows treats simulated mouse clicks as user actions
+            try:
+                window_rect = win32gui.GetWindowRect(hwnd)
+                # Calculate center of title bar (top portion of window)
+                title_bar_x = (window_rect[0] + window_rect[2]) // 2
+                title_bar_y = window_rect[1] + 10  # 10 pixels from top (title bar area)
+                
+                # Move mouse to title bar position
+                ctypes.windll.user32.SetCursorPos(title_bar_x, title_bar_y)
+                time.sleep(0.05)
+                
+                # Simulate mouse down and up (left button)
+                ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)  # MOUSEEVENTF_LEFTDOWN
+                time.sleep(0.05)
+                ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)  # MOUSEEVENTF_LEFTUP
+                time.sleep(delay)
+                
+                self.logger.info(f"Simulated mouse click on window title bar at ({title_bar_x}, {title_bar_y})")
+            except Exception as e:
+                self.logger.warning(f"Mouse click simulation failed: {e}")
 
             # Step 6: Send Alt+Tab effect to ensure focus
             try:

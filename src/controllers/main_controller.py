@@ -2,7 +2,9 @@ import io
 import os
 import mss
 import logging
+import psutil
 import requests
+import subprocess
 import threading
 import time
 from typing import List, Tuple
@@ -22,6 +24,7 @@ class MainController:
 
     def __init__(self):
         self.logger = logging.getLogger("Dota2AutoAccept.MainController")
+        self._ensure_discord_running()
         self.config_model = ConfigModel()
         self.audio_model = AudioModel()
         self.screenshot_model = ScreenshotModel()
@@ -39,6 +42,7 @@ class MainController:
         self._last_telegram_photo_sent = 0
         self._last_telegram_event_sent = 0
         self._prev_detection_state = None
+        self._screenshot_timer_active = True
 
         # Choose UI based on config preference
         if self.config_model.use_modern_ui:
@@ -52,6 +56,114 @@ class MainController:
         self._initialize_ui()
 
         self._setup_periodic_updates()
+
+    def _ensure_discord_running(self):
+        """Check if Discord is running and launch it if not."""
+        try:
+            discord_found = False
+            for proc in psutil.process_iter(["name"]):
+                try:
+                    pname = proc.info["name"] or ""
+                    if "discord" in pname.lower():
+                        discord_found = True
+                        break
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            if discord_found:
+                self.logger.info("Discord is already running.")
+                return
+
+            self.logger.info("Discord not found. Attempting to launch Discord...")
+
+            # Common Discord installation paths on Windows
+            discord_paths = [
+                os.path.expandvars(r"%LOCALAPPDATA%\Discord\Update.exe"),
+                os.path.expandvars(r"%LOCALAPPDATA%\Discord\app-*\Discord.exe"),
+                os.path.expandvars(r"%PROGRAMFILES%\Discord\Update.exe"),
+                os.path.expandvars(r"%PROGRAMFILES(X86)%\Discord\Update.exe"),
+            ]
+
+            # Try the most common path first (Update.exe --processStart Discord.exe)
+            update_exe = os.path.expandvars(r"%LOCALAPPDATA%\Discord\Update.exe")
+            if os.path.isfile(update_exe):
+                subprocess.Popen(
+                    [update_exe, "--processStart", "Discord.exe"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                self.logger.info("Discord launched via Update.exe --processStart Discord.exe")
+                return
+
+            # Fallback: find Discord.exe directly
+            import glob
+            for pattern in discord_paths[1:]:
+                matches = glob.glob(pattern)
+                if matches:
+                    discord_exe = matches[-1]  # Take the newest version
+                    subprocess.Popen(
+                        [discord_exe],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    self.logger.info(f"Discord launched via {discord_exe}")
+                    return
+
+            self.logger.warning("Could not find Discord executable in common paths.")
+
+        except Exception as e:
+            self.logger.error(f"Failed to ensure Discord is running: {e}", exc_info=True)
+
+    def _ensure_dota2_running(self):
+        """Check if Dota 2 is running and launch it via Steam if not."""
+        try:
+            # Check if Dota 2 process is already running
+            dota_processes = self.detection_model.window_model.get_dota2_processes()
+            if dota_processes:
+                self.logger.info("Dota 2 is already running.")
+                return True
+
+            self.logger.info("Dota 2 not found. Attempting to launch via Steam...")
+
+            # Try to launch Dota 2 via Steam protocol (most reliable method)
+            try:
+                # Steam protocol to launch Dota 2 (App ID 570)
+                subprocess.Popen(
+                    ["cmd", "/c", "start", "steam://rungameid/570"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
+                self.logger.info("Dota 2 launch initiated via Steam protocol (steam://rungameid/570)")
+                return True
+            except Exception as e:
+                self.logger.warning(f"Failed to launch via Steam protocol: {e}")
+
+            # Fallback: Try to find Dota 2 executable directly via Steam paths
+            steam_paths = [
+                os.path.expandvars(r"%PROGRAMFILES(X86)%\Steam\steamapps\common\dota 2 beta\game\bin\win64\dota2.exe"),
+                os.path.expandvars(r"%PROGRAMFILES(X86)%\Steam\steamapps\common\dota 2\game\bin\win64\dota2.exe"),
+                os.path.expandvars(r"%PROGRAMFILES%\Steam\steamapps\common\dota 2 beta\game\bin\win64\dota2.exe"),
+                os.path.expandvars(r"%PROGRAMFILES%\Steam\steamapps\common\dota 2\game\bin\win64\dota2.exe"),
+            ]
+
+            for dota_path in steam_paths:
+                if os.path.isfile(dota_path):
+                    subprocess.Popen(
+                        [dota_path],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=subprocess.CREATE_NO_WINDOW
+                    )
+                    self.logger.info(f"Dota 2 launched via executable: {dota_path}")
+                    return True
+
+            self.logger.warning("Could not find Dota 2 executable in common Steam paths.")
+            return False
+
+        except Exception as e:
+            self.logger.error(f"Failed to ensure Dota 2 is running: {e}", exc_info=True)
+            return False
 
     def _setup_callbacks(self):
         """Setup callbacks between controllers and views"""
@@ -85,6 +197,7 @@ class MainController:
 
         self.detection_controller.on_match_found = self._on_match_found
         self.detection_controller.on_detection_update = self._on_detection_update
+        self.detection_controller.on_detection_ended = self._on_detection_ended
 
     def _initialize_ui(self):
         """Initialize UI with current settings"""
@@ -108,6 +221,8 @@ class MainController:
 
         self.view.set_device_options(device_names, selected_device_index)
 
+        # Ensure Dota 2 is running before starting detection
+        self._ensure_dota2_running()
         self.detection_controller.start_detection()
 
 
@@ -210,16 +325,23 @@ class MainController:
 
     def _on_start_detection(self):
         """Handle start detection request"""
+        print("[EVENT] Detection Started")
+        self._screenshot_timer_active = True
+        # Ensure Dota 2 is running before starting detection
+        self._ensure_dota2_running()
         self.detection_controller.start_detection()
         self._send_telegram_event("started", "🟢 Detection Started — Monitoring for Dota 2 matches.")
 
     def _on_stop_detection(self):
         """Handle stop detection request"""
+        print("[EVENT] Detection Stopped")
+        self._screenshot_timer_active = False
         self.detection_controller.stop_detection()
         self._send_telegram_event("stopped", "🔴 Detection Stopped — Monitoring ended.")
 
     def _on_test_sound(self):
         """Handle test sound request"""
+        print("[EVENT] Test Sound")
         try:
             # Check if device is still available before testing
             if (self.config_model.selected_device_id is not None and 
@@ -235,11 +357,13 @@ class MainController:
 
     def _on_test_telegram(self):
         """Handle Telegram test button click"""
+        print("[EVENT] Test Telegram")
         message = self.config_model.telegram_message or "Telegram test message from Dota 2 Auto Accept"
         self._send_telegram_notification(message, force=True)
 
     def _on_device_change(self, device_index: int):
         """Handle audio device change"""
+        print(f"[EVENT] Device Change: index={device_index}")
         devices = self.audio_model.get_output_devices()
         if 0 <= device_index < len(devices):
             device_id = devices[device_index]["id"]
@@ -255,32 +379,40 @@ class MainController:
 
     def _on_volume_change(self, volume: int):
         """Handle volume change"""
+        print(f"[EVENT] Volume Change: {volume}%")
         self.config_model.alert_volume = volume / 100.0
 
 
 
     def _on_always_on_top_change(self, always_on_top: bool):
         """Handle always on top change"""
+        print(f"[EVENT] Always On Top Change: {always_on_top}")
         self.config_model.always_on_top = always_on_top
         self.view.set_always_on_top(always_on_top)
 
     def _on_score_threshold_change(self, threshold: float):
         """Handle score threshold change"""
+        print(f"[EVENT] Score Threshold Change: {threshold}")
         self.detection_model.set_score_threshold(threshold)
 
     def _on_telegram_enabled_change(self, enabled: bool):
+        print(f"[EVENT] Telegram Enabled Change: {enabled}")
         self.config_model.telegram_enabled = enabled
 
     def _on_telegram_bot_token_change(self, bot_token: str):
+        print(f"[EVENT] Telegram Bot Token Change: {'***' + bot_token[-4:] if len(bot_token) > 4 else '***'}")
         self.config_model.telegram_bot_token = bot_token.strip()
 
     def _on_telegram_chat_id_change(self, chat_id: str):
+        print(f"[EVENT] Telegram Chat ID Change: {chat_id}")
         self.config_model.telegram_chat_id = chat_id.strip()
 
     def _on_telegram_message_change(self, message: str):
+        print(f"[EVENT] Telegram Message Change: {message[:50]}...")
         self.config_model.telegram_message = message.strip()
 
     def _on_telegram_send_screenshots_change(self, enabled: bool):
+        print(f"[EVENT] Telegram Send Screenshots Change: {enabled}")
         self.config_model.telegram_send_screenshots = enabled
         if enabled:
             self.logger.info("Telegram periodic screenshots enabled.")
@@ -288,6 +420,7 @@ class MainController:
             self.logger.info("Telegram periodic screenshots disabled.")
 
     def _on_telegram_screenshot_interval_change(self, interval: int):
+        print(f"[EVENT] Telegram Screenshot Interval Change: {interval}s")
         try:
             val = int(interval)
             if val < 10:
@@ -298,6 +431,7 @@ class MainController:
             self.logger.warning(f"Invalid screenshot interval: {interval}")
 
     def _on_telegram_notify_events_change(self, enabled: bool):
+        print(f"[EVENT] Telegram Notify Events Change: {enabled}")
         self.config_model.telegram_notify_events = enabled
         if enabled:
             self.logger.info("Telegram event notifications enabled.")
@@ -405,17 +539,19 @@ class MainController:
 
     def _telegram_screenshot_timer(self):
         """Periodic timer that sends a screenshot if enabled and enough time has elapsed."""
-        try:
-            if (self.config_model.telegram_enabled
-                    and self.config_model.telegram_send_screenshots
-                    and self.config_model.telegram_bot_token
-                    and self.config_model.telegram_chat_id):
-                interval = max(10, self.config_model.telegram_screenshot_interval)
-                now = time.time()
-                if now - self._last_telegram_photo_sent >= interval:
-                    self._send_telegram_photo()
-        except Exception as e:
-            self.logger.debug(f"Telegram screenshot timer error: {e}")
+        if self._screenshot_timer_active:
+            try:
+                if (self.config_model.telegram_enabled
+                        and self.config_model.telegram_send_screenshots
+                        and self.config_model.telegram_bot_token
+                        and self.config_model.telegram_chat_id):
+                    interval = max(10, self.config_model.telegram_screenshot_interval)
+                    now = time.time()
+                    if now - self._last_telegram_photo_sent >= interval:
+                        print(f"[EVENT] Periodic Screenshot Timer: sending screenshot (interval={interval}s)")
+                        self._send_telegram_photo()
+            except Exception as e:
+                self.logger.debug(f"Telegram screenshot timer error: {e}")
 
         self.view.after(1000, self._telegram_screenshot_timer)
 
@@ -480,15 +616,23 @@ class MainController:
 
     def _on_closing(self):
         """Handle application closing"""
+        print("[EVENT] App Closing")
+        self._screenshot_timer_active = False
         self.detection_controller.stop_detection()
         self._send_telegram_event("closing", "👋 App Closing — Dota 2 Auto Accept is shutting down.")
 
     def _on_match_found(self):
         """Handle match found event"""
+        if not self._screenshot_timer_active:
+            print("[EVENT] 🎮 MATCH FOUND! (ignored - detection stopped)")
+            return
+        print("[EVENT] 🎮 MATCH FOUND! 🎮")
         self._send_telegram_notification(self.config_model.telegram_message)
 
     def _on_detection_update(self, img, highest_match, match_score=None):
         """Handle detection update event"""
+        if not self._screenshot_timer_active:
+            return
         if match_score is not None:
             self.view.set_match_percent_and_name(match_score * 100, highest_match)
 
@@ -496,9 +640,35 @@ class MainController:
         if self._prev_detection_state != highest_match:
             prev = self._prev_detection_state or "none"
             score_str = f" ({match_score:.1f}%)" if match_score is not None else ""
+            print(f"[EVENT] Detection Update: {prev} → {highest_match}{score_str}")
             msg = f"🔄 Detection: {prev} → {highest_match}{score_str}"
             self._send_telegram_event("state_change", msg)
             self._prev_detection_state = highest_match
+
+    def _on_detection_ended(self):
+        """Handle detection loop ending (AD detected, error, or stop)."""
+        self._screenshot_timer_active = False
+        self.logger.info("Detection ended — periodic screenshots and notifications disabled.")
+        
+        # Check if detection ended due to AD detected (match accepted, game started)
+        # In this case, close the auto-accept app
+        if self._prev_detection_state == "ad" or self.detection_controller.match_found:
+            self.logger.info("Match accepted and game started — closing auto-accept app.")
+            self._send_telegram_event("closed", "🎮 Game Started — Dota 2 Auto Accept closing automatically.")
+            # Give a moment for the notification to send, then close
+            self.view.after(500, self._close_app)
+        else:
+            # Detection ended for other reasons (stopped by user, error, etc.)
+            self._send_telegram_event("stopped", "🛑 Detection Stopped — Monitoring ended.")
+
+    def _close_app(self):
+        """Close the application window."""
+        try:
+            if hasattr(self.view, 'window') and self.view.window:
+                self.view.window.destroy()
+                self.logger.info("Application window closed.")
+        except Exception as e:
+            self.logger.error(f"Error closing app: {e}")
 
     def debug_dota2_windows(self):
         """Debug method to get information about Dota 2 windows"""

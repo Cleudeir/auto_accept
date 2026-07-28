@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 from typing import Callable, Optional
@@ -7,6 +8,7 @@ class DetectionController:
     """Controller for handling detection logic and threading"""
 
     def __init__(self, detection_model, screenshot_model, audio_model, config_model):
+        self.logger = logging.getLogger("Dota2AutoAccept.DetectionController")
         self.detection_model = detection_model
         self.screenshot_model = screenshot_model
         self.audio_model = audio_model
@@ -19,6 +21,7 @@ class DetectionController:
         self.on_match_found = None
         self.on_detection_update = None
         self.on_start_failed = None
+        self.on_detection_ended = None
 
     def start_detection(self):
         """Start the detection process"""
@@ -53,6 +56,7 @@ class DetectionController:
                     highest_match, highest_score = self.detection_model.detect_match_in_image_with_score(img)
 
                     if highest_match == "ad":
+                        print("[EVENT] AD detected - stopping detection")
                         self.is_running = False
                         break
 
@@ -72,6 +76,7 @@ class DetectionController:
                             except Exception as e:
                                 pass
                         elif action == "match_detected":
+                            print("[EVENT] Match Detected - playing alert sound")
                             self.audio_model.play_alert_sound(
                                 self.config_model.selected_device_id,
                                 self.config_model.alert_volume,
@@ -88,9 +93,11 @@ class DetectionController:
                 time.sleep(1)
 
         except Exception as e:
-            pass
+            self.logger.error(f"Detection loop error: {e}", exc_info=True)
         finally:
-            pass
+            self.logger.info("Detection loop ended")
+            if self.on_detection_ended:
+                self.on_detection_ended()
 
     def get_status(self) -> dict:
         """Get current detection status"""
