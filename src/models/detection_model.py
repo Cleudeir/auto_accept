@@ -54,18 +54,45 @@ class DetectionModel:
         if self.config_model:
             self.config_model.detection_threshold = threshold
 
+    # Types that represent the match-accept dialog (center of screen)
+    _CENTER_CROP_TYPES = {"dota", "dota2_plus"}
+    # Percentage of image to keep from center (width%, height%)
+    _CENTER_CROP_W = 0.42
+    _CENTER_CROP_H = 0.45
+
+    def _crop_center(self, img: Image.Image, w_pct: float = None, h_pct: float = None) -> Image.Image:
+        """Crop and return only the center region of an image.
+
+        The match-accept dialog (YOUR GAME IS READY / ACEITAR) is always
+        centred on screen.  Comparing only this region avoids false positives
+        from friend-request popups or lobby invites that appear at the edges.
+        """
+        if w_pct is None:
+            w_pct = self._CENTER_CROP_W
+        if h_pct is None:
+            h_pct = self._CENTER_CROP_H
+
+        w, h = img.size
+        new_w = int(w * w_pct)
+        new_h = int(h * h_pct)
+        left = (w - new_w) // 2
+        top = (h - new_h) // 2
+        return img.crop((left, top, left + new_w, top + new_h))
+
     def _load_reference_images(self) -> dict:
         """Load reference images for detection"""
         base_path = get_resource_path("bin")
         references = {
             "dota": os.path.join(base_path, "dota.png"),
-            "dota2_plus": os.path.join(base_path, "dota2_plus.jpeg"),
+            "dota2_plus": os.path.join(base_path, "dota_plus.png"),
             "read_check": os.path.join(base_path, "read_check.jpg"),
             "ad": os.path.join(base_path, "AD.png"),
+            "10min": os.path.join(base_path, "10min.png"),
+            "long_wait": os.path.join(base_path, "long_wait.png"),
         }
         for name, path in references.items():
             if not os.path.exists(path):
-                print(f"⚠️ Reference image not found: {path}")
+                pass
         return references
 
     def compare_images_file(self, img1_path: str, img2_path: str) -> float:
@@ -75,7 +102,6 @@ class DetectionModel:
             img2 = cv2.imread(img2_path)
 
             if img1 is None or img2 is None:
-                print(f"❌ Failed to load images: {img1_path}, {img2_path}")
                 return 0.0
 
             img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
@@ -89,15 +115,22 @@ class DetectionModel:
             score, _ = ssim(img1_gray, img2_gray, full=True)
             return score
         except Exception as e:
-            print(f"❌ Error comparing images: {e}")
             return 0.0
 
-    def compare_image_with_reference(self, img: Image.Image, ref_path: str) -> float:
+    def compare_image_with_reference(self, img: Image.Image, ref_path: str, center_crop: bool = False) -> float:
         try:
+            # When center_crop is True, compare only the central region of
+            # both images.  This is used for match-accept detection to avoid
+            # confusing it with friend requests or other edge popups.
+            if center_crop:
+                img = self._crop_center(img)
+
             # Load reference image using PIL to avoid OpenCV color space issues
-            ref_pil = Image.open(
-                ref_path
-            )  # Ensure both images have the same size - resize reference to match input image
+            ref_pil = Image.open(ref_path)
+            if center_crop:
+                ref_pil = self._crop_center(ref_pil)
+
+            # Ensure both images have the same size - resize reference to match input image
             if ref_pil.size != img.size:
                 ref_pil = ref_pil.resize(img.size, Image.Resampling.LANCZOS)
 
@@ -113,9 +146,6 @@ class DetectionModel:
 
             # Verify both arrays have the same shape (should be guaranteed now)
             if img_np.shape != ref_np.shape:
-                print(
-                    f"⚠️ Image shapes don't match after equalization: {img_np.shape} vs {ref_np.shape}"
-                )
                 return 0.0
 
             # Compute SSIM on raw color images without any color space conversion
@@ -123,7 +153,6 @@ class DetectionModel:
 
             return score
         except Exception as e:
-            print(f"❌ Error comparing image with reference: {e}")
             return 0.0
 
     def detect_match_in_image(self, img: Image.Image) -> str:
@@ -134,7 +163,8 @@ class DetectionModel:
         scores = {}
         for name, ref_path in self.reference_images.items():
             if os.path.exists(ref_path):
-                score = self.compare_image_with_reference(img, ref_path)
+                use_center = name in self._CENTER_CROP_TYPES
+                score = self.compare_image_with_reference(img, ref_path, center_crop=use_center)
                 scores[name] = score
             else:
                 scores[name] = 0.0
@@ -147,13 +177,18 @@ class DetectionModel:
 
     def detect_match_in_image_with_score(self, img: Image.Image) -> Tuple[str, float]:
         """
-        Detect reference patterns in the given image
-        Returns (name, score) of the reference image with the highest score
+        Detect reference patterns in the given image.
+        Returns (name, score) of the reference image with the highest score.
+
+        For match-accept types (dota, dota2_plus) only the centre region of
+        the screenshot is compared, so that friend-request popups or lobby
+        invites at the edges do not cause false positives.
         """
         scores = {}
         for name, ref_path in self.reference_images.items():
             if os.path.exists(ref_path):
-                score = self.compare_image_with_reference(img, ref_path)
+                use_center = name in self._CENTER_CROP_TYPES
+                score = self.compare_image_with_reference(img, ref_path, center_crop=use_center)
                 scores[name] = score
             else:
                 scores[name] = 0.0
@@ -171,40 +206,55 @@ class DetectionModel:
         try:
             pyautogui.press("enter")
         except Exception as e:
-            print(f"❌ Error pressing Enter key: {e}")
+            pass
 
     def process_detection_result(self, highest_match: str) -> str:
-        """Process detection results and return action taken using enhanced window focusing"""
+        """Process detection results and return action taken"""
         action = "none"
-        print(f"🔍 Processing detection result: {highest_match}")
 
         # Check if auto-focus is enabled
         should_focus = (
             self.config_model.auto_focus_on_detection if self.config_model else True
         )
+        # When enabled: briefly focus Dota 2 to perform the action (via standard
+        # pyautogui input), then give focus back to the app the user was using.
+        # No PostMessage / message injection is used.
+        brief_focus = (
+            self.config_model.brief_focus_then_restore if self.config_model else True
+        )
+        prev_focus_hwnd = None
 
         if should_focus:
-            # Always try to focus Dota 2 window when any detection occurs
-            print("🎯 Attempting to focus Dota 2 window...")
+            if brief_focus:
+                # Remember the app the user was using so focus can be restored
+                prev_focus_hwnd = self.window_model.get_foreground_window()
             focus_success = self.focus_dota2_window_enhanced()
-            if focus_success:
-                print("✅ Successfully focused Dota 2 window")
-            else:
-                print("❌ Failed to focus Dota 2 window, but continuing with action")
 
         if highest_match == "read_check":
-            print("📖 Read-check pattern detected - confirming with Enter")
             pyautogui.press("enter")
             action = "read_check_detected"
         elif highest_match in ["dota", "dota2_plus"]:
-            print(f"🎉 Match detected ({highest_match}) - accepting with Enter")
             pyautogui.press("enter")
             action = "match_detected"
         elif highest_match == "ad":
-            print("📺 Advertisement detected - window focused")
             action = "ad_detected"
+        elif highest_match == "10min":
+            screen_w, screen_h = pyautogui.size()
+            ok_x = int(screen_w * 0.5)
+            ok_y = int(screen_h * 0.555)
+            pyautogui.click(ok_x, ok_y)
+            action = "10min_ok_clicked"
+        elif highest_match == "long_wait":
+            screen_w, screen_h = pyautogui.size()
+            ok_x = int(screen_w * 0.5)
+            ok_y = int(screen_h * 0.555)
+            pyautogui.click(ok_x, ok_y)
+            action = "long_wait_ok_clicked"
 
-        print(f"✅ Action completed: {action}")
+        # Give focus back to the app the user was using
+        if brief_focus and prev_focus_hwnd:
+            restored = self.window_model.restore_focus_to_window(prev_focus_hwnd)
+
         return action
 
     def focus_dota2_window_enhanced(self) -> bool:
@@ -223,9 +273,8 @@ class DetectionModel:
             if dota_window.isMinimized:
                 dota_window.restore()
             dota_window.activate()
-            print("✅ Focused Dota 2 window (legacy method)")
         except Exception as e:
-            print(f"❌ Could not focus Dota 2 window: {e}")
+            pass
 
     def get_dota2_window_debug_info(self) -> dict:
         """Get debugging information about Dota 2 windows"""
@@ -362,38 +411,4 @@ class DetectionModel:
         """
         Print detailed status about Dota 2 monitoring
         """
-        print("\n" + "=" * 50)
-        print("🔍 DOTA 2 MONITOR STATUS")
-        print("=" * 50)
-
-        info = self.get_dota2_monitor_info()
-
-        print(f"🎮 Dota 2 Running: {'✅ YES' if info['is_running'] else '❌ NO'}")
-        print(f"🖥️ Available Monitors: {info['available_monitors']}")
-
-        if info["monitor_number"] is not None:
-            print(f"📍 Dota 2 Monitor: Monitor {info['monitor_number']}")
-        else:
-            print("📍 Dota 2 Monitor: ❌ Not detected")
-
-        print("\n📊 Monitor Details:")
-        for monitor in info["monitors"]:
-            status = "🎮 (Dota 2)" if monitor["is_dota2_monitor"] else ""
-            print(
-                f"   Monitor {monitor['number']}: {monitor['width']}x{monitor['height']} "
-                f"at ({monitor['left']}, {monitor['top']}) {status}"
-            )
-
-        if info["window_info"]:
-            print(f"\n🪟 Window Info:")
-            print(f"   Title: {info['window_info']['title']}")
-            print(
-                f"   Position: ({info['window_info']['left']}, {info['window_info']['top']})"
-            )
-            print(
-                f"   Size: {info['window_info']['width']}x{info['window_info']['height']}"
-            )
-            print(f"   Minimized: {info['window_info']['is_minimized']}")
-            print(f"   Maximized: {info['window_info']['is_maximized']}")
-
-        print("=" * 50 + "\n")
+        pass

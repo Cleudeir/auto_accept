@@ -34,7 +34,6 @@ class ModernMainView:
         # Callbacks
         self.on_start_detection = None
         self.on_stop_detection = None
-        self.on_test_sound = None
         self.on_device_change = None
         self.on_volume_change = None
         # self.on_monitor_change = None
@@ -65,39 +64,16 @@ class ModernMainView:
         self.window = ctk.CTk()
         self.window.title(self.title)
         
-        # Get screen dimensions for responsive design
+        # Fixed compact window size
+        window_width = 640
+        window_height = 640
+        min_width, min_height = 640, 640
+        
+        # Center on screen
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight()
-        
-        # Calculate responsive dimensions based on screen size and resolution
-        # Ensure minimum height of 800px for all screen sizes
-        if screen_height <= 768:  # Small screens (laptops, tablets)
-            window_width = min(800, int(screen_width * 0.9))
-            window_height = max(800, min(int(screen_height * 0.9), 800))  # Force min 800px height
-            min_width, min_height = 750, 800
-        elif screen_height <= 1080:  # Medium screens (1080p)
-            window_width = min(900, int(screen_width * 0.85))
-            window_height = max(800, min(850, int(screen_height * 0.75)))
-            min_width, min_height = 850, 800
-        elif screen_height <= 1440:  # High resolution screens (1440p)
-            window_width = min(1000, int(screen_width * 0.8))
-            window_height = max(800, min(900, int(screen_height * 0.7)))
-            min_width, min_height = 900, 800
-        else:  # Ultra-high resolution screens (4K+)
-            window_width = min(1100, int(screen_width * 0.75))
-            window_height = max(800, min(950, int(screen_height * 0.65)))
-            min_width, min_height = 950, 800
-        
-        # Smart positioning - avoid taskbars and system areas
-        if screen_width > 2560:  # Ultra-wide or multi-monitor setups
-            x = int(screen_width * 0.1)  # Position towards left on very wide screens
-        elif screen_width > 1920:  # Wide screens
-            x = int(screen_width * 0.15)  # Slightly offset from center
-        else:
-            x = (screen_width // 2) - (window_width // 2)  # Center on standard screens
-        
-        # Position slightly above center, accounting for taskbar
-        y = max(30, (screen_height // 2) - (window_height // 2) - 40)
+        x = (screen_width // 2) - (window_width // 2)
+        y = (screen_height // 2) - (window_height // 2)
         
         self.window.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.window.resizable(True, True)  # Allow resizing for modern UX
@@ -146,46 +122,46 @@ class ModernMainView:
 
     def _create_header_section(self):
         """Create modern header with status and theme toggle"""
-        self.header_frame = ctk.CTkFrame(self.main_container, height=80, corner_radius=10)
-        self.header_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
+        self.header_frame = ctk.CTkFrame(self.main_container, height=50, corner_radius=10)
+        self.header_frame.grid(row=0, column=0, sticky="ew", padx=12, pady=(10, 5))
         self.header_frame.grid_columnconfigure(1, weight=1)
         self.header_frame.grid_propagate(False)
 
         # App title/logo area
         self.title_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        self.title_frame.grid(row=0, column=0, sticky="w", padx=20, pady=10)
+        self.title_frame.grid(row=0, column=0, sticky="w", padx=12, pady=5)
         
         self.app_title = ctk.CTkLabel(
             self.title_frame,
             text="🎮 Dota 2 Auto Accept",
-            font=ctk.CTkFont(size=24, weight="bold")
+            font=ctk.CTkFont(size=16, weight="bold")
         )
         self.app_title.pack()
 
         # Status section
         self.status_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        self.status_frame.grid(row=0, column=1, sticky="ew", padx=20, pady=10)
+        self.status_frame.grid(row=0, column=1, sticky="ew", padx=12, pady=5)
         self.status_frame.grid_columnconfigure(0, weight=1)
 
         self.status_label = ctk.CTkLabel(
             self.status_frame,
             text="Status: Stopped",
-            font=ctk.CTkFont(size=16, weight="bold"),
+            font=ctk.CTkFont(size=13, weight="bold"),
             text_color=("#ff4444", "#ff6666")  # (light mode, dark mode)
         )
         self.status_label.grid(row=0, column=0, sticky="ew")
 
         # Theme button only (removed settings toggle)
         self.controls_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        self.controls_frame.grid(row=0, column=2, sticky="e", padx=20, pady=10)
+        self.controls_frame.grid(row=0, column=2, sticky="e", padx=12, pady=5)
 
         self.theme_btn = ctk.CTkButton(
             self.controls_frame,
             text="🌙",
-            width=36,
-            height=36,
+            width=30,
+            height=30,
             command=self._toggle_theme,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=12),
             corner_radius=8
         )
         self.theme_btn.pack(side="left")
@@ -193,13 +169,13 @@ class ModernMainView:
     def _create_content_area(self):
         """Create the main content area with left and right panels"""
         self.content_frame = ctk.CTkFrame(self.main_container, corner_radius=10)
-        self.content_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+        self.content_frame.grid(row=1, column=0, sticky="nsew", padx=12, pady=5)
         self.content_frame.grid_columnconfigure(0, weight=1)
         self.content_frame.grid_rowconfigure(0, weight=1)
 
         # Left panel (main content)
         self.left_panel = ctk.CTkFrame(self.content_frame, corner_radius=10)
-        self.left_panel.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        self.left_panel.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         self.left_panel.grid_columnconfigure(0, weight=1)
 
         # Create left panel content
@@ -207,9 +183,9 @@ class ModernMainView:
         self._create_screenshot_section()
 
         # Right panel (settings) - permanently visible
-        self.right_panel = ctk.CTkFrame(self.content_frame, width=300, corner_radius=10)
-        self.right_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 10), pady=10)
-        self.content_frame.grid_columnconfigure(1, weight=0, minsize=300)
+        self.right_panel = ctk.CTkFrame(self.content_frame, width=210, corner_radius=10)
+        self.right_panel.grid(row=0, column=1, sticky="nsew", padx=(0, 5), pady=5)
+        self.content_frame.grid_columnconfigure(1, weight=0, minsize=210)
         self.right_panel.grid_rowconfigure(0, weight=1)
         self.right_panel.grid_columnconfigure(0, weight=1)
         
@@ -219,21 +195,21 @@ class ModernMainView:
         """Create modern match status section"""
         # Status card
         self.status_card = ctk.CTkFrame(self.left_panel, corner_radius=10)
-        self.status_card.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        self.status_card.grid(row=0, column=0, sticky="ew", padx=8, pady=5)
         self.status_card.grid_columnconfigure(0, weight=1)
 
         # Match progress section
         self.progress_frame = ctk.CTkFrame(self.status_card, fg_color="transparent")
-        self.progress_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=15)
+        self.progress_frame.grid(row=0, column=0, sticky="ew", padx=12, pady=8)
         self.progress_frame.grid_columnconfigure(0, weight=1)
 
         # Progress bar
         self.match_percent_bar = ctk.CTkProgressBar(
             self.progress_frame,
-            height=20,
-            corner_radius=10
+            height=14,
+            corner_radius=7
         )
-        self.match_percent_bar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        self.match_percent_bar.grid(row=0, column=0, sticky="ew", pady=(0, 5))
         self.match_percent_bar.set(0)
 
         # Match info
@@ -245,30 +221,30 @@ class ModernMainView:
         self.match_percent_text = ctk.CTkLabel(
             self.match_info_frame,
             text="0.0%",
-            font=ctk.CTkFont(size=14, weight="bold")
+            font=ctk.CTkFont(size=12, weight="bold")
         )
         self.match_percent_text.grid(row=0, column=0, sticky="w")
 
         self.match_name_label = ctk.CTkLabel(
             self.match_info_frame,
             text="No Match Detected",
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=ctk.CTkFont(size=12, weight="bold"),
             text_color=("#2196f3", "#64b5f6")
         )
         self.match_name_label.grid(row=0, column=1, sticky="e")
 
         # Sensitivity slider with enhanced feedback
         self.sensitivity_frame = ctk.CTkFrame(self.status_card, fg_color="transparent")
-        self.sensitivity_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=(0, 15))
+        self.sensitivity_frame.grid(row=1, column=0, sticky="ew", padx=12, pady=(0, 8))
         self.sensitivity_frame.grid_columnconfigure(1, weight=1)
 
         # Sensitivity label with tooltip info
         sensitivity_label = ctk.CTkLabel(
             self.sensitivity_frame,
-            text="Detection Threshold:",
-            font=ctk.CTkFont(size=12)
+            text="Threshold:",
+            font=ctk.CTkFont(size=11)
         )
-        sensitivity_label.grid(row=0, column=0, sticky="w", padx=(0, 10))
+        sensitivity_label.grid(row=0, column=0, sticky="w", padx=(0, 5))
 
         self.score_threshold_slider = ctk.CTkSlider(
             self.sensitivity_frame,
@@ -277,14 +253,14 @@ class ModernMainView:
             number_of_steps=45,
             command=self._on_score_threshold_change_event
         )
-        self.score_threshold_slider.grid(row=0, column=1, sticky="ew", padx=(0, 10))
+        self.score_threshold_slider.grid(row=0, column=1, sticky="ew", padx=(0, 5))
         self.score_threshold_slider.set(70)
 
         # Enhanced threshold display with color coding
         self.score_threshold_value_label = ctk.CTkLabel(
             self.sensitivity_frame,
             text="70%",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color=("#ff9800", "#ffa726")  # Orange for medium sensitivity
         )
         self.score_threshold_value_label.grid(row=0, column=2, sticky="e")
@@ -292,17 +268,17 @@ class ModernMainView:
         # Add helpful threshold info
         threshold_info = ctk.CTkLabel(
             self.sensitivity_frame,
-            text="Lower = More Sensitive | Higher = More Strict",
-            font=ctk.CTkFont(size=10),
+            text="Lower=Sensitive | Higher=Strict",
+            font=ctk.CTkFont(size=9),
             text_color=("gray60", "gray40")
         )
-        threshold_info.grid(row=1, column=0, columnspan=3, sticky="ew", pady=(5, 0))
+        threshold_info.grid(row=1, column=0, columnspan=3, sticky="ew", pady=(2, 0))
 
     def _create_screenshot_section(self):
         """Create modern screenshot preview section"""
         # Screenshot card
         self.screenshot_card = ctk.CTkFrame(self.left_panel, corner_radius=10)
-        self.screenshot_card.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.screenshot_card.grid(row=1, column=0, sticky="nsew", padx=8, pady=5)
         self.screenshot_card.grid_columnconfigure(0, weight=1)
         self.screenshot_card.grid_rowconfigure(1, weight=1)
 
@@ -310,40 +286,40 @@ class ModernMainView:
         ctk.CTkLabel(
             self.screenshot_card,
             text="📸 Screenshot Preview",
-            font=ctk.CTkFont(size=16, weight="bold")
-        ).grid(row=0, column=0, sticky="w", padx=20, pady=(15, 10))
+            font=ctk.CTkFont(size=13, weight="bold")
+        ).grid(row=0, column=0, sticky="w", padx=12, pady=(8, 5))
 
         # Screenshot display area
         self.screenshot_frame = ctk.CTkFrame(self.screenshot_card, corner_radius=10)
-        self.screenshot_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 10))
+        self.screenshot_frame.grid(row=1, column=0, sticky="nsew", padx=12, pady=(0, 5))
         self.screenshot_frame.grid_columnconfigure(0, weight=1)
         self.screenshot_frame.grid_rowconfigure(0, weight=1)
 
         self.screenshot_label = ctk.CTkLabel(
             self.screenshot_frame,
             text="No screenshot taken yet",
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=12),
             fg_color=("#f0f0f0", "#2b2b2b"),
             corner_radius=10
         )
-        self.screenshot_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        self.screenshot_label.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
 
         # Timestamp
         self.timestamp_label = ctk.CTkLabel(
             self.screenshot_card,
             text="",
-            font=ctk.CTkFont(size=10),
+            font=ctk.CTkFont(size=9),
             text_color=("gray60", "gray40")
         )
-        self.timestamp_label.grid(row=2, column=0, sticky="e", padx=20, pady=(0, 15))
+        self.timestamp_label.grid(row=2, column=0, sticky="e", padx=12, pady=(0, 8))
 
     def _create_tabbed_settings_panel(self):
         """Create modern settings panel with tabbed pages"""
         if not hasattr(self, 'right_panel'):
             return
 
-        self.settings_tabview = ctk.CTkTabview(self.right_panel, width=280, height=520)
-        self.settings_tabview.grid(row=0, column=0, sticky="nsew", padx=15, pady=15)
+        self.settings_tabview = ctk.CTkTabview(self.right_panel, width=200, height=420)
+        self.settings_tabview.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         self.settings_tabview.grid_rowconfigure(0, weight=1)
         self.settings_tabview.grid_columnconfigure(0, weight=1)
         self.settings_tabview.add("General")
@@ -354,13 +330,13 @@ class ModernMainView:
         self.general_tab.grid_rowconfigure(1, weight=1)
         self.general_tab.grid_columnconfigure(0, weight=1)
         self.general_tab.grid_propagate(False)
-        self.general_tab.configure(width=280, height=520)
+        self.general_tab.configure(width=200, height=420)
 
         self.telegram_tab = self.settings_tabview.tab("Telegram")
         self.telegram_tab.grid_rowconfigure(0, weight=1)
         self.telegram_tab.grid_columnconfigure(0, weight=1)
         self.telegram_tab.grid_propagate(False)
-        self.telegram_tab.configure(width=280, height=520)
+        self.telegram_tab.configure(width=200, height=420)
 
         self.settings_tabview.grid_propagate(False)
 
@@ -373,36 +349,36 @@ class ModernMainView:
         parent = parent or self.right_panel
         # Audio card
         self.audio_card = ctk.CTkFrame(parent, corner_radius=10)
-        self.audio_card.grid(row=0, column=0, sticky="nsew", padx=15, pady=10)
+        self.audio_card.grid(row=0, column=0, sticky="nsew", padx=8, pady=5)
         self.audio_card.grid_columnconfigure(0, weight=1)
 
         # Audio header
         ctk.CTkLabel(
             self.audio_card,
-            text="🔊 Audio Settings",
-            font=ctk.CTkFont(size=14, weight="bold")
-        ).grid(row=0, column=0, sticky="w", padx=15, pady=(15, 10))
+            text="🔊 Audio",
+            font=ctk.CTkFont(size=12, weight="bold")
+        ).grid(row=0, column=0, sticky="w", padx=10, pady=(8, 5))
 
         # Device selection
         ctk.CTkLabel(
             self.audio_card,
-            text="Output Device:",
-            font=ctk.CTkFont(size=12)
-        ).grid(row=1, column=0, sticky="w", padx=15, pady=(0, 5))
+            text="Device:",
+            font=ctk.CTkFont(size=11)
+        ).grid(row=1, column=0, sticky="w", padx=10, pady=(0, 3))
 
         self.device_combo = ctk.CTkComboBox(
             self.audio_card,
             command=self._on_device_change_event,
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(size=11)
         )
-        self.device_combo.grid(row=2, column=0, sticky="ew", padx=15, pady=(0, 10))
+        self.device_combo.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 5))
 
         # Volume control
         ctk.CTkLabel(
             self.audio_card,
             text="Volume:",
-            font=ctk.CTkFont(size=12)
-        ).grid(row=3, column=0, sticky="w", padx=15, pady=(0, 5))
+            font=ctk.CTkFont(size=11)
+        ).grid(row=3, column=0, sticky="w", padx=10, pady=(0, 3))
 
         self.volume_slider = ctk.CTkSlider(
             self.audio_card,
@@ -411,22 +387,22 @@ class ModernMainView:
             number_of_steps=100,
             command=self._on_volume_change_event
         )
-        self.volume_slider.grid(row=4, column=0, sticky="ew", padx=15, pady=(0, 15))
+        self.volume_slider.grid(row=4, column=0, sticky="ew", padx=10, pady=(0, 8))
 
     def _create_modern_monitor_settings(self, parent=None):
         """Create modern monitor settings section"""
         parent = parent or self.right_panel
         # Monitor card
         self.monitor_card = ctk.CTkFrame(parent, corner_radius=10)
-        self.monitor_card.grid(row=1, column=0, sticky="nsew", padx=15, pady=10)
+        self.monitor_card.grid(row=1, column=0, sticky="nsew", padx=8, pady=5)
         self.monitor_card.grid_columnconfigure(0, weight=1)
 
         # Monitor header
         ctk.CTkLabel(
             self.monitor_card,
-            text="🖥️ Monitor Settings",
-            font=ctk.CTkFont(size=14, weight="bold")
-        ).grid(row=0, column=0, sticky="w", padx=15, pady=(15, 10))
+            text="🖥️ Monitor",
+            font=ctk.CTkFont(size=12, weight="bold")
+        ).grid(row=0, column=0, sticky="w", padx=10, pady=(8, 5))
 
         # (Monitor selection UI removed)
 
@@ -434,139 +410,102 @@ class ModernMainView:
         self.always_on_top_var = ctk.BooleanVar()
         self.always_on_top_check = ctk.CTkCheckBox(
             self.monitor_card,
-            text="Keep window on top",
+            text="Keep on top",
             variable=self.always_on_top_var,
             command=self._on_always_on_top_change_event,
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(size=11)
         )
-        self.always_on_top_check.grid(row=4, column=0, sticky="w", padx=15, pady=(0, 15))
+        self.always_on_top_check.grid(row=4, column=0, sticky="w", padx=10, pady=(0, 8))
 
     def _create_modern_telegram_settings(self, parent=None):
         """Create modern Telegram settings section"""
         parent = parent or self.right_panel
         self.telegram_card = ctk.CTkFrame(parent, corner_radius=10)
-        self.telegram_card.grid(row=0, column=0, sticky="nsew", padx=15, pady=10)
+        self.telegram_card.grid(row=0, column=0, sticky="nsew", padx=8, pady=5)
         self.telegram_card.grid_columnconfigure(0, weight=1)
 
         ctk.CTkLabel(
             self.telegram_card,
-            text="📨 Telegram Alerts",
-            font=ctk.CTkFont(size=14, weight="bold")
-        ).grid(row=0, column=0, sticky="w", padx=15, pady=(15, 10))
+            text="📨 Telegram",
+            font=ctk.CTkFont(size=12, weight="bold")
+        ).grid(row=0, column=0, sticky="w", padx=10, pady=(8, 5))
 
         self.telegram_enabled_var = ctk.BooleanVar()
         self.telegram_enabled_switch = ctk.CTkCheckBox(
             self.telegram_card,
-            text="Enable Telegram",
+            text="Enable",
             variable=self.telegram_enabled_var,
             command=self._on_telegram_enabled_change_event,
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(size=11)
         )
-        self.telegram_enabled_switch.grid(row=1, column=0, sticky="w", padx=15, pady=(0, 10))
+        self.telegram_enabled_switch.grid(row=1, column=0, sticky="w", padx=10, pady=(0, 5))
 
         ctk.CTkLabel(
             self.telegram_card,
             text="Bot Token:",
-            font=ctk.CTkFont(size=12)
-        ).grid(row=2, column=0, sticky="w", padx=15, pady=(0, 5))
+            font=ctk.CTkFont(size=11)
+        ).grid(row=2, column=0, sticky="w", padx=10, pady=(0, 3))
         self.telegram_bot_token_entry = ctk.CTkEntry(
             self.telegram_card,
             placeholder_text="Enter bot token",
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(size=11)
         )
-        self.telegram_bot_token_entry.grid(row=3, column=0, sticky="ew", padx=15, pady=(0, 5))
+        self.telegram_bot_token_entry.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 3))
         self.telegram_bot_token_entry.bind("<FocusOut>", self._on_telegram_bot_token_change_event)
         self.telegram_bot_token_entry.bind("<Return>", self._on_telegram_bot_token_change_event)
 
         self.telegram_token_link = ctk.CTkLabel(
             self.telegram_card,
             text="How to create a token?",
-            font=ctk.CTkFont(size=10, underline=True),
+            font=ctk.CTkFont(size=9, underline=True),
             text_color=("gray60", "gray40"),
             cursor="hand2"
         )
-        self.telegram_token_link.grid(row=4, column=0, sticky="w", padx=15, pady=(0, 10))
+        self.telegram_token_link.grid(row=4, column=0, sticky="w", padx=10, pady=(0, 5))
         self.telegram_token_link.bind("<Button-1>", lambda e: webbrowser.open("https://core.telegram.org/bots#how-do-i-create-a-bot"))
 
         # --- Periodic Screenshots Section ---
         ctk.CTkLabel(
             self.telegram_card,
             text="",
-            font=ctk.CTkFont(size=6)
-        ).grid(row=5, column=0, sticky="ew", padx=15)
-
-        ctk.CTkLabel(
-            self.telegram_card,
-            text="📸 Periodic Screenshots",
-            font=ctk.CTkFont(size=13, weight="bold")
-        ).grid(row=6, column=0, sticky="w", padx=15, pady=(0, 5))
-
-        self.telegram_send_screenshots_var = ctk.BooleanVar()
-        self.telegram_send_screenshots_check = ctk.CTkCheckBox(
-            self.telegram_card,
-            text="Send screenshots automatically",
-            variable=self.telegram_send_screenshots_var,
-            command=self._on_telegram_send_screenshots_change_event,
-            font=ctk.CTkFont(size=12)
-        )
-        self.telegram_send_screenshots_check.grid(row=7, column=0, sticky="w", padx=15, pady=(0, 5))
-
-        # Interval row
-        self.telegram_screenshot_interval_frame = ctk.CTkFrame(self.telegram_card, fg_color="transparent")
-        self.telegram_screenshot_interval_frame.grid(row=8, column=0, sticky="ew", padx=15, pady=(0, 5))
-        self.telegram_screenshot_interval_frame.grid_columnconfigure(1, weight=1)
-
-        ctk.CTkLabel(
-            self.telegram_screenshot_interval_frame,
-            text="Interval (seconds):",
-            font=ctk.CTkFont(size=12)
-        ).grid(row=0, column=0, sticky="w", padx=(0, 5))
-
-        self.telegram_screenshot_interval_entry = ctk.CTkEntry(
-            self.telegram_screenshot_interval_frame,
-            placeholder_text="60",
-            width=70,
-            font=ctk.CTkFont(size=12)
-        )
-        self.telegram_screenshot_interval_entry.grid(row=0, column=1, sticky="w")
-        self.telegram_screenshot_interval_entry.bind("<FocusOut>", self._on_telegram_screenshot_interval_change_event)
-        self.telegram_screenshot_interval_entry.bind("<Return>", self._on_telegram_screenshot_interval_change_event)
+            font=ctk.CTkFont(size=4)
+        ).grid(row=5, column=0, sticky="ew", padx=10)
 
         # --- Event Notifications Section ---
         ctk.CTkLabel(
             self.telegram_card,
-            text="🔔 Event Notifications",
-            font=ctk.CTkFont(size=13, weight="bold")
-        ).grid(row=9, column=0, sticky="w", padx=15, pady=(5, 5))
+            text="🔔 Notifications",
+            font=ctk.CTkFont(size=11, weight="bold")
+        ).grid(row=6, column=0, sticky="w", padx=10, pady=(3, 3))
 
         self.telegram_notify_events_var = ctk.BooleanVar()
         self.telegram_notify_events_check = ctk.CTkCheckBox(
             self.telegram_card,
-            text="Notify about all detection events",
+            text="All events",
             variable=self.telegram_notify_events_var,
             command=self._on_telegram_notify_events_change_event,
-            font=ctk.CTkFont(size=12)
+            font=ctk.CTkFont(size=11)
         )
-        self.telegram_notify_events_check.grid(row=10, column=0, sticky="w", padx=15, pady=(0, 10))
+        self.telegram_notify_events_check.grid(row=7, column=0, sticky="w", padx=10, pady=(0, 5))
 
         # Separator before message
         ctk.CTkLabel(
             self.telegram_card,
             text="",
-            font=ctk.CTkFont(size=4)
-        ).grid(row=11, column=0, sticky="ew", padx=15)
+            font=ctk.CTkFont(size=3)
+        ).grid(row=8, column=0, sticky="ew", padx=10)
 
         ctk.CTkLabel(
             self.telegram_card,
             text="Message:",
-            font=ctk.CTkFont(size=12)
-        ).grid(row=12, column=0, sticky="w", padx=15, pady=(0, 5))
+            font=ctk.CTkFont(size=11)
+        ).grid(row=9, column=0, sticky="w", padx=10, pady=(0, 3))
         self.telegram_message_entry = ctk.CTkEntry(
             self.telegram_card,
-            placeholder_text="Enter Telegram alert message",
-            font=ctk.CTkFont(size=12)
+            placeholder_text="Alert message",
+            font=ctk.CTkFont(size=11)
         )
-        self.telegram_message_entry.grid(row=13, column=0, sticky="ew", padx=15, pady=(0, 10))
+        self.telegram_message_entry.grid(row=10, column=0, sticky="ew", padx=10, pady=(0, 5))
         self.telegram_message_entry.bind("<FocusOut>", self._on_telegram_message_change_event)
         self.telegram_message_entry.bind("<Return>", self._on_telegram_message_change_event)
 
@@ -574,21 +513,21 @@ class ModernMainView:
             self.telegram_card,
             text="Test Telegram",
             command=self._on_test_telegram_click,
-            height=32,
+            height=28,
             fg_color=("#1976d2", "#2196f3"),
             hover_color=("#2196f3", "#42a5f5"),
             corner_radius=8,
-            font=ctk.CTkFont(size=12, weight="bold")
+            font=ctk.CTkFont(size=11, weight="bold")
         )
-        self.telegram_test_btn.grid(row=14, column=0, sticky="ew", padx=15, pady=(5, 10))
+        self.telegram_test_btn.grid(row=11, column=0, sticky="ew", padx=10, pady=(3, 5))
 
         self.telegram_info_label = ctk.CTkLabel(
             self.telegram_card,
-            text="O bot token será usado para obter o chat ID automaticamente.",
-            font=ctk.CTkFont(size=10),
+            text="Token used to get chat ID auto.",
+            font=ctk.CTkFont(size=9),
             text_color=("gray60", "gray40")
         )
-        self.telegram_info_label.grid(row=15, column=0, sticky="w", padx=15, pady=(0, 15))
+        self.telegram_info_label.grid(row=12, column=0, sticky="w", padx=10, pady=(0, 8))
 
     def _on_telegram_enabled_change_event(self):
         if self.on_telegram_enabled_change:
@@ -656,54 +595,42 @@ class ModernMainView:
 
     def _create_control_section(self):
         """Create modern control buttons section"""
-        self.control_frame = ctk.CTkFrame(self.main_container, height=80, corner_radius=10)
-        self.control_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=(10, 20))
+        self.control_frame = ctk.CTkFrame(self.main_container, height=55, corner_radius=10)
+        self.control_frame.grid(row=2, column=0, sticky="ew", padx=12, pady=(5, 10))
         self.control_frame.grid_columnconfigure(0, weight=1)
         self.control_frame.grid_propagate(False)
 
         # Button container
         self.button_container = ctk.CTkFrame(self.control_frame, fg_color="transparent")
-        self.button_container.grid(row=0, column=0, sticky="", padx=20, pady=15)
+        self.button_container.grid(row=0, column=0, sticky="", padx=12, pady=10)
 
         # Control buttons with modern styling and improved responsiveness
         self.start_btn = ctk.CTkButton(
             self.button_container,
             text="▶️ Start",
             command=self._on_start_detection_click,
-            width=110,
-            height=36,
-            font=ctk.CTkFont(size=13, weight="bold"),
+            width=100,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold"),
             fg_color=("#4caf50", "#45a049"),
             hover_color=("#45a049", "#3d8b40"),
             corner_radius=8
         )
-        self.start_btn.grid(row=0, column=0, padx=8)
+        self.start_btn.grid(row=0, column=0, padx=6)
 
         self.stop_btn = ctk.CTkButton(
             self.button_container,
             text="⏹️ Stop",
             command=self._on_stop_detection_click,
-            width=110,
-            height=36,
-            font=ctk.CTkFont(size=13, weight="bold"),
+            width=100,
+            height=32,
+            font=ctk.CTkFont(size=12, weight="bold"),
             fg_color=("#f44336", "#d32f2f"),
             hover_color=("#d32f2f", "#b71c1c"),
             corner_radius=8
         )
         # Initially hidden
-        
-        self.test_sound_btn = ctk.CTkButton(
-            self.button_container,
-            text="🎵 Sound",
-            command=self._on_test_sound_click,
-            width=100,
-            height=36,
-            font=ctk.CTkFont(size=13, weight="bold"),
-            fg_color=("#ff9800", "#f57c00"),
-            hover_color=("#f57c00", "#ef6c00"),
-            corner_radius=8
-        )
-        self.test_sound_btn.grid(row=0, column=2, padx=8)
+
 
     def _toggle_theme(self):
         """Toggle between light and dark themes"""
@@ -726,11 +653,6 @@ class ModernMainView:
         """Handle stop detection button click"""
         if self.on_stop_detection:
             self.on_stop_detection()
-
-    def _on_test_sound_click(self):
-        """Handle test sound button click"""
-        if self.on_test_sound:
-            self.on_test_sound()
 
     def _on_device_change_event(self, choice):
         """Handle device selection change"""
@@ -811,8 +733,6 @@ class ModernMainView:
                 self._on_start_detection_click()
             elif event.keysym == "F2" and self.is_running:
                 self._on_stop_detection_click()
-            elif event.keysym == "F3":
-                self._on_test_sound_click()
                 
         self.window.bind("<KeyPress>", on_key_press)
         self.window.focus_set()
@@ -865,7 +785,7 @@ class ModernMainView:
                     return
                 
                 # Resize to fit display area while maintaining aspect ratio
-                display_size = (400, 250)
+                display_size = (300, 180)
                 pil_image.thumbnail(display_size, Image.Resampling.LANCZOS)
                 
                 # Use CTkImage for proper CustomTkinter compatibility and HiDPI scaling
@@ -901,6 +821,7 @@ class ModernMainView:
             "dota": "🎯 Match Found!",
             "dota2_plus": "⭐ Dota Plus Offer",
             "read_check": "✅ Read-Check Required",
+            "10min": "⏱️ 10-Minute Wait",
             "ad": "📢 Advertisement",
             "none": "❌ No Match Detected"
         }

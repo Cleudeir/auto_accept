@@ -56,15 +56,17 @@ class DetectionController:
                     highest_match, highest_score = self.detection_model.detect_match_in_image_with_score(img)
 
                     if highest_match == "ad":
-                        print("[EVENT] AD detected - stopping detection")
+                        self.logger.debug("[EVENT] AD detected - stopping detection")
                         self.is_running = False
                         break
 
                     if highest_match in [
                         "dota",
                         "dota2_plus",
-                        "read_check",                  
+                        "read_check",
+                        "10min",
                         "ad",
+                        "long_wait",
                     ]:
                         action = self.detection_model.process_detection_result(
                             highest_match
@@ -76,11 +78,6 @@ class DetectionController:
                             except Exception as e:
                                 pass
                         elif action == "match_detected":
-                            print("[EVENT] Match Detected - playing alert sound")
-                            self.audio_model.play_alert_sound(
-                                self.config_model.selected_device_id,
-                                self.config_model.alert_volume,
-                            )
                             self.match_found = True
                             if self.on_match_found:
                                 self.on_match_found()

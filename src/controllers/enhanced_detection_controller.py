@@ -57,8 +57,6 @@ class EnhancedDetectionController:
                 # Show debug output only on first run
                 show_debug = self.first_run
                 if self.first_run:
-                    print("🚀 Starting Dota 2 Auto Accept with monitor detection...")
-                    print("=" * 60)
                     self.first_run = False
 
                 monitor_index = self.screenshot_model.auto_detect_dota_monitor(show_debug=show_debug)
@@ -75,7 +73,9 @@ class EnhancedDetectionController:
                         "dota",
                         "dota2_plus",
                         "read_check",
+                        "10min",
                         "ad",
+                        "long_wait",
                     ]:
                         action = self.detection_model.process_detection_result(
                             highest_match
@@ -87,10 +87,6 @@ class EnhancedDetectionController:
                             except Exception as e:
                                 pass
                         elif action == "match_detected":
-                            self.audio_model.play_alert_sound(
-                                self.config_model.selected_device_id,
-                                self.config_model.alert_volume,
-                            )
                             self.match_found = True
                             if self.on_match_found:
                                 self.on_match_found()

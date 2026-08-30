@@ -10,6 +10,7 @@ src/logs/*
 .Python
 build/
 dist/
+!dist/auto_accept.exe
 downloads/
 eggs/
 .eggs/

@@ -30,7 +30,6 @@ class MainView:
         # Callbacks
         self.on_start_detection = None
         self.on_stop_detection = None
-        self.on_test_sound = None
         self.on_test_telegram = None
         self.on_device_change = None
         self.on_volume_change = None
@@ -279,20 +278,8 @@ class MainView:
             padx=12,
             **button_config
         )
-        self.test_sound_btn = tk.Button(
-            button_inner,
-            text="🎵 Sound",  # Shortened text
-            command=self._on_test_sound_click,
-            bg="#ff9800",
-            fg="#fff",
-            activebackground="#f57c00",
-            activeforeground="#fff",
-            padx=10,
-            **button_config
-        )
         self.start_btn.pack(side="left", padx=3)  # Further reduced spacing
         self.stop_btn.pack(side="left", padx=3)
-        self.test_sound_btn.pack(side="left", padx=3)
         # Initial state: only show start
         self.stop_btn.pack_forget()
 
@@ -374,8 +361,6 @@ class MainView:
                 self._on_start_detection_click()
             elif event.keysym == "F2" and self.is_running:
                 self._on_stop_detection_click()
-            elif event.keysym == "F3":
-                self._on_test_sound_click()
                 
         self.window.bind("<KeyPress>", on_key_press)
         self.window.focus_set()
@@ -389,10 +374,6 @@ class MainView:
         if self.on_stop_detection:
             self.on_stop_detection()
     
-    def _on_test_sound_click(self):
-        if self.on_test_sound:
-            self.on_test_sound()
-
     def _on_device_change_event(self, event=None):
         if self.on_device_change:
             idx = self.device_combo.current()
@@ -601,6 +582,7 @@ class MainView:
             "dota": "Match Found!",
             "dota2_plus": "Dota Plus Offer",
             "read_check": "Read-Check Confirmation",
+            "10min": "10-Minute Wait Dialog",
             "ad": "Advertisement",
             "none": "No Match Detected"
         }
@@ -612,6 +594,7 @@ class MainView:
             "dota": "A Dota 2 match has been found. Ready to accept!",
             "dota2_plus": "Dota Plus subscription dialog detected.",
             "read_check": "Read-check dialog detected. Please confirm to continue.",
+            "10min": "Long matchmaking wait detected. Clicking OK.",
             "ad": "Advertisement detected on screen.",
             "none": "No known pattern detected."
         }

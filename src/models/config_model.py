@@ -20,6 +20,7 @@ class ConfigModel:
             "always_on_top": False,
             "enhanced_window_focus": True,
             "auto_focus_on_detection": True,
+            "brief_focus_then_restore": True,
             "focus_retry_attempts": 3,
             "focus_delay_ms": 150,  # Slightly longer delay for better reliability
             "ui_theme": "dark",  # UI theme: "dark", "light", "system"
@@ -128,6 +129,14 @@ class ConfigModel:
     @auto_focus_on_detection.setter
     def auto_focus_on_detection(self, value):
         self.set("auto_focus_on_detection", bool(value))
+
+    @property
+    def brief_focus_then_restore(self):
+        return self._config.get("brief_focus_then_restore", True)
+
+    @brief_focus_then_restore.setter
+    def brief_focus_then_restore(self, value):
+        self.set("brief_focus_then_restore", bool(value))
 
     @property
     def focus_retry_attempts(self):

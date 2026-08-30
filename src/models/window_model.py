@@ -7,7 +7,6 @@ from typing import Optional, List, Tuple
 # Windows-specific imports with platform check
 if platform.system() == "Windows":
     import ctypes
-    import ctypes.wintypes
     import pygetwindow as gw
     import win32gui
     import win32con
@@ -280,6 +279,65 @@ class WindowModel:
             self.logger.error(f"Error forcing focus on window {hwnd}: {e}")
             return False
 
+    def _get_sorted_dota2_windows(self) -> list:
+        """Get Dota 2 windows sorted by priority (best candidate first)"""
+        dota_windows = self.get_dota2_windows()
+        if not dota_windows:
+            return []
+
+        def window_priority(window):
+            priority = 0
+            # Prefer non-minimized windows
+            if not window["is_minimized"]:
+                priority += 100
+            # Prefer visible windows
+            if window["is_visible"]:
+                priority += 50
+            # Prefer main Dota 2 window over other Dota apps
+            if window["title"] == "Dota 2":
+                priority += 25
+            # Prefer windows with actual Dota 2 process
+            if "dota2.exe" in window["process_name"].lower():
+                priority += 10
+            return priority
+
+        return sorted(dota_windows, key=window_priority, reverse=True)
+
+    def get_foreground_window(self) -> Optional[int]:
+        """Return the HWND of the currently focused (foreground) window"""
+        if platform.system() != "Windows":
+            return None
+        try:
+            return win32gui.GetForegroundWindow()
+        except Exception as e:
+            self.logger.warning(f"Failed to get foreground window: {e}")
+            return None
+
+    def restore_focus_to_window(self, hwnd: int) -> bool:
+        """Restore focus to a previously foreground window (e.g. the app the user was using)"""
+        if platform.system() != "Windows":
+            return False
+        try:
+            current_thread = ctypes.windll.kernel32.GetCurrentThreadId()
+            target_thread = win32process.GetWindowThreadProcessId(hwnd)[0]
+            attached = False
+            if current_thread != target_thread:
+                attached = ctypes.windll.user32.AttachThreadInput(
+                    current_thread, target_thread, True
+                )
+            try:
+                win32gui.SetForegroundWindow(hwnd)
+            finally:
+                if attached:
+                    ctypes.windll.user32.AttachThreadInput(
+                        current_thread, target_thread, False
+                    )
+            self.logger.info(f"✅ Focus restored to window {hwnd}")
+            return True
+        except Exception as e:
+            self.logger.warning(f"Failed to restore focus to window {hwnd}: {e}")
+            return False
+
     def focus_dota2_window_enhanced(self) -> bool:
         """Enhanced strategy to focus Dota 2 window with aggressive methods"""
         success = False
@@ -314,34 +372,10 @@ class WindowModel:
                         return True
                     return False
 
-                dota_windows = self.get_dota2_windows()
-                self.logger.info(f"Found {len(dota_windows)} Dota 2 windows")
+                sorted_windows = self._get_sorted_dota2_windows()
+                self.logger.info(f"Found {len(sorted_windows)} Dota 2 windows")
 
-                if dota_windows:
-                    # Sort windows by priority:
-                    # 1. Non-minimized main Dota 2 windows first
-                    # 2. Visible windows
-                    # 3. Any Dota 2 window
-                    def window_priority(window):
-                        priority = 0
-                        # Prefer non-minimized windows
-                        if not window["is_minimized"]:
-                            priority += 100
-                        # Prefer visible windows
-                        if window["is_visible"]:
-                            priority += 50
-                        # Prefer main Dota 2 window over other Dota apps
-                        if window["title"] == "Dota 2":
-                            priority += 25
-                        # Prefer windows with actual Dota 2 process
-                        if "dota2.exe" in window["process_name"].lower():
-                            priority += 10
-                        return priority
-
-                    sorted_windows = sorted(
-                        dota_windows, key=window_priority, reverse=True
-                    )
-
+                if sorted_windows:
                     # Try each window in priority order
                     for i, window in enumerate(sorted_windows):
                         self.logger.info(

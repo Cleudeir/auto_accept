@@ -33,7 +33,7 @@ $projectRoot = "$PSScriptRoot"
 $srcDir = Join-Path $projectRoot 'src'
 $mainPy = Join-Path $srcDir 'main.py'
 $distDir = Join-Path $projectRoot 'dist'
-$exeName = 'main.exe'
+$exeName = 'auto_accept.exe'
 
 # Step 1: Ensure PyInstaller is installed
 if (-not (pip show pyinstaller)) {
@@ -55,7 +55,7 @@ if (Test-Path (Join-Path $srcDir 'build')) { Remove-Item (Join-Path $srcDir 'bui
 if (Test-Path (Join-Path $srcDir 'main.spec')) { Remove-Item (Join-Path $srcDir 'main.spec') -Force }
 
 # Build the argument list for PyInstaller
-$pyinstallerArgs = @('--onefile', '--noconsole', "--icon=$binDir\\icon.ico", '--hidden-import=sounddevice') + $datas + $mainPy
+$pyinstallerArgs = @('--onefile', '--noconsole', '--name=auto_accept', "--icon=$binDir\\icon.ico", '--hidden-import=sounddevice') + $datas + $mainPy
 Write-Host "Running: pyinstaller $($pyinstallerArgs -join ' ')"
 Push-Location $projectRoot
 pyinstaller @pyinstallerArgs
@@ -66,7 +66,7 @@ $exePath = Join-Path $distDir $exeName
 $targetDir = 'C:\Users\CleudeirSilva\My Drive\auto_accept'
 $versionedExeName = "auto-accept-$appVersion.exe"
 $versionedTargetPath = Join-Path $targetDir $versionedExeName
-$targetPath = Join-Path $targetDir 'main.exe'
+$targetPath = Join-Path $targetDir 'auto_accept.exe'
 
 if (Test-Path $exePath) {
     Write-Host "Executable created at $exePath"

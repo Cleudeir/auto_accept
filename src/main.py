@@ -22,13 +22,19 @@ log_file = os.path.join(log_dir, f"auto_accept_{datetime.now().strftime('%Y%m%d_
 # Use sys.__stdout__ which is always available even in windowed apps
 output_stream = sys.stdout if sys.stdout is not None else sys.__stdout__
 
+_log_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+_file_handler = logging.FileHandler(log_file, encoding="utf-8")
+_file_handler.setLevel(logging.DEBUG)
+_file_handler.setFormatter(logging.Formatter(_log_format))
+
+_console_handler = logging.StreamHandler(output_stream)
+_console_handler.setLevel(logging.INFO)
+_console_handler.setFormatter(logging.Formatter(_log_format))
+
 logging.basicConfig(
     level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
-        logging.StreamHandler(output_stream),
-    ],
+    format=_log_format,
+    handlers=[_file_handler, _console_handler],
 )
 
 logger = logging.getLogger("Dota2AutoAccept")
