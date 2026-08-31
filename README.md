@@ -13,6 +13,16 @@ A cross-platform automation tool that automatically accepts Dota 2 matches by de
 
 ---
 
+## Versions
+
+| Version | Changes |
+|---------|---------|
+| **3.0.0** | Compact 640x640 UI, remove periodic screenshots, clean logs |
+| **2.0.0** | Auto-launch Dota 2, enhanced window focus, auto-close after game starts, Telegram notifications |
+| **1.0.0** | Initial release — auto accept via SSIM detection, audio alerts, multi-monitor support |
+
+---
+
 ## Features
 
 - **Auto Accept Matches** — Detects the match found popup via image recognition and automatically accepts it
