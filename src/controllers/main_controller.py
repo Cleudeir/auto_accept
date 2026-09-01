@@ -557,10 +557,12 @@ class MainController:
         # Send event on state change
         if self._prev_detection_state != highest_match:
             prev = self._prev_detection_state or "none"
+            curr = highest_match or "none"
             score_str = f" ({match_score:.1f}%)" if match_score is not None else ""
-            self.logger.debug(f"[EVENT] Detection Update: {prev} → {highest_match}{score_str}")
-            msg = f"🔄 Detection: {prev} → {highest_match}{score_str}"
-            self._send_telegram_event("state_change", msg)
+            self.logger.debug(f"[EVENT] Detection Update: {prev} → {curr}{score_str}")
+            if prev != "none" or curr != "none":
+                msg = f"🔄 Detection: {prev} → {curr}{score_str}"
+                self._send_telegram_event("state_change", msg)
             self._prev_detection_state = highest_match
 
     def _on_detection_ended(self):
